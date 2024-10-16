@@ -12,10 +12,10 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.mini_pekkas.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_event"
+        android:name="com.example.mini_pekkas.ui.event.EventFragment"
+        android:label="@string/title_event"
+        tools:layout="@layout/fragment_event" />
 
     <fragment
         android:id="@+id/navigation_camera"
