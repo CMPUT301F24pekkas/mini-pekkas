@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "476113562010",
+    "project_id": "mini-pekkas",
+    "storage_bucket": "mini-pekkas.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:476113562010:android:8ae851a4cea3845c05f223",
+        "android_client_info": {
+          "package_name": "com.example.mini_pekkas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRgxFkwDvI2Z6KuB1qpLN31qrzWHJwPMg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
