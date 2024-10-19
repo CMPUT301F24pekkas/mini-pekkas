@@ -11,7 +11,7 @@
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 
-    <fragment
+    yy<fragment
         android:id="@+id/navigation_events"
         android:name="com.example.mini_pekkas.ui.events.EventsFragment"
         android:label="@string/title_events"
