@@ -8,7 +8,7 @@
         android:visible="true" />
 
     <item
-        android:id="@+id/navigation_events"
+        android:id="@+id/navigation_event"
         android:icon="@drawable/ticket"
         android:title="@string/title_events"
         />
