@@ -22,6 +22,7 @@
         android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.mini_pekkas.ui.profile.ProfileFragment"
@@ -32,4 +33,5 @@
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
         android:label="@string/title_camera"
         tools:layout="@layout/fragment_camera" />
+
 </navigation>
