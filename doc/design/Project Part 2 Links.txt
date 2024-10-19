@@ -1,0 +1,4 @@
+Project Part 2
+
+StoryBoard And Mockup: https://www.figma.com/design/aBRGmx8qcp1QHNhpf8LuwY/mini-pekkas-mockup?node-id=1-12499&t=A16mwehAllksuJme-1
+CRC Cards: https://drive.google.com/file/d/14zBqq63YF87CrZRUO3c564jBjFOMphmY/view?usp=sharing
