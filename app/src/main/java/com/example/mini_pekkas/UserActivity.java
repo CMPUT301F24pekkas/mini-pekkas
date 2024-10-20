@@ -11,7 +11,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends AppCompatActivity {
+public class UserActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
