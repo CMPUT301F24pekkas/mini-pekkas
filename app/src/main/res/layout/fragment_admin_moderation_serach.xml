@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Find Profiles Section -->
+    <TextView
+        android:id="@+id/findProfilesLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Find Profiles"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/searchProfilesInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Search for Content"
+        android:background="@drawable/editdate"
+        android:padding="12dp"
+        android:drawableEnd="@drawable/search"
+        app:layout_constraintTop_toBottomOf="@id/findProfilesLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Browse Events Section -->
+    <TextView
+        android:id="@+id/browseEventsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Browse Events"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchProfilesInput" />
+
+    <EditText
+        android:id="@+id/enterUrlInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter Url/Hashcode"
+        android:background="@drawable/editdate"
+        android:padding="12dp"
+        android:drawableEnd="@drawable/search"
+        app:layout_constraintTop_toBottomOf="@id/browseEventsLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Browse Facilities Section -->
+    <TextView
+        android:id="@+id/browseFacilitiesLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Browse Facilities"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/enterUrlInput" />
+
+    <EditText
+        android:id="@+id/searchFacilitiesInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Search for Content"
+        android:background="@drawable/editdate"
+        android:padding="12dp"
+        android:drawableEnd="@drawable/search"
+        app:layout_constraintTop_toBottomOf="@id/browseFacilitiesLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Browse Images Button -->
+    <Button
+        android:id="@+id/browseImagesButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Browse Images"
+        android:drawableStart="@drawable/editdate"
+        android:backgroundTint="#e9d8ff"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toBottomOf="@id/searchFacilitiesInput"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <!-- Logs Section -->
+    <TextView
+        android:id="@+id/logsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Logs"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/browseImagesButton" />
+
+    <!-- RecyclerView for Logs -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/logsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/logsLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
