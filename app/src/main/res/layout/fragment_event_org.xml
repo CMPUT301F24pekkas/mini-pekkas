@@ -61,7 +61,7 @@
         app:layout_constraintTop_toBottomOf="@+id/eventImageView" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/chosenAmountView"
         android:layout_width="400dp"
         android:layout_height="103dp"
         android:layout_marginStart="27dp"
@@ -167,7 +167,7 @@
         app:layout_constraintTop_toTopOf="@+id/eventImageView" />
 
     <ImageButton
-        android:id="@+id/imageButton2"
+        android:id="@+id/chooseButton"
         android:layout_width="116dp"
         android:layout_height="50dp"
         android:layout_marginStart="275dp"
@@ -176,13 +176,13 @@
         android:layout_marginBottom="17dp"
         android:background="@drawable/ripple_rec"
         android:src="@drawable/choose"
-        app:layout_constraintBottom_toBottomOf="@+id/textView6"
-        app:layout_constraintEnd_toEndOf="@+id/textView6"
-        app:layout_constraintStart_toStartOf="@+id/textView6"
-        app:layout_constraintTop_toTopOf="@+id/textView6" />
+        app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
+        app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
+        app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
+        app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
     <ImageButton
-        android:id="@+id/imageButton3"
+        android:id="@+id/waitButton"
         android:layout_width="114dp"
         android:layout_height="50dp"
         android:layout_marginStart="149dp"
@@ -191,10 +191,10 @@
         android:background="@drawable/ripple_rec"
         android:scaleType="centerCrop"
         android:src="@drawable/wait_list"
-        app:layout_constraintBottom_toBottomOf="@+id/textView6"
-        app:layout_constraintEnd_toStartOf="@+id/imageButton2"
-        app:layout_constraintStart_toStartOf="@+id/textView6"
-        app:layout_constraintTop_toTopOf="@+id/textView6" />
+        app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
+        app:layout_constraintEnd_toStartOf="@+id/chooseButton"
+        app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
+        app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
     <ScrollView
         android:id="@+id/eventScrollableView"
@@ -242,10 +242,10 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/textView6"
-        app:layout_constraintEnd_toEndOf="@+id/textView6"
-        app:layout_constraintStart_toStartOf="@+id/textView6"
-        app:layout_constraintTop_toTopOf="@+id/textView6" />
+        app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
+        app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
+        app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
+        app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
     <TextView
         android:id="@+id/textView8"
@@ -258,10 +258,10 @@
         android:text="%d wait listed"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/textView6"
-        app:layout_constraintEnd_toEndOf="@+id/textView6"
-        app:layout_constraintStart_toStartOf="@+id/textView6"
-        app:layout_constraintTop_toTopOf="@+id/textView6" />
+        app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
+        app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
+        app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
+        app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

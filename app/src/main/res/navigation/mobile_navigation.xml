@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_navigation_home_to_navigation_create_event"
-            app:destination="@id/navigation_create_event" />
+            app:destination="@id/navigation_event_org2" />
     </fragment>
 
     <fragment
@@ -33,6 +33,11 @@
         android:label="Event Organizer"
         tools:layout="@layout/fragment_event_org" />
 
+    <fragment
+        android:id="@+id/navigation_event_org2"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment2"
+        android:label="Event Organizer"
+        tools:layout="@layout/fragment_event_org2"/>
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
