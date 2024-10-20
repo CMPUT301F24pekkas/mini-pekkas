@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,30 +14,26 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.R;
-import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
-import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
+import com.example.mini_pekkas.databinding.FragmentEventOrg2Binding;
 
 // TODO:
-//  - I put in code for when you click choose, it will show the choosing participants dialogue
-//  - I didn't do anything for the confirm or cancel button
-//  - When you click confirm it should bring you to EventOrgFragment2
-//  - and the stats for having the people chosen should be updated
-//  - Maybe just have like 200 people and choose 100 randomly and see if that works on the firebase
-//  - and if it translates to the EventOrgFragment2 View
-// xmls used in this class:
-// fragment_event_org.xml, fragment_choose_part.xml
+//  - This page only shows after pressing confirm on the choosing participants dialogue
+//  not sure exactly how it should work but I'm sure it uses the mobile_navigation.xml in navigation
+//  - I haven't done the list views yet for chosen, canceled, wait list and enrolled
+//  so those buttons shouldn't be doing anything for now
+//  - Also don't really have something planned for edit event so just try doing the other things for now
 
-public class EventOrgFragment extends Fragment {
+public class EventOrgFragment2 extends Fragment {
 
-    private FragmentEventOrgBinding binding;
+    private FragmentEventOrg2Binding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        EventOrgViewModel eventViewModel =
-                new ViewModelProvider(this).get(EventOrgViewModel.class);
+        EventOrgViewModel2 eventViewModel =
+                new ViewModelProvider(this).get(EventOrgViewModel2.class);
 
-        binding = FragmentEventOrgBinding.inflate(inflater, container, false);
+        binding = FragmentEventOrg2Binding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         // binds the text views to the view model
@@ -47,6 +42,9 @@ public class EventOrgFragment extends Fragment {
         final TextView locationView = binding.locationView;
         final TextView eventDescriptionView = binding.eventDescriptionView;
         final TextView eventDetailsView = binding.eventDetailsView;
+        final TextView chosenPartView = binding.chosenPartView;
+        final TextView canceledPartView = binding.canceledAmountView;
+        final TextView enrolledPartView = binding.enrolledAmountView;
 
         // updates text views when they are changed
         eventViewModel.getEventName().observe(getViewLifecycleOwner(), eventNameView::setText);
@@ -54,6 +52,9 @@ public class EventOrgFragment extends Fragment {
         eventViewModel.getLocation().observe(getViewLifecycleOwner(), locationView::setText);
         eventViewModel.getEventDescription().observe(getViewLifecycleOwner(), eventDescriptionView::setText);
         eventViewModel.getEventDetails().observe(getViewLifecycleOwner(), eventDetailsView::setText);
+        eventViewModel.getChosenPart().observe(getViewLifecycleOwner(), chosenPartView::setText);
+        eventViewModel.getCanceledPart().observe(getViewLifecycleOwner(), canceledPartView::setText);
+        eventViewModel.getEnrolledPart().observe(getViewLifecycleOwner(), enrolledPartView::setText);
 
         // binds the images to the view model
         final ImageView eventImage = binding.eventImageView;
