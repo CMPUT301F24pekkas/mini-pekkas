@@ -10,22 +10,21 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.mini_pekkas.databinding.FragmentNotificationsBinding;
-
+import com.example.mini_pekkas.databinding.FragmentCameraBinding;
 public class CameraFragment extends Fragment {
 
-    private FragmentNotificationsBinding binding;
+    private FragmentCameraBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        CameraViewModel notificationsViewModel =
+        CameraViewModel cameraViewModel =
                 new ViewModelProvider(this).get(CameraViewModel.class);
 
-        binding = FragmentNotificationsBinding.inflate(inflater, container, false);
+        binding = FragmentCameraBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textNotifications;
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textCamera;
+        cameraViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

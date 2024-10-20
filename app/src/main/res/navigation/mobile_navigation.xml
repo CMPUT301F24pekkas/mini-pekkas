@@ -14,14 +14,8 @@
     <fragment
         android:id="@+id/navigation_event"
         android:name="com.example.mini_pekkas.ui.event.EventFragment"
-        android:label="@string/title_event"
+        android:label="@string/title_events"
         tools:layout="@layout/fragment_event" />
-
-    <fragment
-        android:id="@+id/navigation_camera"
-        android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
-        android:label="@string/title_camera"
-        tools:layout="@layout/fragment_camera" />
 
     <fragment
         android:id="@+id/navigation_notifications"
@@ -34,4 +28,10 @@
         android:name="com.example.mini_pekkas.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/navigation_camera"
+        android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
+        android:label="@string/title_camera"
+        tools:layout="@layout/fragment_camera" />
+
 </navigation>
