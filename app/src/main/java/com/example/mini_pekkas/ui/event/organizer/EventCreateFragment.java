@@ -14,7 +14,7 @@ import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
 
 
 // TODO:
-//  - Save the event onto the firebase!!!!
+//  - Save the event onto the firebase
 //  - Create a QR code and replace the image with the qr code
 //  figure out how to save the hash code for qr code
 //  - I didn't put any prompts for restrictions yet,
