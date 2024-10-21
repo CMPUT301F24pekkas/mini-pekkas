@@ -2,7 +2,9 @@ package com.example.mini_pekkas;
 
 import static android.content.ContentValues.TAG;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.devicelock.DeviceId;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -14,14 +16,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class accesses the firestore and contains functions to return important information
  */
 public class Firebase {
-    private FirebaseFirestore db;
-    private String android_id = null;
+    private final FirebaseFirestore db;
+    private final String android_id;
     //private CollectionReference adminList;
 
     /**
@@ -29,19 +32,36 @@ public class Firebase {
      * @param context
      * the context of the activity the function is called from
      */
+    @SuppressLint("HardwareIds") // We just need the device id as a string
     public Firebase(Context context) {
         // initialize the database
         this.db = FirebaseFirestore.getInstance();
-
         // Get the device id
         android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
+    /**
+     * returns the FirebaseFirestore instance
+     * @return a variable linked to the firebase
+     */
     public FirebaseFirestore getDb() {
         return db;
     }
 
+    /**
+     * returns the device id as a String
+     * @return the device id
+     */
+    public String getAndroid_id() {
+        return android_id;
+    }
 
+    /**
+     * Queries and returns the data from document.get()
+     * @param collection the name of the collection
+     * @param document the name of the document
+     * @return a DocumentSnapshot, identical to collection.document.get()
+     */
     public DocumentSnapshot getDocument(String collection, String document) {
         final DocumentSnapshot[] doc = new DocumentSnapshot[1];
 
