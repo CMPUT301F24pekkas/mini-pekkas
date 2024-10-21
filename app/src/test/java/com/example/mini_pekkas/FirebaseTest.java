@@ -1,8 +1,15 @@
 package com.example.mini_pekkas;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import android.content.Context;
+
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
@@ -14,9 +21,12 @@ import java.util.Map;
 
 /**
  * Testing class for the firebase class
+ * @// TODO: 2024-10-21 Mockito still not importing 
  */
+@RunWith(MockitoJUnitRunner::class)
 public class FirebaseTest {
-    private Firebase firebase = new Firebase();
+    Context context = mock(Context.class);
+    private Firebase firebase = new Firebase(context);
 
     @Before
     public void makeAdminTestData() {
@@ -38,13 +48,14 @@ public class FirebaseTest {
     }
 
     /**
-     * Test if the document was made
+     * Test the function getDocument()
      */
     @Test
-    public void testExist() {
-        DocumentReference docRef = firebase.getDb().document("testAdmins");
-        assertEquals(2, docRef.);
+    public void testGet() {
+        DocumentSnapshot result = firebase.getDocument("testAdmins", "doc1");
+        assertTrue(result.contains("admin1id"));
     }
+
 
     @After
     /**
