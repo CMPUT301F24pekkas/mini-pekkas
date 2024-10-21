@@ -13,17 +13,17 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="36dp"
         android:src="@drawable/user_circle"
-        app:layout_constraintEnd_toStartOf="@+id/full_name"
+        app:layout_constraintEnd_toStartOf="@+id/first_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/full_name"
+        android:id="@+id/first_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Full 45678"
+        android:text="First Name"
         android:textSize="36sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,14 +31,14 @@
         app:layout_constraintTop_toTopOf="@id/profile_image" />
 
     <TextView
-        android:id="@+id/user_id"
+        android:id="@+id/last_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name123"
+        android:text="Last Name"
         android:textSize="36sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/full_name"
-        app:layout_constraintStart_toStartOf="@id/full_name" />
+        app:layout_constraintTop_toBottomOf="@id/first_name"
+        app:layout_constraintStart_toStartOf="@id/first_name" />
 
 
 
@@ -51,7 +51,7 @@
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/user_id" />
+        app:layout_constraintTop_toBottomOf="@id/last_name" />
 
 
 
@@ -140,13 +140,5 @@
         app:layout_constraintTop_toBottomOf="@+id/phone_input"
         app:layout_constraintVertical_bias="0.76" />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edit Profile"
-        app:layout_constraintBottom_toTopOf="@+id/contact_info_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

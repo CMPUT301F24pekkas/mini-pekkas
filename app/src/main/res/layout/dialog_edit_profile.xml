@@ -16,12 +16,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email"
-        android:inputType="textEmailAddress" />
+        />
 
     <EditText
         android:id="@+id/dialog_phone_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Phone Number"
-        android:inputType="phone" />
+        android:hint="Phone NUmber"
+        />
 </LinearLayout>

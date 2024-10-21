@@ -34,22 +34,26 @@ public class ProfileFragment extends Fragment {
         View root = binding.getRoot();
 
 
-        final TextView fullName = binding.fullName;
-        final TextView userId = binding.userId;
+        final TextView firstName = binding.firstName;
+        final TextView lastName = binding.lastName;
+        final TextView emailInput = binding.emailInput;
+        final TextView phoneInput = binding.phoneInput;
         final ImageView profileImage = binding.profileImage;
         final ImageButton editButton = binding.editButton;
         final Switch organizerToggle = binding.organizerToggle;
 
 
-        profileViewModel.getFullName().observe(getViewLifecycleOwner(), fullName::setText);
-        profileViewModel.getUserId().observe(getViewLifecycleOwner(), userId::setText);
+        profileViewModel.getFullName().observe(getViewLifecycleOwner(), firstName::setText);
+        profileViewModel.getUserId().observe(getViewLifecycleOwner(), lastName::setText);
+        profileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
+        profileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
         profileViewModel.getIsOrganizer().observe(getViewLifecycleOwner(), organizerToggle::setChecked);
 
 
         editButton.setOnClickListener(v -> showEditDialog());
 
         organizerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            profileViewModel.setIsOrganizer(isChecked); // Update the ViewModel
+            profileViewModel.setIsOrganizer(isChecked);
         });
 
         return root;
@@ -62,8 +66,8 @@ public class ProfileFragment extends Fragment {
 
         // acesses the EditText fields from the dialog layout
         EditText fullNameInput = dialogView.findViewById(R.id.full_name_input);
-        EditText emailInput = dialogView.findViewById(R.id.dialog_email_input); // Updated ID
-        EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input); // Updated ID
+        EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
+        EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
 
         // set current values to the EditText fields
         fullNameInput.setText(profileViewModel.getFullName().getValue());
