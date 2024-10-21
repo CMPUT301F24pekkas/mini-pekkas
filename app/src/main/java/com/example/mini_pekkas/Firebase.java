@@ -1,9 +1,15 @@
 package com.example.mini_pekkas;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
 import android.provider.Settings;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,37 +37,31 @@ public class Firebase {
         android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
-    /**
-     * No context constructor for calling outside an activity
-     */
-    public Firebase() {
-        // initialize the database
-        this.db = FirebaseFirestore.getInstance();
-    }
-
     public FirebaseFirestore getDb() {
         return db;
     }
 
 
-    public Object getDocument(String collection, String document) {
-        AtomicReference<Object> data = null;
+    public DocumentSnapshot getDocument(String collection, String document) {
+        final DocumentSnapshot[] doc = new DocumentSnapshot[1];
 
         DocumentReference docRef = db.collection(collection).document(document);
-        docRef.get().addOnCompleteListener((OnCompleteListener<DocumentSnapshot>) task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document1 = task.getResult();
-                if (document1.exists()) {
-                    data.set(document1.getData());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        doc[0] = (DocumentSnapshot) document.getData();
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
                 } else {
-                    data.set(null);
+                    Log.d(TAG, "get failed with ", task.getException());
                 }
-            } else {
-                // TODO why cant I just throw an exception
-                task.getException();
             }
         });
-        return data;
+        return doc[0];
     }
 
 
@@ -71,8 +71,7 @@ public class Firebase {
      * True if device id is in the admin collection store
      */
     public Boolean isAdmin() {
-
-
+        // TODO
         return true;
     }
 }
