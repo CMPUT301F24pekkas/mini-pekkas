@@ -4,7 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.devicelock.DeviceId;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -15,9 +14,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class accesses the firestore and contains functions to return important information
