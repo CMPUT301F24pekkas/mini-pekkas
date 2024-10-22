@@ -40,8 +40,6 @@
         app:layout_constraintTop_toBottomOf="@id/first_name"
         app:layout_constraintStart_toStartOf="@id/first_name" />
 
-
-
     <TextView
         android:id="@+id/contact_info_label"
         android:layout_width="wrap_content"
@@ -52,7 +50,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/last_name" />
-
 
     <TextView
         android:id="@+id/email_label"
@@ -109,7 +106,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/phone_label" />
 
-
     <TextView
         android:id="@+id/organizer_label"
         android:layout_width="wrap_content"
@@ -130,7 +126,7 @@
         android:layout_marginStart="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/organizer_label"
-        app:layout_constraintTop_toBottomOf="@+id/phone_input"
+        app:layout_constraintTop_toBottomOf="@id/phone_input"
         app:layout_constraintVertical_bias="0.774" />
 
     <ImageButton
@@ -142,8 +138,7 @@
         android:src="@drawable/edit_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/phone_input"
+        app:layout_constraintTop_toBottomOf="@id/phone_input"
         app:layout_constraintVertical_bias="0.76" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
