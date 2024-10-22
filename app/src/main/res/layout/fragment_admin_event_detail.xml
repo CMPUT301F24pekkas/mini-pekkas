@@ -8,6 +8,22 @@
     tools:context=".ui.event.user.EventFragment">
 
 
+    <Button
+        android:id="@+id/eventDelete"
+        android:layout_width="74dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="2dp"
+        android:text="Delete"
+        android:textSize="10sp"
+        android:backgroundTint="@android:color/holo_red_dark"
+        app:layout_constraintBottom_toTopOf="@+id/qrImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toEndOf="@+id/eventNameView"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
     <TextView
         android:id="@+id/eventNameView"
         android:layout_width="wrap_content"
@@ -18,9 +34,9 @@
         android:textSize="34sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.078"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 
     <ImageView
         android:id="@+id/eventImageView"
@@ -34,6 +50,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/eventNameView"
         tools:src="@tools:sample/backgrounds/scenic" />
+
+    <ImageView
+        android:id="@+id/eventImageDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="81dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="7dp"
+        app:layout_constraintBottom_toBottomOf="@+id/eventImageView"
+        app:layout_constraintEnd_toEndOf="@+id/eventImageView"
+        app:layout_constraintStart_toStartOf="@+id/eventImageView"
+        app:layout_constraintTop_toTopOf="@+id/eventImageView"
+        app:srcCompat="@drawable/delete_button" />
 
     <ImageView
         android:id="@+id/qrImage"
@@ -265,22 +295,6 @@
         app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
         app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
         app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
-
-    <Button
-        android:id="@+id/acceptButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="245dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="9dp"
-        android:layout_marginBottom="25dp"
-        android:text="Join Waitlist"
-        app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
-        app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
-        app:layout_constraintTop_toTopOf="@+id/chosenAmountView"
-        app:layout_constraintVertical_bias="0.0" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
