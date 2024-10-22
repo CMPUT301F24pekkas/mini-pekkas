@@ -14,6 +14,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentProfileBinding;
@@ -27,11 +29,8 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         profileViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
-
-
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
 
         final TextView firstName = binding.firstName;
         final TextView lastName = binding.lastName;
@@ -42,45 +41,52 @@ public class ProfileFragment extends Fragment {
         final Switch organizerToggle = binding.organizerToggle;
 
 
+
+        // Observe LiveData from the ViewModel
         profileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
         profileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
         profileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         profileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
         profileViewModel.getIsOrganizer().observe(getViewLifecycleOwner(), organizerToggle::setChecked);
 
-
+        // Set click listener for the edit button
         editButton.setOnClickListener(v -> showEditDialog());
 
+        // Toggle for organizer status
         organizerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             profileViewModel.setIsOrganizer(isChecked);
+            if (isChecked) {
+                // Navigate to OrganizerProfileFragment when toggled on
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment); // Use the ID of your NavHostFragment
+                navController.navigate(R.id.organizerProfileFragment); // Navigate to organizer profile
+            }
         });
 
         return root;
     }
 
     private void showEditDialog() {
-        // dialog layout
+        // Dialog layout
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_edit_profile, null);
 
-        // acesses the EditText fields from the dialog layout
+        // Accesses the EditText fields from the dialog layout
         EditText firstNameInput = dialogView.findViewById(R.id.first_name_input);
         EditText lastNameInput = dialogView.findViewById(R.id.last_name_input);
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
 
-        // set current values to the EditText fields
+        // Set current values to the EditText fields
         firstNameInput.setText(profileViewModel.getFirstName().getValue());
         emailInput.setText(profileViewModel.getEmail().getValue());
         lastNameInput.setText(profileViewModel.getLastName().getValue());
         phoneInput.setText(profileViewModel.getPhoneNumber().getValue());
 
-
         new AlertDialog.Builder(getActivity())
                 .setTitle("Edit Profile")
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
-                    // new values
+                    // New values
                     profileViewModel.setFirstName(firstNameInput.getText().toString());
                     profileViewModel.setLastName(lastNameInput.getText().toString());
                     profileViewModel.setEmail(emailInput.getText().toString());
@@ -94,6 +100,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        binding = null; // Clear the binding reference
     }
 }
