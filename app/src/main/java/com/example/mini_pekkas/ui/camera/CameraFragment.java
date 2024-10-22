@@ -42,15 +42,15 @@ public class CameraFragment extends Fragment {
     }
 
     private void openCamera() {
-        // Check if the app has camera permission
+        // checks perms in manifest
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Request camera permission
+            //  requests perms
             ActivityCompat.requestPermissions(getActivity(),
                     new String[]{Manifest.permission.CAMERA},
                     CAMERA_REQUEST_CODE);
         } else {
-            // Open camera if permission is granted
+            // opens if allowed
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (cameraIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                 startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
