@@ -55,3 +55,4 @@
         android:label="@string/title_camera"
         tools:layout="@layout/fragment_camera" />
 </navigation>
+
