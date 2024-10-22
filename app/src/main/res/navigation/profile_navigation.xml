@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_navigation"
+    app:startDestination="@id/navigation_profile">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.mini_pekkas.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_create_event"
+            app:destination="@id/navigation_event_org2" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_event"
+        android:name="com.example.mini_pekkas.ui.event.user.EventFragment"
+        android:label="@string/title_event"
+        tools:layout="@layout/fragment_event" />
+
+    <fragment
+        android:id="@+id/navigation_create_event"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventCreateFragment"
+        android:label="Create Event"
+        tools:layout="@layout/fragment_create_event"/>
+
+    <fragment
+        android:id="@+id/navigation_event_org"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment"
+        android:label="Event Organizer"
+        tools:layout="@layout/fragment_event_org" />
+
+    <fragment
+        android:id="@+id/navigation_event_org2"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment2"
+        android:label="Event Organizer"
+        tools:layout="@layout/fragment_event_org2"/>
+    <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
+        android:label="@string/title_notifications"
+        tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/navigation_camera"
+        android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
+        android:label="@string/title_camera"
+        tools:layout="@layout/fragment_camera" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.mini_pekkas.ui.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/organizerProfileFragment"
+        android:name="com.example.mini_pekkas.ui.profile.OrganizerProfileFragment"
+        android:label="Organizer Profile"
+        tools:layout="@layout/fragment_organizer_profile" />
+
+    <action
+        android:id="@+id/action_profileFragment_to_organizerProfileFragment"
+        app:destination="@id/organizerProfileFragment" />
+</navigation>
