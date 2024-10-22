@@ -11,7 +11,7 @@
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
         <action
-            android:id="@+id/action_navigation_home_to_navigation_create_event"
+            android:id="@+id/action_navigation_home_to_navigation_event_org2"
             app:destination="@id/navigation_event_org2" />
     </fragment>
 
@@ -53,6 +53,8 @@
         android:id="@+id/navigation_camera"
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
         android:label="@string/title_camera"
-        tools:layout="@layout/fragment_camera" />
+        tools:layout="@layout/fragment_camera" /><![CDATA[
+    />
 
+]]>
 </navigation>
