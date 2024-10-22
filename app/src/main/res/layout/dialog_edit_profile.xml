@@ -6,10 +6,16 @@
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/full_name_input"
+        android:id="@+id/first_name_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Full Name" />
+        android:hint="First Name" />
+
+    <EditText
+        android:id="@+id/last_name_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Last Name" />
 
     <EditText
         android:id="@+id/dialog_email_input"

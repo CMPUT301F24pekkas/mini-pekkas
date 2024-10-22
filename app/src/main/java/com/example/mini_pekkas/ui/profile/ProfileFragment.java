@@ -1,7 +1,6 @@
 package com.example.mini_pekkas.ui.profile;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,8 +42,8 @@ public class ProfileFragment extends Fragment {
         final Switch organizerToggle = binding.organizerToggle;
 
 
-        profileViewModel.getFullName().observe(getViewLifecycleOwner(), firstName::setText);
-        profileViewModel.getUserId().observe(getViewLifecycleOwner(), lastName::setText);
+        profileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
+        profileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
         profileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         profileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
         profileViewModel.getIsOrganizer().observe(getViewLifecycleOwner(), organizerToggle::setChecked);
@@ -65,13 +64,15 @@ public class ProfileFragment extends Fragment {
         View dialogView = inflater.inflate(R.layout.dialog_edit_profile, null);
 
         // acesses the EditText fields from the dialog layout
-        EditText fullNameInput = dialogView.findViewById(R.id.full_name_input);
+        EditText firstNameInput = dialogView.findViewById(R.id.first_name_input);
+        EditText lastNameInput = dialogView.findViewById(R.id.last_name_input);
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
 
         // set current values to the EditText fields
-        fullNameInput.setText(profileViewModel.getFullName().getValue());
+        firstNameInput.setText(profileViewModel.getFirstName().getValue());
         emailInput.setText(profileViewModel.getEmail().getValue());
+        lastNameInput.setText(profileViewModel.getLastName().getValue());
         phoneInput.setText(profileViewModel.getPhoneNumber().getValue());
 
 
@@ -80,7 +81,8 @@ public class ProfileFragment extends Fragment {
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
                     // new values
-                    profileViewModel.setFullName(fullNameInput.getText().toString());
+                    profileViewModel.setFirstName(firstNameInput.getText().toString());
+                    profileViewModel.setLastName(lastNameInput.getText().toString());
                     profileViewModel.setEmail(emailInput.getText().toString());
                     profileViewModel.setPhoneNumber(phoneInput.getText().toString());
                 })

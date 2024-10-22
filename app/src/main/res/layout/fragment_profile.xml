@@ -54,6 +54,17 @@
         app:layout_constraintTop_toBottomOf="@id/last_name" />
 
 
+    <TextView
+        android:id="@+id/email_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:text="Email"
+        android:textStyle="bold"
+        android:textSize="25sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contact_info_label" />
 
     <TextView
         android:id="@+id/email_input"
@@ -64,24 +75,11 @@
         android:layout_marginEnd="16dp"
         android:hint="Label"
         android:inputType="textEmailAddress"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/email_label" />
-
-    <TextView
-        android:id="@+id/phone_input"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="16dp"
-        android:hint="Label"
-        android:inputType="phone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/phone_label" />
 
     <TextView
         android:id="@+id/phone_label"
@@ -90,20 +88,27 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="Phone Number"
-        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/email_input" />
 
     <TextView
-        android:id="@+id/email_label"
-        android:layout_width="wrap_content"
+        android:id="@+id/phone_input"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        android:text="Email"
-        android:textSize="14sp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif"
+        android:hint="Label"
+        android:inputType="phone"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/contact_info_label" />
+        app:layout_constraintTop_toBottomOf="@id/phone_label" />
+
 
     <TextView
         android:id="@+id/organizer_label"
