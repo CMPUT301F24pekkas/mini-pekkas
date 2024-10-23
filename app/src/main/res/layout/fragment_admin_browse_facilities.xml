@@ -22,7 +22,7 @@
 
     <!-- ListView for the list of profiles -->
     <ListView
-        android:id="@+id/listView"
+        android:id="@+id/adminFacilityListView"
         android:layout_width="wrap_content"
         android:layout_height="585dp"
         android:layout_marginStart="16dp"
