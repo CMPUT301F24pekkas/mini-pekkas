@@ -57,20 +57,18 @@ public class ProfileFragment extends Fragment {
         // Set click listener for the edit button
         editButton.setOnClickListener(v -> showEditDialog());
 
-        // Get the NavController from the fragment's view
-        NavController navController = Navigation.findNavController(view);
-
         // Toggle for organizer status
         organizerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            profileViewModel.setIsOrganizer(isChecked);
             if (isChecked) {
-                // Navigate to OrganizerProfileFragment when toggled on
-                navController.navigate(R.id.action_profileFragment_to_organizerProfileFragment);
+                // Navigate to OrganizerProfileFragment when the switch is checked
+                NavController navController = Navigation.findNavController(view);
+                navController.navigate(R.id.action_navigation_profile_to_navigation_organizer_profile);
             } else {
-                // Navigate back to ProfileFragment when toggled off
-                navController.navigate(R.id.action_organizerProfileFragment_to_profileFragment);
+
             }
         });
+
+
     }
 
     private void showEditDialog() {

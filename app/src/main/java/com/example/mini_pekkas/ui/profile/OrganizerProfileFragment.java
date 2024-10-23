@@ -12,8 +12,11 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentOrganizerProfileBinding;
@@ -27,7 +30,6 @@ public class OrganizerProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         organizerProfileViewModel = new ViewModelProvider(this).get(OrganizerProfileViewModel.class);
-
         binding = FragmentOrganizerProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -48,33 +50,42 @@ public class OrganizerProfileFragment extends Fragment {
         organizerProfileViewModel.getIsOrganizer().observe(getViewLifecycleOwner(), organizerToggle::setChecked);
         organizerProfileViewModel.getOrganizerLocation().observe(getViewLifecycleOwner(), organizerLocationInput::setText); // Observe organizer location
 
+        // Set click listener for the edit button
         editButton.setOnClickListener(v -> showEditDialog());
 
+        // Toggle for organizer status
         organizerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            organizerProfileViewModel.setIsOrganizer(isChecked);
+            if (!isChecked) {
+                // Navigate back to ProfileFragment when the switch is unchecked
+                NavController navController = Navigation.findNavController(requireView());
+                navController.popBackStack(); // Go back to the ProfileFragment
+            } else {
+                // Optionally, you could perform some action when toggled on
+//                organizerProfileViewModel.setIsOrganizer(isChecked);
+            }
         });
 
         return root;
     }
 
     private void showEditDialog() {
-        // dialog layout
+        // Correct layout for the organizer profile dialog
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_edit_profile, null);
+        View dialogView = inflater.inflate(R.layout.dialog_edit_organizer_profile, null); // Inflate the correct layout
 
         // Access the EditText fields from the dialog layout
         EditText firstNameInput = dialogView.findViewById(R.id.first_name_input);
-        EditText lastNameInput = dialogView.findViewById(R.id.last_name_input);
+        EditText lastNameInput = dialogView.findViewById(R.id.last_name_input); // This needs to be added to your XML
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
-        EditText organizerLocationInput = dialogView.findViewById(R.id.dialog_organizer_input); // New EditText for organizer location
+        EditText organizerLocationInput = dialogView.findViewById(R.id.dialog_organizer_input);
 
         // Set current values to the EditText fields
         firstNameInput.setText(organizerProfileViewModel.getFirstName().getValue());
-        lastNameInput.setText(organizerProfileViewModel.getLastName().getValue());
+        lastNameInput.setText(organizerProfileViewModel.getLastName().getValue()); // Set last name value
         emailInput.setText(organizerProfileViewModel.getEmail().getValue());
         phoneInput.setText(organizerProfileViewModel.getPhoneNumber().getValue());
-        organizerLocationInput.setText(organizerProfileViewModel.getOrganizerLocation().getValue()); // Set organizer location
+        organizerLocationInput.setText(organizerProfileViewModel.getOrganizerLocation().getValue());
 
         new AlertDialog.Builder(getActivity())
                 .setTitle("Edit Profile")
@@ -82,7 +93,7 @@ public class OrganizerProfileFragment extends Fragment {
                 .setPositiveButton("Save", (dialog, which) -> {
                     // New values
                     organizerProfileViewModel.setFirstName(firstNameInput.getText().toString());
-                    organizerProfileViewModel.setLastName(lastNameInput.getText().toString());
+                    organizerProfileViewModel.setLastName(lastNameInput.getText().toString()); // Save last name
                     organizerProfileViewModel.setEmail(emailInput.getText().toString());
                     organizerProfileViewModel.setPhoneNumber(phoneInput.getText().toString());
                     organizerProfileViewModel.setOrganizerLocation(organizerLocationInput.getText().toString()); // Save organizer location
@@ -92,9 +103,10 @@ public class OrganizerProfileFragment extends Fragment {
                 .show();
     }
 
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        binding = null; // Clear the binding reference
     }
 }
