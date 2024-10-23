@@ -48,7 +48,7 @@
         android:id="@+id/navigation_profile"
         android:name="com.example.mini_pekkas.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_profile" >
+        tools:layout="@layout/fragment_profile">
         <action
             android:id="@+id/action_navigation_profile_to_navigation_organizer_profile"
             app:destination="@id/navigation_organizer_profile" />
@@ -56,8 +56,11 @@
     <fragment
         android:id="@+id/navigation_organizer_profile"
         android:name="com.example.mini_pekkas.ui.profile.OrganizerProfileFragment"
-        android:label="Organizer Profile"
-        tools:layout="@layout/fragment_organizer_profile"/>
+        android:label="OrganizerProfileFragment">
+        <action
+            android:id="@+id/navigation_organizer_profile_to_navigation_profile"
+            app:destination="@id/navigation_profile" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_camera"
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"

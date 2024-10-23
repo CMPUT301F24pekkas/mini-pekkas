@@ -12,6 +12,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -28,9 +29,15 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        // ViewModel setup
         profileViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
         binding = FragmentProfileBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+        return binding.getRoot(); // Return root view from binding
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         final TextView firstName = binding.firstName;
         final TextView lastName = binding.lastName;
@@ -39,8 +46,6 @@ public class ProfileFragment extends Fragment {
         final ImageView profileImage = binding.profileImage;
         final ImageButton editButton = binding.editButton;
         final Switch organizerToggle = binding.organizerToggle;
-
-
 
         // Observe LiveData from the ViewModel
         profileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
@@ -54,15 +59,15 @@ public class ProfileFragment extends Fragment {
 
         // Toggle for organizer status
         organizerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            profileViewModel.setIsOrganizer(isChecked);
             if (isChecked) {
-                // Navigate to OrganizerProfileFragment when toggled on
-                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment); // Use the ID of your NavHostFragment
-                navController.navigate(R.id.action_navigation_profile_to_navigation_organizer_profile); // Navigate to organizer profile
-            }
+                // Navigate to OrganizerProfileFragment when the switch is checked
+                NavController navController = Navigation.findNavController(view);
+                navController.navigate(R.id.action_navigation_profile_to_navigation_organizer_profile);
+            } else {
+
         });
 
-        return root;
+
     }
 
     private void showEditDialog() {
