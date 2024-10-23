@@ -8,16 +8,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.mini_pekkas.databinding.FragmentAdminEventDetailBinding; // Import binding
+import com.example.mini_pekkas.databinding.FragmentAdminEventDetailsBinding;
 public class AdminEventDetails extends Fragment {
 
-    private FragmentAdminEventDetailBinding binding; // Declare binding variable
+    private FragmentAdminEventDetailsBinding binding; // Declare binding variable
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout using View Binding
-        binding = FragmentAdminEventDetailBinding.inflate(inflater, container, false);
+        binding = FragmentAdminEventDetailsBinding.inflate(inflater, container, false);
         return binding.getRoot(); // Return the root view from binding
     }
 
