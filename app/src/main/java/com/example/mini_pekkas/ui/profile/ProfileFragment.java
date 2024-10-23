@@ -58,7 +58,7 @@ public class ProfileFragment extends Fragment {
             if (isChecked) {
                 // Navigate to OrganizerProfileFragment when toggled on
                 NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment); // Use the ID of your NavHostFragment
-                navController.navigate(R.id.organizerProfileFragment); // Navigate to organizer profile
+                navController.navigate(R.id.action_navigation_profile_to_navigation_organizer_profile); // Navigate to organizer profile
             }
         });
 
