@@ -69,18 +69,18 @@ public class OrganizerProfileFragment extends Fragment {
     }
 
     private void showEditDialog() {
-        // Correct layout for the organizer profile dialog
+        // correct layout for the organizer profile dialog
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_edit_organizer_profile, null); // Inflate the correct layout
 
-        // Access the EditText fields from the dialog layout
+        // access the EditText fields from the dialog layout
         EditText firstNameInput = dialogView.findViewById(R.id.first_name_input);
         EditText lastNameInput = dialogView.findViewById(R.id.last_name_input); // This needs to be added to your XML
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
         EditText organizerLocationInput = dialogView.findViewById(R.id.dialog_organizer_input);
 
-        // Set current values to the EditText fields
+        // set current values to the EditText fields
         firstNameInput.setText(organizerProfileViewModel.getFirstName().getValue());
         lastNameInput.setText(organizerProfileViewModel.getLastName().getValue()); // Set last name value
         emailInput.setText(organizerProfileViewModel.getEmail().getValue());
@@ -91,7 +91,7 @@ public class OrganizerProfileFragment extends Fragment {
                 .setTitle("Edit Profile")
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
-                    // New values
+    
                     organizerProfileViewModel.setFirstName(firstNameInput.getText().toString());
                     organizerProfileViewModel.setLastName(lastNameInput.getText().toString()); // Save last name
                     organizerProfileViewModel.setEmail(emailInput.getText().toString());
