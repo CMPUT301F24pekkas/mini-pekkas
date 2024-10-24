@@ -38,6 +38,28 @@ public class UserActivity extends AppCompatActivity {
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        // Initialize Firebase class
+        Firebase firebase = new Firebase(this);
+        // An example use case of retrieving the document
+        /*
+        firebase.getDocument("myCollection", "myDocument", new Firebase.OnDocumentRetrievedListener() {
+            @Override
+            public void onDocumentRetrieved(DocumentSnapshot documentSnapshot) {
+                // Access document data here
+                String name = documentSnapshot.getString("realName");
+                int phone = documentSnapshot.getLong("phone").intValue();
+                // etc...
+            }
+
+            @Override
+            public void onError(Exception e) {
+                // Handle errors here
+                Log.e(TAG, "Error getting document: ", e);
+            }
+        });
+         */
+
     }
 
 }

@@ -7,13 +7,13 @@ import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class accesses the firestore and contains functions to return important information
@@ -21,7 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class Firebase {
     private final FirebaseFirestore db;
     private final String android_id;
-    //private CollectionReference adminList;
+    private DocumentSnapshot user_document;
 
     /**
      * Constructor to access the firestore in db
@@ -34,50 +34,92 @@ public class Firebase {
         this.db = FirebaseFirestore.getInstance();
         // Get the device id
         android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        // Get the user document, or create a new one if it doesn't exist
+        findUserDocumentByDeviceId(android_id);
     }
 
     /**
-     * returns the FirebaseFirestore instance
-     * @return a variable linked to the firebase
+     * find the user id and store it in the user_document variable
+     * @param deviceId the device id of the user
      */
-    public FirebaseFirestore getDb() {
-        return db;
+    public void findUserDocumentByDeviceId(String deviceId) {
+        db.collection("users")
+                .whereEqualTo("deviceID", deviceId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Found the document, store it in the class variable
+                            user_document = document;
+                            break; // Exit the loop after finding the document
+                        }
+
+                        if (user_document == null) {
+                            // Document not found, create a new document
+                            createNewUserDocument(deviceId);
+                        }
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                });
     }
 
     /**
-     * returns the device id as a String
-     * @return the device id
+     * Create a new user document in the firestore if it doesn't already exist
+     * @param deviceId the device id of the user
      */
-    public String getAndroid_id() {
-        return android_id;
+    private void createNewUserDocument(String deviceId) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("deviceID", deviceId);
+        // TODO Add other initial user data as needed
+        user.put("email", null);
+        user.put("facility", null);
+        user.put("realName", null);
+        user.put("phone", null);
+        user.put("enrolled", null);
+        user.put("waitlist", deviceId);
+        user.put("notification", deviceId);
+
+        db.collection("users")
+                .add(user)
+                .addOnSuccessListener(documentReference -> {
+                    user_document = documentReference.get().getResult(); // Get the newly created document
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error adding document", e);
+                });
     }
+
+    /**
+     * all document request must implement this interface
+     * onDocumentRetrieved is called when the document is retrieved successfully. Collect results in the listener
+     * onError handles any errors that occur
+     */
+    public interface OnDocumentRetrievedListener {
+        void onDocumentRetrieved(DocumentSnapshot documentSnapshot);
+        void onError(Exception e);
+    }
+
 
     /**
      * Queries and returns the data from document.get()
      * @param collection the name of the collection
      * @param document the name of the document
-     * @return a DocumentSnapshot, identical to collection.document.get()
      */
-    public DocumentSnapshot getDocument(String collection, String document) {
-        final DocumentSnapshot[] doc = new DocumentSnapshot[1];
-
+    public void getDocument(String collection, String document, OnDocumentRetrievedListener listener) {
         DocumentReference docRef = db.collection(collection).document(document);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        doc[0] = (DocumentSnapshot) document.getData();
-                    } else {
-                        Log.d(TAG, "No such document");
-                    }
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (documentSnapshot.exists()) {
+                    listener.onDocumentRetrieved(documentSnapshot);
                 } else {
-                    Log.d(TAG, "get failed with ", task.getException());
+                    listener.onError(new Exception("No such document"));
                 }
+            } else {
+                listener.onError(task.getException());
             }
         });
-        return doc[0];
     }
 
 
