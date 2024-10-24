@@ -7,7 +7,7 @@
     tools:context=".ui.profile.ProfileFragment">
 
     <ImageView
-        android:id="@+id/profile_image"
+        android:id="@+id/user_profile_image"
         android:layout_width="101dp"
         android:layout_height="100dp"
         android:layout_marginStart="16dp"
@@ -27,8 +27,8 @@
         android:textSize="36sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/profile_image"
-        app:layout_constraintTop_toTopOf="@id/profile_image" />
+        app:layout_constraintStart_toEndOf="@id/user_profile_image"
+        app:layout_constraintTop_toTopOf="@id/user_profile_image" />
 
     <TextView
         android:id="@+id/last_name"
@@ -40,6 +40,8 @@
         app:layout_constraintTop_toBottomOf="@id/first_name"
         app:layout_constraintStart_toStartOf="@id/first_name" />
 
+
+
     <TextView
         android:id="@+id/contact_info_label"
         android:layout_width="wrap_content"
@@ -50,6 +52,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/last_name" />
+
 
     <TextView
         android:id="@+id/email_label"
@@ -106,6 +109,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/phone_label" />
 
+
     <TextView
         android:id="@+id/organizer_label"
         android:layout_width="wrap_content"
@@ -119,6 +123,34 @@
         app:layout_constraintTop_toBottomOf="@id/phone_input"
         app:layout_constraintVertical_bias="0.74" />
 
+    <TextView
+        android:id="@+id/organization_location_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Organization Location"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.098"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/phone_input" />
+
+    <TextView
+        android:id="@+id/organization_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        android:hint="Label"
+        android:inputType="textEmailAddress"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/organization_location_label" />
+
     <Switch
         android:id="@+id/organizer_toggle"
         android:layout_width="50dp"
@@ -126,7 +158,7 @@
         android:layout_marginStart="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/organizer_label"
-        app:layout_constraintTop_toBottomOf="@id/phone_input"
+        app:layout_constraintTop_toBottomOf="@+id/phone_input"
         app:layout_constraintVertical_bias="0.774" />
 
     <ImageButton
@@ -138,7 +170,10 @@
         android:src="@drawable/edit_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/phone_input"
+        app:layout_constraintTop_toBottomOf="@+id/phone_input"
         app:layout_constraintVertical_bias="0.76" />
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

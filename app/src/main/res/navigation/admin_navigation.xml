@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/admin_navigation"
+    app:startDestination="@id/adminModerationSearchFragment">
+
+    <fragment
+        android:id="@+id/adminModerationSearchFragment"
+        android:name="com.example.mini_pekkas.ui.event.admin.AdminModerationSearchFragment"
+        android:label="AdminModerationSearchFragment"
+        tools:layout="@layout/fragment_admin_moderation_search" />
+    <fragment
+        android:id="@+id/eventFragment"
+        android:name="com.example.mini_pekkas.ui.event.user.EventFragment"
+        android:label="fragment_admin_event_detail"
+        tools:layout="@layout/fragment_admin_event_details" />/>
+</navigation>

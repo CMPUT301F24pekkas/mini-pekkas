@@ -55,7 +55,7 @@ dependencies {
     testImplementation("junit:junit")
     androidTestImplementation("androidx.test.ext:junit")
     androidTestImplementation("androidx.test.espresso:espresso-core")
-
+    testImplementation("org.mockito:mockito-core") //TODO: Will not import
     // Implement android.jar for javadoc, replace with your own filepath
     // implementation(files("/home/ryan/Android/Sdk/platforms/android-34/android.jar"))
 
