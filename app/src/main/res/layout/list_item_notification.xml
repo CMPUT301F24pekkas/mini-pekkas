@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/header_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Header (ie category) (date)"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
+        android:paddingBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/supporting_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Supporting line text lorem ipsum dolor sit amet, consectetur."
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:paddingBottom="8dp"/>
+
+</LinearLayout>
