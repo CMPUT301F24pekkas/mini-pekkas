@@ -65,8 +65,9 @@ public class ProfileFragment extends Fragment {
                 navController.navigate(R.id.action_navigation_profile_to_navigation_organizer_profile);
             } else {
 
-        });
+            }
 
+        });
 
     }
 
