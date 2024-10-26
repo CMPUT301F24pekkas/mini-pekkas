@@ -58,7 +58,7 @@ public class OrganizerProfileFragment extends Fragment {
             if (!isChecked) {
                 // Navigate back to ProfileFragment when the switch is unchecked
                 NavController navController = Navigation.findNavController(requireView());
-                navController.popBackStack(); // Go back to the ProfileFragment
+                navController.navigate(R.id.navigation_organizer_profile_to_navigation_profile);
             } else {
                 // Optionally, you could perform some action when toggled on
 //                organizerProfileViewModel.setIsOrganizer(isChecked);
