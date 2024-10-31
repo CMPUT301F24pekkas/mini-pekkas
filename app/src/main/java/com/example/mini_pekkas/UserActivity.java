@@ -12,6 +12,9 @@ import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
@@ -53,6 +56,17 @@ public class UserActivity extends AppCompatActivity {
 //            public void onError(Exception e) {
 //                Firebase.OnDocumentRetrievedListener.super.onError(e);
 //            }
+        });
+
+        firebaseHelper.getWaitlist(new Firebase.OnDocumentListRetrievedListener() {
+            @Override
+            public void onDocumentsRetrieved(List<DocumentSnapshot> documentSnapshots) {
+                ArrayList<Event> eventList = new ArrayList<>();
+                for (DocumentSnapshot documentSnapshot : documentSnapshots) {
+                    Event event = new Event(documentSnapshot.getData());
+                    eventList.add(event);
+                };
+            }
         });
     }
 
