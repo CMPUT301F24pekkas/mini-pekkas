@@ -7,6 +7,7 @@ import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -20,8 +21,12 @@ import java.util.Map;
  */
 public class Firebase {
     private final FirebaseFirestore db;
-    private final String android_id;
-    private DocumentSnapshot user_document;
+    private final String deviceID;
+    private final CollectionReference userCollection;
+    private final CollectionReference eventCollection;
+    private final CollectionReference adminCollection;
+
+    private DocumentSnapshot userDocument;
 
     /**
      * Constructor to access the firestore in db
@@ -30,74 +35,70 @@ public class Firebase {
      */
     @SuppressLint("HardwareIds") // We just need the device id as a string
     public Firebase(Context context) {
-        // initialize the database
+        // Initialize the database
         this.db = FirebaseFirestore.getInstance();
+        // Initialize the collection references
+        userCollection = db.collection("users");
+        eventCollection = db.collection("events");
+        adminCollection = db.collection("admins");
+
         // Get the device id
-        android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        // Get the user document, or create a new one if it doesn't exist
-        findUserDocumentByDeviceId(android_id);
+        deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
-    /**
-     * find the user id and store it in the user_document variable
-     * @param deviceId the device id of the user
-     */
-    public void findUserDocumentByDeviceId(String deviceId) {
-        db.collection("users")
-                .whereEqualTo("deviceID", deviceId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            // Found the document, store it in the class variable
-                            user_document = document;
-                            break; // Exit the loop after finding the document
-                        }
-
-                        if (user_document == null) {
-                            // Document not found, create a new document
-                            createNewUserDocument(deviceId);
-                        }
-                    } else {
-                        Log.d(TAG, "Error getting documents: ", task.getException());
-                    }
-                });
-    }
 
     /**
-     * Create a new user document in the firestore if it doesn't already exist
-     * @param deviceId the device id of the user
+     * Create a new user document in the firestore
      */
-    private void createNewUserDocument(String deviceId) {
+    private void createNewUserDocument() {
         Map<String, Object> user = new HashMap<>();
-        user.put("deviceID", deviceId);
+        user.put("deviceID", this.deviceID);
         // TODO Add other initial user data as needed
         user.put("email", null);
         user.put("facility", null);
         user.put("realName", null);
         user.put("phone", null);
         user.put("enrolled", null);
-        user.put("waitlist", deviceId);
-        user.put("notification", deviceId);
+        user.put("waitlist", null);
+        user.put("notification", null);
 
-        db.collection("users")
+        userCollection
                 .add(user)
                 .addOnSuccessListener(documentReference -> {
-                    user_document = documentReference.get().getResult(); // Get the newly created document
+                    userDocument = documentReference.get().getResult(); // Get the newly created document
                 })
                 .addOnFailureListener(e -> {
                     Log.w(TAG, "Error adding document", e);
                 });
     }
 
+
+    /**
+     * Create a new event document in the firestore if it doesn't already exist
+     */
+    private void createNewEventDocument(Map<String, Object> event) {
+        if (event == null){
+            event = new HashMap<>();
+        }
+
+        eventCollection
+                .add(event)
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error adding document", e);
+                });
+    }
+
+
     /**
      * all document request must implement this interface
-     * onDocumentRetrieved is called when the document is retrieved successfully. Collect results in the listener
-     * onError handles any errors that occur
+     * onDocumentRetrieved is called when the document is retrieved successfully. Data should be collected here
+     * onError handles any errors that occur. Default behaviour logs the error to console
      */
     public interface OnDocumentRetrievedListener {
         void onDocumentRetrieved(DocumentSnapshot documentSnapshot);
-        void onError(Exception e);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting document: ", e);
+        }
     }
 
 
@@ -122,14 +123,30 @@ public class Firebase {
         });
     }
 
-
     /**
-     * Checks if the current device is an admin user
-     * @return
-     * True if device id is in the admin collection store
+     * Find the user document in the firestore
      */
-    public Boolean isAdmin() {
-        // TODO
-        return true;
+    public void getUser(OnDocumentRetrievedListener listener) {
+        userCollection
+                .whereEqualTo("deviceID", this.deviceID) // Filter by device id
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Found the document, store it in the class variable
+                            userDocument = document;
+                            break; // Exit the loop after finding the document
+                        }
+                        if (userDocument == null) {
+                            // Document not found, create a new document
+                            createNewUserDocument();
+                        }
+                        // Call the document received listener
+                        listener.onDocumentRetrieved(userDocument);
+                    } else {
+                        // Call the error listener
+                        listener.onError(task.getException());
+                    }
+                });
     }
 }

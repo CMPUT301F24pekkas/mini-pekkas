@@ -10,6 +10,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class UserActivity extends AppCompatActivity {
 
@@ -40,26 +41,19 @@ public class UserActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         // Initialize Firebase class
-        Firebase firebase = new Firebase(this);
-        // An example use case of retrieving the document
-        /*
-        firebase.getDocument("myCollection", "myDocument", new Firebase.OnDocumentRetrievedListener() {
+        Firebase firebaseHelper = new Firebase(this);
+
+        firebaseHelper.getUser(new Firebase.OnDocumentRetrievedListener() {
             @Override
             public void onDocumentRetrieved(DocumentSnapshot documentSnapshot) {
-                // Access document data here
-                String name = documentSnapshot.getString("realName");
-                int phone = documentSnapshot.getLong("phone").intValue();
-                // etc...
+                User thisUser = new User(documentSnapshot.getData());
             }
-
-            @Override
-            public void onError(Exception e) {
-                // Handle errors here
-                Log.e(TAG, "Error getting document: ", e);
-            }
+//            Default error handler just prints the error
+//            @Override
+//            public void onError(Exception e) {
+//                Firebase.OnDocumentRetrievedListener.super.onError(e);
+//            }
         });
-         */
-
     }
 
 }
