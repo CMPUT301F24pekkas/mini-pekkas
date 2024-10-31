@@ -224,4 +224,31 @@ public class Firebase {
                     
                 });
     }
+
+    /**
+     * Interface to check if the user is an admin. Return value is the boolean if yes or no
+     */
+    public interface AdminCheckListener {
+        void onAdminCheckComplete(boolean isAdmin);
+    }
+
+
+    /**
+     * Retrieve the admin list
+     * @param listener the user defined admin listener which sends true or false depending on if the user is an admin
+     */
+    public void isAdmin(AdminCheckListener listener) {
+        adminCollection
+                .whereEqualTo("deviceID", this.deviceID)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        boolean isAdmin = !task.getResult().isEmpty(); // Check if any documents were found
+                        listener.onAdminCheckComplete(isAdmin);
+                    } else {
+                        // Handle error (e.g., call listener with false or throw an exception)
+                        listener.onAdminCheckComplete(false); // Assuming error means not admin
+                    }
+                });
+    }
 }
