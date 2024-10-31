@@ -13,7 +13,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +26,7 @@ public class Firebase {
     private final String deviceID;
     private final CollectionReference userCollection;
     private final CollectionReference eventCollection;
+    private final CollectionReference userInEventCollection;
     private final CollectionReference adminCollection;
 
     private DocumentSnapshot userDocument;
@@ -40,6 +43,7 @@ public class Firebase {
         // Initialize the collection references
         userCollection = db.collection("users");
         eventCollection = db.collection("events");
+        userInEventCollection = db.collection("users-in-events");
         adminCollection = db.collection("admins");
 
         // Get the device id
@@ -90,7 +94,7 @@ public class Firebase {
 
 
     /**
-     * all document request must implement this interface
+     * all document request must implement this interface if it retrieves a single document
      * onDocumentRetrieved is called when the document is retrieved successfully. Data should be collected here
      * onError handles any errors that occur. Default behaviour logs the error to console
      */
@@ -98,6 +102,18 @@ public class Firebase {
         void onDocumentRetrieved(DocumentSnapshot documentSnapshot);
         default void onError(Exception e) {
             Log.e(TAG, "Error getting document: ", e);
+        }
+    }
+
+    /**
+     * all document request must implement this interface if it retrieves multiple document
+     * onDocumentsRetrieved is called when all documents are retrieved successfully. Data should be collected here
+     * onError handles any errors that occur. Default behaviour logs the error to console
+     */
+    public interface OnDocumentListRetrievedListener {
+        void onDocumentsRetrieved(List<DocumentSnapshot> documentSnapshots);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting documents: ", e);
         }
     }
 
@@ -124,7 +140,8 @@ public class Firebase {
     }
 
     /**
-     * Find the user document in the firestore
+     * Get the current user associated with the device id
+     * @param listener the user defined listener to be called when the document is retrieved
      */
     public void getUser(OnDocumentRetrievedListener listener) {
         userCollection
@@ -147,6 +164,64 @@ public class Firebase {
                         // Call the error listener
                         listener.onError(task.getException());
                     }
+                });
+    }
+
+    /**
+     * Get the waitlist of the event associated with a user
+     * @param listener the user defined listener to be called when the document is retrieved
+     */
+    public void getWaitlist(OnDocumentListRetrievedListener listener) {
+        userInEventCollection
+                .whereEqualTo("user", userDocument)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QueryDocumentSnapshot eventDocument = null;
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Found the document, store it in the class variable
+                            eventDocument = document;
+                            break; // Exit the loop after finding the document
+                        }
+                        
+                        if (eventDocument != null) {
+                            if (eventDocument.exists()) {
+                                // Extract the array of event references
+                                List<DocumentReference> eventRefs = (List<DocumentReference>) eventDocument.get("waitlist");
+                                List<DocumentSnapshot> waitlistEvents = new ArrayList<>();
+
+                                // Then retrieve the event documents
+                                for (DocumentReference eventRef : eventRefs) {
+                                    eventRef.get().addOnCompleteListener(eventTask -> {
+                                        if (eventTask.isSuccessful()) {
+                                            DocumentSnapshot eventDoc = eventTask.getResult();
+                                            if (eventDoc.exists()) {
+                                                // Add eventDoc to list of result
+                                                waitlistEvents.add(eventDoc);
+                                            } else {
+                                                // Handle case where event document doesn't exist
+                                                listener.onError(new Exception("No such document"));
+                                            }
+                                        } else {
+                                            // Handle error getting event document
+                                            listener.onError(task.getException());
+                                        }
+                                    });
+                                }
+                                // After getting all event documents, call the document get listener
+                                listener.onDocumentsRetrieved(waitlistEvents);
+
+                            }
+                        } else {
+                            // Document not found, throw an exception
+                            listener.onError(new Exception("No such document"));
+
+                        }
+                    } else {
+                        // Call the error listener
+                        listener.onError(task.getException());
+                    }
+                    
                 });
     }
 }
