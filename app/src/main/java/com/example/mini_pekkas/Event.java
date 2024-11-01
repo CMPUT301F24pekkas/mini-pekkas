@@ -1,12 +1,8 @@
 package com.example.mini_pekkas;
 
-import com.example.mini_pekkas.AppUser;
-import com.google.firebase.firestore.auth.User;
-
 import java.util.ArrayList;
-import java.util.Date;
+
 import android.graphics.Bitmap;
-import java.util.List;
 
 public class Event {
     // Attributes
@@ -21,16 +17,18 @@ public class Event {
     private String facility;
     private double facilityGeoLat;
     private double facilityGeoLong;
-    private int limit;
+    private int maxAttendees;
     private ArrayList<AppUser> attendees;
     private ArrayList<AppUser> waitlist;
     private String checkinID;
     private String checkinRq;
     private boolean geo;
+    private Bitmap waitlistQR;
+    private Bitmap detailsQR;
 
     // Constructors
     public Event(String id, String name, AppUser eventHost, String description, String startDate, String endDate, int price,
-                 String facility, double facilityGeoLat, double facilityGeoLong, int limit, ArrayList<AppUser> attendees,
+                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees, ArrayList<AppUser> attendees,
                  ArrayList<AppUser> waitlist, String checkinID, String checkinRq, boolean geo) {
         this.id = id;
         this.name = name;
@@ -42,7 +40,7 @@ public class Event {
         this.facility = facility;
         this.facilityGeoLat = facilityGeoLat;
         this.facilityGeoLong = facilityGeoLong;
-        this.limit = limit;
+        this.maxAttendees = maxAttendees;
         this.attendees = attendees;
         this.waitlist = waitlist;
         this.checkinID = checkinID;
@@ -84,8 +82,8 @@ public class Event {
     public double getFacilityGeoLong() { return facilityGeoLong; }
     public void setFacilityGeoLong(double facilityGeoLong) { this.facilityGeoLong = facilityGeoLong; }
 
-    public int getLimit() { return limit; }
-    public void setLimit(int limit) { this.limit = limit; }
+    public int getMaxAttendees() { return maxAttendees; }
+    public void setMaxAttendees(int maxAttendees) { this.maxAttendees = maxAttendees; }
 
     public ArrayList<AppUser> getAttendees() { return attendees; }
     public void setAttendees(ArrayList<AppUser> attendees) { this.attendees = attendees; }
@@ -101,6 +99,21 @@ public class Event {
 
     public boolean isGeo() { return geo; }
     public void setGeo(boolean geo) { this.geo = geo; }
+
+    public Bitmap getDetailsQR() {
+        return detailsQR;
+    }
+    public void setDetailsQR (Bitmap detailsQR) {
+        this.detailsQR = detailsQR;
+    }
+
+    public Bitmap getWaitlistQR() {
+        return waitlistQR;
+    }
+
+    public void setWaitlistQR(Bitmap waitlistQR) {
+        this.waitlistQR = waitlistQR;
+    }
 
     
 
