@@ -1,5 +1,6 @@
 package com.example.mini_pekkas;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class User {
@@ -19,5 +20,17 @@ public class User {
         this.isOrganizer = (Boolean) map.get("isOrganizer");
         // this.isAdmin = (Boolean) map.get("isAdmin");
         this.profilePhoto = (String) map.get("profilePhoto");
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("name", name);
+        map.put("email", email);
+        map.put("phone", phone);
+        map.put("facility", facility);
+        map.put("isOrganizer", isOrganizer);
+        // map.put("isAdmin", isAdmin);
+        map.put("profilePhoto", profilePhoto);
+        return map;
     }
 }

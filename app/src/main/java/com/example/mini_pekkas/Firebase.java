@@ -11,9 +11,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.auth.User;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -229,20 +228,20 @@ public class Firebase {
                 })
                 .addOnFailureListener(listener::onError);
     }
-    public void editUser(AppUser user) {
-        db.collection("users").document(user.getDeviceID())
+    public void editUser(User user) {
+        db.collection("users").document(this.deviceID)
                 .set(user.toMap())
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully updated"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error updating user", e));
     }
-    public void addUser(AppUser user) {
-        db.collection("users").document(user.getDeviceID())
+    public void addUser(User user) {
+        db.collection("users").document(this.deviceID)
                 .set(user.toMap())
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully added"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error adding user", e));
     }
-    public void deleteUser(AppUser user) {
-        db.collection("users").document(user.getDeviceID())
+    public void deleteUser(User user) {
+        db.collection("users").document(this.deviceID)
                 .delete()
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully deleted"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting user", e));
