@@ -7,10 +7,13 @@ import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +25,11 @@ public class Firebase {
     private final FirebaseFirestore db;
     private final String android_id;
     private DocumentSnapshot user_document;
+    private final CollectionReference usersRef;
+    private final CollectionReference eventsRef;
+    private final CollectionReference checkinsRef;
+    private final CollectionReference signupsRef;
+    private ListenerRegistration userListener;
 
     /**
      * Constructor to access the firestore in db
@@ -36,6 +44,10 @@ public class Firebase {
         android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         // Get the user document, or create a new one if it doesn't exist
         findUserDocumentByDeviceId(android_id);
+        this.usersRef = db.collection("users");
+        this.eventsRef = db.collection("events");
+        this.checkinsRef = db.collection("checkins");
+        this.signupsRef = db.collection("signups");
     }
 
     /**
@@ -79,6 +91,8 @@ public class Firebase {
         user.put("enrolled", null);
         user.put("waitlist", deviceId);
         user.put("notification", deviceId);
+        user.put("admin", null);
+        user.put("organizer", null);
 
         db.collection("users")
                 .add(user)
@@ -121,6 +135,41 @@ public class Firebase {
             }
         });
     }
+//    this is all newly integrated firebase stuff, keep and leave what you think is good -daniel
+    public void getUser(String id, OnDocumentRetrievedListener listener) {
+        db.collection("users").document(id)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        listener.onDocumentRetrieved(documentSnapshot);
+                    } else {
+                        listener.onError(new Exception("No user found with this ID"));
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+    public void editUser(AppUser user) {
+        db.collection("users").document(user.getDeviceID())
+                .set(user.toMap())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully updated"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error updating user", e));
+    }
+    public void addUser(AppUser user) {
+        db.collection("users").document(user.getDeviceID())
+                .set(user.toMap())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully added"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding user", e));
+    }
+    public void deleteUser(AppUser user) {
+        db.collection("users").document(user.getDeviceID())
+                .delete()
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully deleted"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting user", e));
+    }
+
+
+
+
 
 
     /**
@@ -133,3 +182,4 @@ public class Firebase {
         return true;
     }
 }
+
