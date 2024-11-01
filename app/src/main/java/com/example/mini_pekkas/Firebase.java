@@ -138,7 +138,7 @@ public class Firebase {
                 .whereEqualTo("deviceID", this.deviceID).get() // Filter by device id
                 .addOnSuccessListener(documentSnapshots ->{
                     // Retrieve the user document from query of user collection
-                    userDocument = documentSnapshots.getDocuments().get(0);;
+                    userDocument = documentSnapshots.getDocuments().get(0);
 
                     // Check
                     if (userDocument == null) {
@@ -152,69 +152,38 @@ public class Firebase {
                 .addOnFailureListener(listener::onError);
     }
 
-        /**
-         * Get the waitlist of the event associated with a user
-         * @param listener the user defined listener to be called when the document is retrieved
-         */
+    /**
+     * Get the waitlist of the event associated with a user
+     * @param listener the user defined listener to be called when the document is retrieved
+     */
     public void getWaitlist(OnDocumentListRetrievedListener listener) {
-        // First check if the user document exist
-        if (userDocument == null) {
-            listener.onError(new Exception("No such document"));
-            return;
-        }
 
-        // Retrieve the document if it does
         userInEventCollection
-                .whereEqualTo("user", userDocument.getId())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QueryDocumentSnapshot eventDocument = null;
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            // Found the document, store it in the class variable
-                            eventDocument = document;
-                            break; // Exit the loop after finding the document
-                        }
-                        
-                        if (eventDocument != null) {
-                            if (eventDocument.exists()) {
-                                // Extract the array of event references
-                                List<DocumentReference> eventRefs = (List<DocumentReference>) eventDocument.get("waitlist");
-                                List<DocumentSnapshot> waitlistEvents = new ArrayList<>();
+                .whereEqualTo("user", userDocument.getReference()).get()
+                .addOnSuccessListener(documentSnapshots -> {
+                    // Retrieve the user document from query of user collection
+                    DocumentSnapshot eventDocument = documentSnapshots.getDocuments().get(0);
 
-                                // Then retrieve the event documents
-                                for (DocumentReference eventRef : eventRefs) {
-                                    eventRef.get().addOnCompleteListener(eventTask -> {
-                                        if (eventTask.isSuccessful()) {
-                                            DocumentSnapshot eventDoc = eventTask.getResult();
-                                            if (eventDoc.exists()) {
-                                                // Add eventDoc to list of result
-                                                waitlistEvents.add(eventDoc);
-                                            } else {
-                                                // Handle case where event document doesn't exist
-                                                listener.onError(new Exception("No such document"));
-                                            }
-                                        } else {
-                                            // Handle error getting event document
-                                            listener.onError(task.getException());
-                                        }
-                                    });
-                                }
-                                // After getting all event documents, call the document get listener
-                                listener.onDocumentsRetrieved(waitlistEvents);
+                    // List of events from waitlist TODO is this right?
+                    List<DocumentReference> eventList = (List<DocumentReference>) eventDocument.get("waitlist");
 
-                            }
-                        } else {
-                            // Document not found, throw an exception
-                            listener.onError(new Exception("No such document"));
-
-                        }
-                    } else {
-                        // Call the error listener
-                        listener.onError(task.getException());
+                    // Make an array of event documentSnapshots
+                    List<DocumentSnapshot> eventDocs = new ArrayList<>();
+                    for (DocumentReference eventRef : eventList) {
+                        eventRef.get()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    eventDocs.add(documentSnapshot);
+                                })
+                                .addOnFailureListener(listener::onError);
                     }
-                });
+
+                    // Then Call the success listener
+                    listener.onDocumentsRetrieved(eventDocs);
+
+                })
+                .addOnFailureListener(listener::onError);
     }
+
 
 
 //    this is all newly integrated firebase stuff, keep and leave what you think is good -daniel
