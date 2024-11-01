@@ -26,8 +26,8 @@ import org.junit.runner.RunWith;
 @LargeTest
 public class ExampleUITest {
     @Rule
-    public ActivityScenarioRule<MainActivity> scenario = new
-            ActivityScenarioRule<MainActivity>(MainActivity.class);
+    public ActivityScenarioRule<UserActivity> scenario = new
+            ActivityScenarioRule<UserActivity>(UserActivity.class);
 
     /**
      * Test the navigation bar functionality
@@ -39,8 +39,5 @@ public class ExampleUITest {
         onView(withId(R.id.navigation_notifications)).perform(click());
         onView(withId(R.id.navigation_profile)).perform(click());
         onView(withId(R.id.navigation_home)).perform(click());
-
-        // Add any checks to see if we're at home screen
-        // ...
     }
 }
