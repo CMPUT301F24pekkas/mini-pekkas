@@ -4,18 +4,15 @@ import java.util.List;
 import java.util.ArrayList;
 
 
-/* Fill in List parameter with User e.x List<User>
-   EventParticipant should also be replaced by User (or whatever the name of the user object is)
- */
 public class EventList {
 
     // Name of the event and a list of all the participants
     private String eventName;
-    private List<User> participants;
+    private List<AppUser> participants;
 
     public EventList(String eventName) {
         this.eventName = eventName;
-        this.participants = new ArrayList<User>();
+        this.participants = new ArrayList<AppUser>();
     }
 
     // Getters
@@ -23,12 +20,12 @@ public class EventList {
         return eventName;
     }
 
-    public List<User> getParticipants() {
+    public List<AppUser> getParticipants() {
         return participants;
     }
 
     // Method to add participant to event
-    public void joinEvent(User participant) {
+    public void joinEvent(AppUser participant) {
         participants.add(participant);
     }
 
