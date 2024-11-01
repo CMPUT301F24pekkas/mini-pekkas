@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/organizer_navigation"
+    app:startDestination="@id/organizerProfileFragment">
+
+    <fragment
+        android:id="@+id/eventCreateFragment"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventCreateFragment"
+        android:label="EventCreateFragment"
+        tools:layout="@layout/fragment_create_event"/>
+    <fragment
+        android:id="@+id/navigation_event_org"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment"
+        android:label="Event Organizer"
+        tools:layout="@layout/fragment_event_org" />
+    <fragment
+        android:id="@+id/navigation_event_org3"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment"
+        android:label="Event Organizer"
+        tools:layout="@layout/fragment_event_org2" />
+    <fragment
+        android:id="@+id/navigation_event_home"
+        android:name="com.example.mini_pekkas.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_organizer_home" />
+    <fragment
+        android:id="@+id/organizerProfileFragment"
+        android:name="com.example.mini_pekkas.ui.profile.OrganizerProfileFragment"
+        android:label="OrganizerProfileFragment"
+        tools:layout="@layout/fragment_organizer_profile"/>
+</navigation>
