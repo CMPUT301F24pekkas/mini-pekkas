@@ -1,9 +1,12 @@
 import android.graphics.Bitmap;
 
+
 import com.example.mini_pekkas.AppUser;
 import com.google.firebase.firestore.auth.User;
 
 import java.util.Date;
+
+
 import java.util.List;
 
 public class Event {
@@ -48,6 +51,7 @@ public class Event {
         this.geo = geo;
     }
 
+
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -55,8 +59,10 @@ public class Event {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+
     public User getEventHost() { return eventHost; }
     public void setEventHost(User eventHost) { this.eventHost = eventHost; }
+
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
@@ -96,6 +102,9 @@ public class Event {
 
     public boolean isGeo() { return geo; }
     public void setGeo(boolean geo) { this.geo = geo; }
+
+    
+
 
     public Bitmap getQRCodeFromID(int width, int height) {
         return null;
