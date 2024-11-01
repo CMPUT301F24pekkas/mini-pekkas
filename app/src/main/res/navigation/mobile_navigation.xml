@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/userActivity">
+    app:startDestination="@id/navigation_home">
 
     <fragment
         android:id="@+id/navigation_home"
@@ -66,10 +66,5 @@
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
         android:label="@string/title_camera"
         tools:layout="@layout/fragment_camera" />
-    <activity
-        android:id="@+id/userActivity"
-        android:name="com.example.mini_pekkas.UserActivity"
-        android:label="UserActivity"
-        tools:layout="@layout/home_page" />
 </navigation>
 
