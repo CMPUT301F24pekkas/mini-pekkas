@@ -28,21 +28,6 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
-        // this switch button is just for testing the organizer view for events
-        // should be deleted
-        Button switchViews = binding.switchButton;
-        switchViews.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                NavController navController = NavHostFragment.findNavController(HomeFragment.this);
-                navController.navigate(R.id.action_navigation_home_to_navigation_event_org2);
-            }
-        });
-        //////////////////////////////////////////////////////////////////////////////
-
         return root;
     }
 
