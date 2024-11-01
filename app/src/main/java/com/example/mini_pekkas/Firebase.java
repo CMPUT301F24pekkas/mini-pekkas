@@ -87,7 +87,13 @@ public class Firebase {
         user.put("waitlist", null);
         user.put("notification", null);
 
-        userCollection.document(this.deviceID).set(user);
+        userCollection.document(this.deviceID)
+                .set(user)
+                .addOnSuccessListener(documentSnapshot -> {
+                    // The document now exist, call again to retrieve the document
+                    checkOrCreateUser();
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding new user document", e));
     }
 
 
@@ -115,6 +121,13 @@ public class Firebase {
         }
     }
 
+    /**
+     * Interface to check if the user is an admin. Return value is the boolean if yes or no
+     */
+    public interface AdminCheckListener {
+        void onAdminCheckComplete(boolean isAdmin);
+    }
+
 
     /**
      * Get the current user associated with the device id
@@ -122,33 +135,27 @@ public class Firebase {
      */
     public void getUser(OnDocumentRetrievedListener listener) {
         userCollection
-                .whereEqualTo("deviceID", this.deviceID) // Filter by device id
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            // Found the document, store it in the class variable
-                            userDocument = document;
+                .whereEqualTo("deviceID", this.deviceID).get() // Filter by device id
+                .addOnSuccessListener(documentSnapshots ->{
+                    // Retrieve the user document from query of user collection
+                    userDocument = documentSnapshots.getDocuments().get(0);;
 
-                            // Call the document received listener
-                            listener.onDocumentRetrieved(userDocument);
-                            break; // Exit the loop after finding the document
-                        }
-                        if (userDocument == null) {
-                            // Document not found, create a new document
-                            addThisUserDocument();
-                        }
-                    } else {
-                        // Call the error listener
-                        listener.onError(task.getException());
+                    // Check
+                    if (userDocument == null) {
+                        // Document not found. Throw an exception
+                        listener.onError(new Exception("No such user document"));
+                        return;
                     }
-                });
+
+                    listener.onDocumentRetrieved(userDocument);
+                })
+                .addOnFailureListener(listener::onError);
     }
 
-    /**
-     * Get the waitlist of the event associated with a user
-     * @param listener the user defined listener to be called when the document is retrieved
-     */
+        /**
+         * Get the waitlist of the event associated with a user
+         * @param listener the user defined listener to be called when the document is retrieved
+         */
     public void getWaitlist(OnDocumentListRetrievedListener listener) {
         // First check if the user document exist
         if (userDocument == null) {
@@ -209,12 +216,7 @@ public class Firebase {
                 });
     }
 
-    /**
-     * Interface to check if the user is an admin. Return value is the boolean if yes or no
-     */
-    public interface AdminCheckListener {
-        void onAdminCheckComplete(boolean isAdmin);
-    }
+
 //    this is all newly integrated firebase stuff, keep and leave what you think is good -daniel
     public void getUser(String id, OnDocumentRetrievedListener listener) {
         db.collection("users").document(id)
@@ -246,10 +248,6 @@ public class Firebase {
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully deleted"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting user", e));
     }
-
-
-
-
 
 
     /**
