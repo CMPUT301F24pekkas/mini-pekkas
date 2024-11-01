@@ -50,6 +50,8 @@ public class EventFragment extends Fragment {
         qrImageView.setImageResource(R.drawable.camera);
 
         return root;
+
+
     }
 
     @Override

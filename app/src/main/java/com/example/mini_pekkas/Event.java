@@ -14,6 +14,8 @@ public class Event {
     private String location;
     private String quCode;
     private String reqGeo;
+    private Bitmap waitlistQR;
+    private Bitmap detailsQR;
 
     public Event(Map<String, Object> map){
         this.banner = (String) map.get("banner");
