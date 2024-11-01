@@ -1,6 +1,7 @@
 package com.example.mini_pekkas;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Event {
@@ -25,5 +26,20 @@ public class Event {
         this.quCode = (String) map.get("quCode");
         this.reqGeo = (String) map.get("reqGeo");
         // TODO Add other initial event data as needed
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("banner", this.banner);
+        map.put("title", this.title);
+        map.put("description", this.description);
+        map.put("details", this.details);
+        map.put("startDate", this.startDate);
+        map.put("endDate", this.endDate);
+        map.put("location", this.location);
+        map.put("quCode", this.quCode);
+        map.put("reqGeo", this.reqGeo);
+        // TODO Add other initial event data as needed
+        return map;
     }
 }
