@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@id/userActivity">
 
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.example.mini_pekkas.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" >
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_navigation_home_to_navigation_event_org2"
             app:destination="@id/navigation_event_org2" />
@@ -25,7 +25,7 @@
         android:id="@+id/navigation_create_event"
         android:name="com.example.mini_pekkas.ui.event.organizer.EventCreateFragment"
         android:label="Create Event"
-        tools:layout="@layout/fragment_create_event"/>
+        tools:layout="@layout/fragment_create_event" />
 
     <fragment
         android:id="@+id/navigation_event_org"
@@ -37,7 +37,7 @@
         android:id="@+id/navigation_event_org2"
         android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment2"
         android:label="Event Organizer"
-        tools:layout="@layout/fragment_event_org2"/>
+        tools:layout="@layout/fragment_event_org2" />
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
@@ -66,5 +66,10 @@
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
         android:label="@string/title_camera"
         tools:layout="@layout/fragment_camera" />
+    <activity
+        android:id="@+id/userActivity"
+        android:name="com.example.mini_pekkas.UserActivity"
+        android:label="UserActivity"
+        tools:layout="@layout/home_page" />
 </navigation>
 
