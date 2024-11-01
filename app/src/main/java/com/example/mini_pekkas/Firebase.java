@@ -50,15 +50,29 @@ public class Firebase {
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // Get the user document TODO functions could call, getting userDocument==null before this finishes execution
-        this.getUser(documentSnapshot -> userDocument = documentSnapshot);
+        checkOrCreateUser();
+    }
+
+    /**
+     * Check if the user document exists. If not, create a new one
+     */
+    private void checkOrCreateUser() {
+        userCollection.document(deviceID)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        userDocument = documentSnapshot;
+                    } else {
+                        addThisUserDocument();
+                    }
+                });
     }
 
 
     /**
      * Create a new user document in the firestore
-     * @param listener the user defined listener to be called when the document is created
      */
-    private void createNewUserDocument(OnDocumentRetrievedListener listener) {
+    private void addThisUserDocument() {
         Map<String, Object> user = new HashMap<>();
         user.put("deviceID", this.deviceID);
         // TODO Add other initial user data as needed
@@ -70,36 +84,7 @@ public class Firebase {
         user.put("waitlist", null);
         user.put("notification", null);
 
-        userCollection
-                .add(user)
-                .addOnSuccessListener(documentReference -> {
-                    documentReference.get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            userDocument = task.getResult();
-                            listener.onDocumentRetrieved(userDocument);
-                        }
-
-                    }); // Get the newly created document
-                })
-                .addOnFailureListener(e -> {
-                    listener.onError(e);
-                });
-    }
-
-
-    /**
-     * Create a new event document in the firestore if it doesn't already exist
-     */
-    private void createNewEventDocument(Map<String, Object> event) {
-        if (event == null){
-            event = new HashMap<>();
-        }
-
-        eventCollection
-                .add(event)
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Error adding document", e);
-                });
+        userCollection.document(this.deviceID).set(user);
     }
 
 
@@ -129,27 +114,6 @@ public class Firebase {
 
 
     /**
-     * Queries and returns the data from document.get()
-     * @param collection the name of the collection
-     * @param document the name of the document
-     */
-    public void getDocument(String collection, String document, OnDocumentRetrievedListener listener) {
-        DocumentReference docRef = db.collection(collection).document(document);
-        docRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot documentSnapshot = task.getResult();
-                if (documentSnapshot.exists()) {
-                    listener.onDocumentRetrieved(documentSnapshot);
-                } else {
-                    listener.onError(new Exception("No such document"));
-                }
-            } else {
-                listener.onError(task.getException());
-            }
-        });
-    }
-
-    /**
      * Get the current user associated with the device id
      * @param listener the user defined listener to be called when the document is retrieved
      */
@@ -169,7 +133,7 @@ public class Firebase {
                         }
                         if (userDocument == null) {
                             // Document not found, create a new document
-                            createNewUserDocument(listener);
+                            addThisUserDocument();
                         }
                     } else {
                         // Call the error listener
@@ -183,8 +147,15 @@ public class Firebase {
      * @param listener the user defined listener to be called when the document is retrieved
      */
     public void getWaitlist(OnDocumentListRetrievedListener listener) {
+        // First check if the user document exist
+        if (userDocument == null) {
+            listener.onError(new Exception("No such document"));
+            return;
+        }
+
+        // Retrieve the document if it does
         userInEventCollection
-                .whereEqualTo("user", userDocument.getReference())
+                .whereEqualTo("user", userDocument.getId())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -232,7 +203,6 @@ public class Firebase {
                         // Call the error listener
                         listener.onError(task.getException());
                     }
-                    
                 });
     }
 
