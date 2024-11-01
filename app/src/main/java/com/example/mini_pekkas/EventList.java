@@ -1,7 +1,5 @@
 package com.example.mini_pekkas;
 
-import com.google.firebase.firestore.auth.User;
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -13,11 +11,11 @@ public class EventList {
 
     // Name of the event and a list of all the participants
     private String eventName;
-    private List<> participants;
+    private List<User> participants;
 
-    public Event(String eventName) {
+    public EventList(String eventName) {
         this.eventName = eventName;
-        this.participants = new ArrayList<>();
+        this.participants = new ArrayList<User>();
     }
 
     // Getters
@@ -25,13 +23,13 @@ public class EventList {
         return eventName;
     }
 
-    public List<> getParticipants() {
+    public List<User> getParticipants() {
         return participants;
     }
 
     // Method to add participant to event
-    public void joinEvent(EventPaticipant participant) {
-        participants.add(participants);
+    public void joinEvent(User participant) {
+        participants.add(participant);
     }
 
     // Method to get the number of participants in event
