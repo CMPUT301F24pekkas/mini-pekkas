@@ -23,8 +23,8 @@ public class OrganizerActivity extends AppCompatActivity {
 
         BottomNavigationView navView = findViewById(R.id.organizer_view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_event, R.id.navigation_camera,
-                R.id.navigation_notifications, R.id.navigation_profile)
+                R.id.navigation_org_add, R.id.navigation_org_event, R.id.navigation_org_home,
+                R.id.navigation_org_profile, R.id.navigation_org_notifications)
                 .build();
 
         // Get the NavController
@@ -36,8 +36,5 @@ public class OrganizerActivity extends AppCompatActivity {
         // Set up the action bar and bottom navigation
         NavigationUI.setupActionBarWithNavController(OrganizerActivity.this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.organizerView, navController);
-
-        // Navigate to fragment_home if facility is empty
-        navController.navigate(R.id.navigation_home);
     }
 }
