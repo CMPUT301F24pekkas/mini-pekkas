@@ -1,12 +1,11 @@
-import android.graphics.Bitmap;
-
+package com.example.mini_pekkas;
 
 import com.example.mini_pekkas.AppUser;
 import com.google.firebase.firestore.auth.User;
 
+import java.util.ArrayList;
 import java.util.Date;
-
-
+import android.graphics.Bitmap;
 import java.util.List;
 
 public class Event {
@@ -23,16 +22,16 @@ public class Event {
     private double facilityGeoLat;
     private double facilityGeoLong;
     private int limit;
-    private UserList attendees;
-    private UserList waitlist;
+    private ArrayList<AppUser> attendees;
+    private ArrayList<AppUser> waitlist;
     private String checkinID;
     private String checkinRq;
     private boolean geo;
 
     // Constructors
-    public Event(String id, String name, User eventHost, String description, String startDate, String endDate, int price,
-                 String facility, double facilityGeoLat, double facilityGeoLong, int limit, UserList attendees,
-                 UserList waitlist, String checkinID, String checkinRq, boolean geo) {
+    public Event(String id, String name, AppUser eventHost, String description, String startDate, String endDate, int price,
+                 String facility, double facilityGeoLat, double facilityGeoLong, int limit, ArrayList<AppUser> attendees,
+                 ArrayList<AppUser> waitlist, String checkinID, String checkinRq, boolean geo) {
         this.id = id;
         this.name = name;
         this.eventHost = eventHost;
@@ -60,8 +59,8 @@ public class Event {
     public void setName(String name) { this.name = name; }
 
 
-    public User getEventHost() { return eventHost; }
-    public void setEventHost(User eventHost) { this.eventHost = eventHost; }
+    public AppUser getEventHost() { return eventHost; }
+    public void setEventHost(AppUser eventHost) { this.eventHost = eventHost; }
 
 
     public String getDescription() { return description; }
@@ -88,11 +87,11 @@ public class Event {
     public int getLimit() { return limit; }
     public void setLimit(int limit) { this.limit = limit; }
 
-    public UserList getAttendees() { return attendees; }
-    public void setAttendees(UserList attendees) { this.attendees = attendees; }
+    public ArrayList<AppUser> getAttendees() { return attendees; }
+    public void setAttendees(ArrayList<AppUser> attendees) { this.attendees = attendees; }
 
-    public UserList getWaitlist() { return waitlist; }
-    public void setWaitlist(UserList waitlist) { this.waitlist = waitlist; }
+    public ArrayList<AppUser> getWaitlist() { return waitlist; }
+    public void setWaitlist(ArrayList<AppUser> waitlist) { this.waitlist = waitlist; }
 
     public String getCheckinID() { return checkinID; }
     public void setCheckinID(String checkinID) { this.checkinID = checkinID; }
