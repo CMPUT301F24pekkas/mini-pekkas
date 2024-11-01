@@ -55,7 +55,7 @@ public class UserActivity extends AppCompatActivity {
 
         // Finds the user document for the given device. Makes a new one if it doesn't exist
         // Creates a new user Class. See implementation in User.java
-        firebaseHelper.getUser(new Firebase.OnDocumentRetrievedListener() {
+        firebaseHelper.getThisUser(new Firebase.OnDocumentRetrievedListener() {
             @Override
             public void onDocumentRetrieved(DocumentSnapshot documentSnapshot) {
                 User thisUser = new User(documentSnapshot.getData());

@@ -133,7 +133,7 @@ public class Firebase {
      * Get the current user associated with the device id
      * @param listener the user defined listener to be called when the document is retrieved
      */
-    public void getUser(OnDocumentRetrievedListener listener) {
+    public void getThisUser(OnDocumentRetrievedListener listener) {
         userCollection
                 .whereEqualTo("deviceID", this.deviceID).get() // Filter by device id
                 .addOnSuccessListener(documentSnapshots ->{
@@ -164,16 +164,14 @@ public class Firebase {
                     // Retrieve the user document from query of user collection
                     DocumentSnapshot eventDocument = documentSnapshots.getDocuments().get(0);
 
-                    // List of events from waitlist TODO is this right?
+                    // List of events references from waitlist TODO is this right?
                     List<DocumentReference> eventList = (List<DocumentReference>) eventDocument.get("waitlist");
 
                     // Make an array of event documentSnapshots
                     List<DocumentSnapshot> eventDocs = new ArrayList<>();
                     for (DocumentReference eventRef : eventList) {
                         eventRef.get()
-                                .addOnSuccessListener(documentSnapshot -> {
-                                    eventDocs.add(documentSnapshot);
-                                })
+                                .addOnSuccessListener(eventDocs::add)
                                 .addOnFailureListener(listener::onError);
                     }
 
@@ -187,18 +185,7 @@ public class Firebase {
 
 
 //    this is all newly integrated firebase stuff, keep and leave what you think is good -daniel
-    public void getUser(String id, OnDocumentRetrievedListener listener) {
-        db.collection("users").document(id)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        listener.onDocumentRetrieved(documentSnapshot);
-                    } else {
-                        listener.onError(new Exception("No user found with this ID"));
-                    }
-                })
-                .addOnFailureListener(listener::onError);
-    }
+
     public void editUser(User user) {
         db.collection("users").document(this.deviceID)
                 .set(user.toMap())
