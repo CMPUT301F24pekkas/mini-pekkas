@@ -10,7 +10,7 @@ public class Event {
     private String id;
     private String title;
     private String name;
-    private AppUser eventHost;
+    private User eventHost;
     private String description;
     private String startDate;
     private String endDate;
@@ -19,8 +19,8 @@ public class Event {
     private double facilityGeoLat;
     private double facilityGeoLong;
     private int maxAttendees;
-    private ArrayList<AppUser> attendees;
-    private ArrayList<AppUser> waitlist;
+    private ArrayList<User> attendees;
+    private ArrayList<User> waitlist;
     private String checkinID;
     private String checkinRq;
     private boolean geo;
@@ -28,9 +28,9 @@ public class Event {
     private Bitmap detailsQR;
 
     // Constructors
-    public Event(String id, String name, AppUser eventHost, String description, String startDate, String endDate, int price,
-                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees, ArrayList<AppUser> attendees,
-                 ArrayList<AppUser> waitlist, String checkinID, String checkinRq, boolean geo) {
+    public Event(String id, String name, User eventHost, String description, String startDate, String endDate, int price,
+                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees, ArrayList<User> attendees,
+                 ArrayList<User> waitlist, String checkinID, String checkinRq, boolean geo) {
         this.id = id;
         this.name = name;
         this.eventHost = eventHost;
@@ -59,8 +59,8 @@ public class Event {
     public void setName(String name) { this.name = name; }
 
 
-    public AppUser getEventHost() { return eventHost; }
-    public void setEventHost(AppUser eventHost) { this.eventHost = eventHost; }
+    public User getEventHost() { return eventHost; }
+    public void setEventHost(User eventHost) { this.eventHost = eventHost; }
 
 
     public String getDescription() { return description; }
@@ -87,11 +87,11 @@ public class Event {
     public int getMaxAttendees() { return maxAttendees; }
     public void setMaxAttendees(int maxAttendees) { this.maxAttendees = maxAttendees; }
 
-    public ArrayList<AppUser> getAttendees() { return attendees; }
-    public void setAttendees(ArrayList<AppUser> attendees) { this.attendees = attendees; }
+    public ArrayList<User> getAttendees() { return attendees; }
+    public void setAttendees(ArrayList<User> attendees) { this.attendees = attendees; }
 
-    public ArrayList<AppUser> getWaitlist() { return waitlist; }
-    public void setWaitlist(ArrayList<AppUser> waitlist) { this.waitlist = waitlist; }
+    public ArrayList<User> getWaitlist() { return waitlist; }
+    public void setWaitlist(ArrayList<User> waitlist) { this.waitlist = waitlist; }
 
     public String getCheckinID() { return checkinID; }
     public void setCheckinID(String checkinID) { this.checkinID = checkinID; }
@@ -122,5 +122,27 @@ public class Event {
 
     public Bitmap getQRCodeFromID(int width, int height) {
         return null;
+    }
+
+    public Event(Map<String, Object> map) {
+        this.id = (String) map.get("id");
+        this.title = (String) map.get("title");
+        this.name = (String) map.get("name");
+        this.eventHost = (User) map.get("eventHost");
+        this.description = (String) map.get("description");
+        this.startDate = (String) map.get("startDate");
+        this.endDate = (String) map.get("endDate");
+        this.price = map.get("price") != null ? (int) map.get("price") : 0;
+        this.facility = (String) map.get("facility");
+        this.facilityGeoLat = map.get("facilityGeoLat") != null ? (double) map.get("facilityGeoLat") : 0.0;
+        this.facilityGeoLong = map.get("facilityGeoLong") != null ? (double) map.get("facilityGeoLong") : 0.0;
+        this.maxAttendees = map.get("maxAttendees") != null ? (int) map.get("maxAttendees") : 0;
+        this.attendees = (ArrayList<User>) map.get("attendees");
+        this.waitlist = (ArrayList<User>) map.get("waitlist");
+        this.checkinID = (String) map.get("checkinID");
+        this.checkinRq = (String) map.get("checkinRq");
+        this.geo = map.get("geo") != null ? (boolean) map.get("geo") : false;
+        this.waitlistQR = (Bitmap) map.get("waitlistQR");
+        this.detailsQR = (Bitmap) map.get("detailsQR");
     }
 }
