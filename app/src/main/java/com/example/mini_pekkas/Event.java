@@ -1,5 +1,7 @@
 package com.example.mini_pekkas;
 
+import android.graphics.Bitmap;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
