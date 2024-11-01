@@ -11,7 +11,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ public class Firebase {
     private final CollectionReference adminCollection;
 
     private DocumentSnapshot userDocument;
+
 
     /**
      * Constructor to access the firestore in db
@@ -51,6 +54,7 @@ public class Firebase {
 
         // Get the user document TODO functions could call, getting userDocument==null before this finishes execution
         checkOrCreateUser();
+
     }
 
     /**
@@ -212,6 +216,41 @@ public class Firebase {
     public interface AdminCheckListener {
         void onAdminCheckComplete(boolean isAdmin);
     }
+//    this is all newly integrated firebase stuff, keep and leave what you think is good -daniel
+    public void getUser(String id, OnDocumentRetrievedListener listener) {
+        db.collection("users").document(id)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        listener.onDocumentRetrieved(documentSnapshot);
+                    } else {
+                        listener.onError(new Exception("No user found with this ID"));
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+    public void editUser(AppUser user) {
+        db.collection("users").document(user.getDeviceID())
+                .set(user.toMap())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully updated"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error updating user", e));
+    }
+    public void addUser(AppUser user) {
+        db.collection("users").document(user.getDeviceID())
+                .set(user.toMap())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully added"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding user", e));
+    }
+    public void deleteUser(AppUser user) {
+        db.collection("users").document(user.getDeviceID())
+                .delete()
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully deleted"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting user", e));
+    }
+
+
+
+
 
 
     /**
@@ -233,3 +272,4 @@ public class Firebase {
                 });
     }
 }
+
