@@ -1,10 +1,6 @@
+package com.example.mini_pekkas;
 import android.graphics.Bitmap;
-
-import com.example.mini_pekkas.AppUser;
 import com.google.firebase.firestore.auth.User;
-
-import java.util.Date;
-import java.util.List;
 
 public class Event {
     // Attributes
@@ -27,7 +23,7 @@ public class Event {
     private boolean geo;
 
     // Constructors
-    public Event(String id, String name, User eventHost, String description, String startDate, String endDate, int price,
+    public Event(String id, String name, AppUser eventHost, String description, String startDate, String endDate, int price,
                  String facility, double facilityGeoLat, double facilityGeoLong, int limit, UserList attendees,
                  UserList waitlist, String checkinID, String checkinRq, boolean geo) {
         this.id = id;
@@ -55,8 +51,8 @@ public class Event {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public User getEventHost() { return eventHost; }
-    public void setEventHost(User eventHost) { this.eventHost = eventHost; }
+    public AppUser getEventHost() { return eventHost; }
+    public void setEventHost(AppUser eventHost) { this.eventHost = eventHost; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
