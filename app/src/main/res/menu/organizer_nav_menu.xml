@@ -2,33 +2,29 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_org_home"
         android:icon="@drawable/home"
         android:title="@string/title_home"
         android:visible="true" />
 
     <item
-        android:id="@+id/navigation_event"
+        android:id="@+id/navigation_org_event"
         android:icon="@drawable/ticket"
         android:title="@string/title_event" />
 
     <item
-        android:id="@+id/navigation_add"
+        android:id="@+id/navigation_org_add"
         android:icon="@drawable/add_ring"
         android:title="@string/add_event" />
 
-    <item
-        android:id="@+id/navigation_camera"
-        android:icon="@drawable/camera"
-        android:title="@string/title_camera" />
 
     <item
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_org_notifications"
         android:icon="@drawable/bell"
         android:title="@string/title_notifications" />
 
     <item
-        android:id="@+id/navigation_profile"
+        android:id="@+id/navigation_org_profile"
         android:icon="@drawable/user"
         android:title="@string/title_profile" />
 

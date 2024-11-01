@@ -267,7 +267,7 @@
         app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
     <Button
-        android:id="@+id/acceptButton"
+        android:id="@+id/joinWaitButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="245dp"
