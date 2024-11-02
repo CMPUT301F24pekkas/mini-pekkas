@@ -105,13 +105,5 @@
         app:layout_constraintTop_toBottomOf="@+id/facilityLayout"
         app:layout_constraintVertical_bias="0.367" />
 
-    <TextView
-        android:id="@+id/textView15"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mini Pekkas"
-        app:layout_constraintBottom_toTopOf="@+id/firstNameLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
