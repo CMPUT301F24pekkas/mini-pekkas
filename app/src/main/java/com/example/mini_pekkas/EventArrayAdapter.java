@@ -52,17 +52,14 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
 
         // Populate with event data
         eventNameView.setText(event.getName());
-        organizerNameView.setText("Organizer: " + event.getEventHost());
+        organizerNameView.setText("Organizer: " + event.getEventHost().getName());
         locationView.setText("This is the location");
         eventDescriptionView.setText(event.getDescription());
+        startDateView.setText(event.getStartDate());
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
-        startDateView.setText(dateFormat.format(event.getStartDate()));
+        currentWaitView.setText(String.valueOf(event.getWaitlist().size()));
 
-
-        currentWaitView.setText(event.getWaitlist().size());
-
-        priceView.setText(event.getPrice());
+        priceView.setText(String.format(Locale.getDefault(), "$%d", event.getPrice()));
 
         return convertView;
 

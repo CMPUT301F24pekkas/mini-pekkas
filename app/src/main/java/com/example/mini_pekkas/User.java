@@ -22,6 +22,66 @@ public class User {
         this.profilePhoto = (String) map.get("profilePhoto");
     }
 
+    public User(String name, String email, String phone, String facility, Boolean isOrganizer, String profilePhoto) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.facility = facility;
+        this.isOrganizer = isOrganizer;
+        this.profilePhoto = profilePhoto;
+    }
+
+    public User() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getFacility() {
+        return facility;
+    }
+
+    public void setFacility(String facility) {
+        this.facility = facility;
+    }
+
+    public Boolean getIsOrganizer() {
+        return isOrganizer;
+    }
+
+    public void setIsOrganizer(Boolean isOrganizer) {
+        this.isOrganizer = isOrganizer;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("name", name);
