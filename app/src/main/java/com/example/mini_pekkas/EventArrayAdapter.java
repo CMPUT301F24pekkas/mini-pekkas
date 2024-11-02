@@ -9,11 +9,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
+import java.text.SimpleDateFormat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 // Not complete yet
 
@@ -36,6 +38,7 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
             convertView = LayoutInflater.from(context).inflate(R.layout.fragment_event, parent, false);
         }
 
+        // Initialize views from layout
         TextView eventNameView = convertView.findViewById(R.id.eventNameView);
         ImageView eventImageView = convertView.findViewById(R.id.eventImageView);
         ImageView qrImage = convertView.findViewById(R.id.qrImage);
@@ -46,6 +49,20 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
         TextView startDateView = convertView.findViewById(R.id.startDateView);
         TextView currentWaitView = convertView.findViewById(R.id.currentWaitView);
         TextView priceView = convertView.findViewById(R.id.priceView);
+
+        // Populate with event data
+        eventNameView.setText(event.getName());
+        organizerNameView.setText("Organizer: " + event.getEventHost());
+        locationView.setText("This is the location");
+        eventDescriptionView.setText(event.getDescription());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+        startDateView.setText(dateFormat.format(event.getStartDate()));
+
+
+        currentWaitView.setText(event.getWaitlist().size());
+
+        priceView.setText(event.getPrice());
 
         return convertView;
 
