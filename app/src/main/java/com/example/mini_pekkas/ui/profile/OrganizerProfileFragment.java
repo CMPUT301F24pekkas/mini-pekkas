@@ -40,30 +40,30 @@ public class OrganizerProfileFragment extends Fragment {
         final TextView organizerLocationInput = binding.organizationInput; // New TextView for organizer location
         final ImageView profileImage = binding.userProfileImage;
         final ImageButton editButton = binding.editButton;
-        final Switch organizerToggle = binding.organizerToggle;
+        //final Switch organizerToggle = binding.organizerToggle;
 
         // Observe LiveData
         organizerProfileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
         organizerProfileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
         organizerProfileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         organizerProfileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
-        organizerProfileViewModel.getIsOrganizer().observe(getViewLifecycleOwner(), organizerToggle::setChecked);
+        // organizerProfileViewModel.getIsOrganizer().observe(getViewLifecycleOwner(), organizerToggle::setChecked);
         organizerProfileViewModel.getOrganizerLocation().observe(getViewLifecycleOwner(), organizerLocationInput::setText); // Observe organizer location
 
         // Set click listener for the edit button
         editButton.setOnClickListener(v -> showEditDialog());
 
         // Toggle for organizer status
-        organizerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!isChecked) {
-                // Navigate back to ProfileFragment when the switch is unchecked
-                NavController navController = Navigation.findNavController(requireView());
-                navController.navigate(R.id.navigation_organizer_profile_to_navigation_profile);
-            } else {
-                // Optionally, you could perform some action when toggled on
-//                organizerProfileViewModel.setIsOrganizer(isChecked);
-            }
-        });
+//        organizerToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            if (!isChecked) {
+//                // Navigate back to ProfileFragment when the switch is unchecked
+//                NavController navController = Navigation.findNavController(requireView());
+//                navController.navigate(R.id.navigation_organizer_profile_to_navigation_profile);
+//            } else {
+//                // Optionally, you could perform some action when toggled on
+////                organizerProfileViewModel.setIsOrganizer(isChecked);
+//            }
+//        });
 
         return root;
     }
