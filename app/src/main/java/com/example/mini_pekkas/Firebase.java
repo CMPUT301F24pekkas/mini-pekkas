@@ -13,7 +13,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,8 +47,8 @@ public class Firebase {
         // Get the device id
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        // Get the user document. If it doesn't exist, set to null
-        checkThisUserExist();
+        // Fetch the user document
+        fetchUserDocument(() -> {Log.d(TAG, "User document fetched");});
     }
 
 
@@ -104,7 +103,7 @@ public class Firebase {
      * Checks if the user document exists in the firestore. Updates the local copy and calls the listener
      * @param listener a listener that is called when the check is complete. Returns true if the document exists
      */
-    private void checkThisUserExist(CheckListener listener) {
+    public void checkThisUserExist(CheckListener listener) {
         if (userDocument != null) {
             listener.onCheckComplete(true);
         } else {
@@ -131,12 +130,12 @@ public class Firebase {
      * @param user A user object to be initialized
      * @param listener A listener that is called after the user is initialized
      */
-    private void InitializeThisUser(User user, InitializationListener listener) {
+    public void InitializeThisUser(User user, InitializationListener listener) {
         userCollection.document(this.deviceID)
                 .set(user.toMap())
                 .addOnSuccessListener(v -> {
-                    userDocument = userCollection.document(this.deviceID).get().getResult();
-                    listener.onInitialized();
+                    // Re fetch the user document
+                    fetchUserDocument(listener);
                 })
                 .addOnFailureListener(e -> Log.w(TAG, "Error adding new user document", e));
     }
@@ -163,7 +162,7 @@ public class Firebase {
      * Gets and returns a User object stored in UserDocument
      * @return the user document as a User object. Or null if the user document doesn't exist
      */
-    private User getThisUser() {
+    public User getThisUser() {
         if (userDocument == null) {
             return null;
         } else {
