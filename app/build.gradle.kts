@@ -67,4 +67,9 @@ dependencies {
     // When using the BoM, don't specify versions in Firebase dependencies
     // https://firebase.google.com/docs/android/setup#available-libraries
     implementation("com.google.firebase:firebase-firestore")
+    // for the qr code
+    implementation("com.google.zxing:core:3.4.1") // Core library
+    implementation("com.google.zxing:javase:3.4.1")// Optional, for the MatrixToImageWriter
+    implementation("com.google.zxing:android-core:3.3.0") // Android-specific library
+    implementation("com.google.zxing:android-integration:3.3.0") // Optional, for integration with Android
 }
