@@ -12,7 +12,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This class accesses the firestore and contains functions to return important information
@@ -101,17 +100,13 @@ public class Firebase {
      * @param listener a void listener that runs on a successful fetch
      */
     private void fetchUserDocument(InitializationListener listener) {
-        if (userDocument == null) {
-            userCollection.document(this.deviceID)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        userDocument = documentSnapshot;
-                        listener.onInitialized();
-                    });
-        } else {
-            // Document already exists, call the listener
-            listener.onInitialized();
-        }
+        userCollection.document(this.deviceID)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    userDocument = documentSnapshot;
+                    listener.onInitialized();
+                })
+                .addOnFailureListener(e ->Log.e(TAG, "Error getting user document", e));
     }
 
     /**
@@ -165,7 +160,7 @@ public class Firebase {
         if (userDocument == null) {
             return null;
         } else {
-            return new User(Objects.requireNonNull(userDocument.getData()));
+            return new User(userDocument.getData());
         }
     }
 

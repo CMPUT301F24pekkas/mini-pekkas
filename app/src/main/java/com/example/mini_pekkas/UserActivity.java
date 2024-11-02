@@ -67,13 +67,13 @@ public class UserActivity extends AppCompatActivity {
                 User tempUser = new User(map);
                 firebaseHelper.InitializeThisUser(tempUser, () -> {
                     // User successfully initialized. Perform any necessary actions here.
-
-                    // TODO TESTING BELOW
-                    // Get the user object
                     User epicUser = firebaseHelper.getThisUser();
 
-
                 });
+            } else {
+                // User already exist
+                User epicUser = firebaseHelper.getThisUser();
+
             }
         });
     }
