@@ -10,10 +10,9 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserActivity extends AppCompatActivity {
 
@@ -48,48 +47,33 @@ public class UserActivity extends AppCompatActivity {
         What follows below are firebase functions I have to test in main because it needs special permissions
         Clean and remove this calls when you are done testing. They should be called in their respective UI fragment
         You can also let Android studio compress these into lambda functions for readability. I left them in here for clarity
+        TODO Feel free to replace with your own functions
          */
 
         // Initialize Firebase class
         Firebase firebaseHelper = new Firebase(this);
 
-        // Finds the user document for the given device. Makes a new one if it doesn't exist
-        // Creates a new user Class. See implementation in User.java
-        firebaseHelper.getThisUser(new Firebase.OnDocumentRetrievedListener() {
-            @Override
-            public void onDocumentRetrieved(DocumentSnapshot documentSnapshot) {
-                User thisUser = new User(documentSnapshot.getData());
-            }
+        firebaseHelper.checkThisUserExist(exist -> {
+            if (!exist) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("name", "temp");
+                map.put("email", "realemail@@tttt");
+                map.put("phone", "7801116666");
+                map.put("facility", "Ymca");
+                map.put("isOrganizer", true);
+                // map.put("isAdmin", isAdmin);
+                map.put("profilePhoto", "rer");
 
-            // All my default error handler just prints the error. Not necessary to implement
-            @Override
-            public void onError(Exception e) {
-                Firebase.OnDocumentRetrievedListener.super.onError(e);
-            }
-        });
+                User tempUser = new User(map);
+                firebaseHelper.InitializeThisUser(tempUser, () -> {
+                    // User successfully initialized. Perform any necessary actions here.
 
-        // Finds a list of events in users-in-events collection
-        // Replace eventList with your own event list
-        firebaseHelper.getWaitlist(new Firebase.OnDocumentListRetrievedListener() {
-            @Override
-            public void onDocumentsRetrieved(List<DocumentSnapshot> documentSnapshots) {
-                ArrayList<Event> eventList = new ArrayList<>();
-                for (DocumentSnapshot documentSnapshot : documentSnapshots) {
-                    Event event = new Event(documentSnapshot.getData());
-                    eventList.add(event);
-                };
-            }
-        });
+                    // TODO TESTING BELOW
+                    // Get the user object
+                    User epicUser = firebaseHelper.getThisUser();
 
-        // Checks if the current user is an admin from the admins collection
-        firebaseHelper.isAdmin(new Firebase.AdminCheckListener() {
-            @Override
-            public void onAdminCheckComplete(boolean isAdmin) {
-                if (isAdmin) {
-                    // User is an admin. Render admin UI
-                } else {
-                    // User is not an admin. Render user UI
-                }
+
+                });
             }
         });
     }

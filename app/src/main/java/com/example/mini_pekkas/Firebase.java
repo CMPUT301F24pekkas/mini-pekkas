@@ -8,11 +8,9 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -98,50 +96,8 @@ public class Firebase {
         }
     }
 
-
     /**
-     * Checks if the user document exists in the firestore. Updates the local copy and calls the listener
-     * @param listener a listener that is called when the check is complete. Returns true if the document exists
-     */
-    public void checkThisUserExist(CheckListener listener) {
-        if (userDocument != null) {
-            listener.onCheckComplete(true);
-        } else {
-            userCollection.document(deviceID)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                            // Cache userDocument for later use access
-                            Boolean exist = documentSnapshot.exists();
-
-                            // Set UserDocument to the document if it exists
-                            if (exist) {
-                                userDocument = documentSnapshot;
-                            }
-
-                            // Call the listener, return true if the document exists
-                            listener.onCheckComplete(exist);
-                    })
-                    .addOnFailureListener(e -> Log.w(TAG, "Error checking if user exists", e));
-        }
-    }
-
-    /**
-     * Initializes a new user in Firebase
-     * @param user A user object to be initialized
-     * @param listener A listener that is called after the user is initialized
-     */
-    public void InitializeThisUser(User user, InitializationListener listener) {
-        userCollection.document(this.deviceID)
-                .set(user.toMap())
-                .addOnSuccessListener(v -> {
-                    // Re fetch the user document
-                    fetchUserDocument(listener);
-                })
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding new user document", e));
-    }
-
-    /**
-     * Private function to fetch the user document. This servers as an updater that any getter functions can call
+     * Private function to fetch the user document. Serves as an updater that any getter functions should call
      * @param listener a void listener that runs on a successful fetch
      */
     private void fetchUserDocument(InitializationListener listener) {
@@ -159,6 +115,49 @@ public class Firebase {
     }
 
     /**
+     * Checks if the user document exists in the firestore. Updates the local copy and calls the listener
+     * @param listener a listener that is called when the check is complete. Returns true if the document exists
+     */
+    public void checkThisUserExist(CheckListener listener) {
+        if (userDocument != null) {
+            listener.onCheckComplete(true);
+        } else {
+            userCollection.document(deviceID)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                            // Cache userDocument for later use access
+                            boolean exist = documentSnapshot.exists();
+
+                            // Set UserDocument to the document if it exists
+                            if (exist) {
+                                userDocument = documentSnapshot;
+                            }
+
+                            // Call the listener, return true if the document exists
+                            listener.onCheckComplete(exist);
+                    })
+                    .addOnFailureListener(e -> Log.e(TAG, "Error checking if user exists", e));
+        }
+    }
+
+    /**
+     * Initializes a new user in Firebase
+     * @param user A user object to be initialized
+     * @param listener A listener that is called after the user is initialized
+     */
+    public void InitializeThisUser(User user, InitializationListener listener) {
+        userCollection.document(this.deviceID)
+                .set(user.toMap())
+                .addOnSuccessListener(v -> {
+                    // Re fetch the user document
+                    fetchUserDocument(listener);
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Error adding new user document", e));
+    }
+
+
+
+    /**
      * Gets and returns a User object stored in UserDocument
      * @return the user document as a User object. Or null if the user document doesn't exist
      */
@@ -170,102 +169,35 @@ public class Firebase {
         }
     }
 
+
     /**
-     * Get the waitlist of the event associated with a user
-     * @param listener the user defined listener to be called when the document is retrieved
+     * Updates the user document with the new user object
+     * @param user a user object with new data to be updated
      */
-    public void getWaitlist(OnDocumentListRetrievedListener listener) {
-        checkThisUserExist(exist -> {
-            if (!exist) {
-                listener.onDocumentsRetrieved(new ArrayList<>()); // Return an empty array if user doesn't exist
-                Log.d(TAG, "User doesn't exist");
-            } else {
-                userInEventCollection
-                        .whereEqualTo("user", userDocument.getReference()).get()
-                        .addOnSuccessListener(documentSnapshots -> {
-                            if (documentSnapshots.isEmpty()) {
-                                listener.onDocumentsRetrieved(new ArrayList<>()); // Return an empty array if no documents found
-                                return;
-                            }
-
-                            // Else Retrieve the user document from query of user collection
-                            DocumentSnapshot eventDocument = documentSnapshots.getDocuments().get(0);
-
-                            // List of events references from waitlist
-                            List<DocumentReference> eventList = (List<DocumentReference>) eventDocument.get("waitlist");
-
-                            // If the waitlist is empty or not found, return an empty list
-                            if (eventList == null || eventList.isEmpty()) {
-                                // Handle case where waitlist is empty or not found
-                                listener.onDocumentsRetrieved(new ArrayList<>()); // Or handle error
-                                return;
-                            }
-
-                            // Counting pending gets. Used to check if we get every element
-                            final int[] pendingGets = {eventList.size()}; // Counter for pending gets
-
-                            // Make an array of event documentSnapshots
-                            List<DocumentSnapshot> eventDocs = new ArrayList<>();
-                            for (DocumentReference eventRef : eventList) {
-                                eventRef.get()
-                                        .addOnSuccessListener(eventSnapshot -> {
-                                            eventDocs.add(eventSnapshot);
-
-                                            // Checks if every document has been retrieved
-                                            if (--pendingGets[0] == 0) {
-                                                listener.onDocumentsRetrieved(eventDocs);
-                                            }
-                                        })
-                                        .addOnFailureListener(listener::onError);
-                            }
-                        })
-                        .addOnFailureListener(listener::onError);
-
-                    }
-
-            });
-    }
-
-
-//    this is all newly integrated firebase stuff, keep and leave what you think is good -daniel
-
-    public void editUser(User user) {
+    public void updateThisUser(User user) {
         db.collection("users").document(this.deviceID)
                 .set(user.toMap())
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully updated"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error updating user", e));
-    }
-    public void addUser(User user) {
-        db.collection("users").document(this.deviceID)
-                .set(user.toMap())
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully added"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding user", e));
-    }
-    public void deleteUser(User user) {
-        db.collection("users").document(this.deviceID)
-                .delete()
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully deleted"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error deleting user", e));
+
+        // Then update the user document
+        fetchUserDocument(() -> {});
     }
 
 
     /**
-     * Retrieve the admin list
-     * @param listener the user defined admin listener which sends true or false depending on if the user is an admin
+     * Deletes this user, essentially starting with a clean slate
+     * @// TODO: 11/2/24   Also need to delete from user-in-event
      */
-    public void isAdmin(CheckListener listener) {
-        adminCollection
-                .whereEqualTo("deviceID", this.deviceID)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        boolean isAdmin = !task.getResult().isEmpty(); // Check if any documents were found
-                        listener.onCheckComplete(isAdmin);
-                    } else {
-                        // Handle error (e.g., call listener with false or throw an exception)
-                        listener.onCheckComplete(false); // Assuming error means not admin
-                    }
-                });
+    public void deleteThisUser() {
+        userCollection.document(this.deviceID)
+                .delete()
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully deleted"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting user", e));
+        userDocument = null;
     }
+
+    // TODO add event functions
+    // TODO add admin functions. Allows for deletion of any document
 }
 
