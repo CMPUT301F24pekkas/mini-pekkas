@@ -159,25 +159,38 @@ public class Firebase {
     public void getWaitlist(OnDocumentListRetrievedListener listener) {
 
         userInEventCollection
-                .whereEqualTo("user", userDocument.getReference()).get()
+                .whereEqualTo("user", userDocument.getId()).get()
                 .addOnSuccessListener(documentSnapshots -> {
                     // Retrieve the user document from query of user collection
                     DocumentSnapshot eventDocument = documentSnapshots.getDocuments().get(0);
 
-                    // List of events references from waitlist TODO is this right?
+                    // List of events references from waitlist
                     List<DocumentReference> eventList = (List<DocumentReference>) eventDocument.get("waitlist");
+
+                    // If the waitlist is empty or not found, return an empty list
+                    if (eventList == null || eventList.isEmpty()) {
+                        // Handle case where waitlist is empty or not found
+                        listener.onDocumentsRetrieved(new ArrayList<>()); // Or handle error
+                        return;
+                    }
+
+                    // Counting pending gets. Used to check if we get every element
+                    final int[] pendingGets = {eventList.size()}; // Counter for pending gets
 
                     // Make an array of event documentSnapshots
                     List<DocumentSnapshot> eventDocs = new ArrayList<>();
                     for (DocumentReference eventRef : eventList) {
                         eventRef.get()
-                                .addOnSuccessListener(eventDocs::add)
+                                .addOnSuccessListener(eventSnapshot -> {
+                                    eventDocs.add(eventSnapshot);
+
+                                    // Checks if every document has been retrieved
+                                    if (--pendingGets[0] == 0) {
+                                        listener.onDocumentsRetrieved(eventDocs);
+                                    }
+                                })
                                 .addOnFailureListener(listener::onError);
                     }
-
-                    // Then Call the success listener
-                    listener.onDocumentsRetrieved(eventDocs);
-
                 })
                 .addOnFailureListener(listener::onError);
     }
