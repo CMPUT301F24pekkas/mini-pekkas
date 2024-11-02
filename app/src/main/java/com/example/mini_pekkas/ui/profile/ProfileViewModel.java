@@ -12,6 +12,7 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> email;
     private final MutableLiveData<String> phoneNumber;
     private final MutableLiveData<Boolean> isOrganizer;
+    private final MutableLiveData<String> pfpText;
 
     public ProfileViewModel() {
         // Initialize LiveData objects with default values
@@ -20,8 +21,10 @@ public class ProfileViewModel extends ViewModel {
         email = new MutableLiveData<>();
         phoneNumber = new MutableLiveData<>();
         isOrganizer = new MutableLiveData<>();
+        pfpText = new MutableLiveData<>();
 
         // Set default values for these fields
+        pfpText.setValue(" ");
         firstName.setValue("Full 45678");
         lastName.setValue("Name123");
         email.setValue("example@example.com");
@@ -50,6 +53,11 @@ public class ProfileViewModel extends ViewModel {
         return isOrganizer;
     }
 
+    public LiveData<String> getPfpText() {
+        return pfpText;
+    }
+
+
     // Setters
     public void setFirstName(String name) {
         firstName.setValue(name);
@@ -69,5 +77,8 @@ public class ProfileViewModel extends ViewModel {
 
     public void setIsOrganizer(Boolean isOrganizerStatus) {
         isOrganizer.setValue(isOrganizerStatus);
+    }
+    public void setPfpText(String text) {
+        pfpText.setValue(text);
     }
 }

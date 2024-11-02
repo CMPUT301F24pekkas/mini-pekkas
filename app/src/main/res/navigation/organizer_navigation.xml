@@ -3,31 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/organizer_navigation"
-    app:startDestination="@id/organizerProfileFragment">
+    app:startDestination="@id/navigation_org_home">
 
     <fragment
-        android:id="@+id/eventCreateFragment"
+        android:id="@+id/navigation_org_add"
         android:name="com.example.mini_pekkas.ui.event.organizer.EventCreateFragment"
-        android:label="EventCreateFragment"
+        android:label="Organizer Create Event"
         tools:layout="@layout/fragment_create_event"/>
     <fragment
-        android:id="@+id/navigation_event_org"
+        android:id="@+id/navigation_org_event"
         android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment"
-        android:label="Event Organizer"
+        android:label="Organizer Event"
         tools:layout="@layout/fragment_event_org" />
     <fragment
-        android:id="@+id/navigation_event_org3"
-        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment"
-        android:label="Event Organizer"
-        tools:layout="@layout/fragment_event_org2" />
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
+        android:label="Organizer Notifications"
+        tools:layout="@layout/fragment_notifications" />
     <fragment
-        android:id="@+id/navigation_event_home"
-        android:name="com.example.mini_pekkas.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_organizer_home" />
+        android:id="@+id/navigation_org_home"
+        android:name="com.example.mini_pekkas.ui.home.OrganizerHomeFragment"
+        android:label="Organizer Home"
+        tools:layout="@layout/fragment_organizer_home"/>
     <fragment
-        android:id="@+id/organizerProfileFragment"
+        android:id="@+id/navigation_org_profile"
         android:name="com.example.mini_pekkas.ui.profile.OrganizerProfileFragment"
-        android:label="OrganizerProfileFragment"
+        android:label="Organizer Profile"
         tools:layout="@layout/fragment_organizer_profile"/>
 </navigation>
