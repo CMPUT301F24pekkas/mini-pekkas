@@ -114,6 +114,7 @@ public class ProfileFragment extends Fragment {
                     profileViewModel.setEmail(emailInput.getText().toString());
                     profileViewModel.setPhoneNumber(phoneInput.getText().toString());
 
+                    // updates edited profile in firebase
                     profileViewModel.updateProfileInFirebase();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())

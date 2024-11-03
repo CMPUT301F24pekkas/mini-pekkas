@@ -42,6 +42,21 @@ public class ProfileViewModel extends ViewModel {
         phoneNumber.setValue("123-456-7890");
         loadUserProfile();
     }
+    private void loadUserProfile() {
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    User user = firebaseHelper.getThisUser();
+                    firstName.setValue(user.getName());
+                    lastName.setValue(user.getLastname());
+                    email.setValue(user.getEmail());
+                    phoneNumber.setValue(user.getPhone());
+                }
+            }
+        });
+    }
+
     public void updateProfileInFirebase() {
         User updatedUser = new User(
                 firstName.getValue(),
@@ -98,33 +113,5 @@ public class ProfileViewModel extends ViewModel {
         pfpText.setValue(text);
     }
 
-    private void loadUserProfile() {
-        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
-            @Override
-            public void onInitialized() {
-                if (firebaseHelper.getThisUser() != null) {
-                    User user = firebaseHelper.getThisUser();
-                    firstName.setValue(user.getName());
-                    lastName.setValue(user.getLastname());
-                    email.setValue(user.getEmail());
-                    phoneNumber.setValue(user.getPhone());
-                }
-            }
-        });
-    }
 
-    public void saveUserProfile() {
-        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
-            @Override
-            public void onInitialized() {
-                if (firebaseHelper.getThisUser() != null) {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("name", firstName);
-                    map.put("lastName", lastName);
-                    map.put("email", email);
-                    map.put("phone",phoneNumber);
-                }
-            }
-        });
-    }
 }
