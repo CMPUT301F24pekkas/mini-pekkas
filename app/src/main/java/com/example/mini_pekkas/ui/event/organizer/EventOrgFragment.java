@@ -19,15 +19,6 @@ import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
 
-// TODO:
-//  - I put in code for when you click choose, it will show the choosing participants dialogue
-//  - I didn't do anything for the confirm or cancel button
-//  - When you click confirm it should bring you to EventOrgFragment2
-//  - and the stats for having the people chosen should be updated
-//  - Maybe just have like 200 people and choose 100 randomly and see if that works on the firebase
-//  - and if it translates to the EventOrgFragment2 View
-// xmls used in this class:
-// fragment_event_org.xml, fragment_choose_part.xml
 
 public class EventOrgFragment extends Fragment {
 
