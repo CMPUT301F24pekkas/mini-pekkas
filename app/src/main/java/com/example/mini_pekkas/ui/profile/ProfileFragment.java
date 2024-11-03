@@ -113,6 +113,8 @@ public class ProfileFragment extends Fragment {
                     profileViewModel.setLastName(lastNameInput.getText().toString());
                     profileViewModel.setEmail(emailInput.getText().toString());
                     profileViewModel.setPhoneNumber(phoneInput.getText().toString());
+
+                    profileViewModel.updateProfileInFirebase();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()
