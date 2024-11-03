@@ -16,19 +16,15 @@
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_navigation_home_to_eventLeaveFragment"
-            app:destination="@id/eventLeaveFragment" />
+            android:id="@+id/action_navigation_home_to_navigation_event"
+            app:destination="@id/navigation_event" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_event"
         android:name="com.example.mini_pekkas.ui.event.user.EventFragment"
         android:label="@string/title_event"
-        tools:layout="@layout/fragment_event" >
-        <action
-            android:id="@+id/action_navigation_event_to_eventLeaveFragment"
-            app:destination="@id/eventLeaveFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_event" />
 
     <fragment
         android:id="@+id/navigation_notifications"
@@ -46,14 +42,5 @@
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
         android:label="@string/title_camera"
         tools:layout="@layout/fragment_camera" />
-    <fragment
-        android:id="@+id/eventLeaveFragment"
-        android:name="com.example.mini_pekkas.ui.event.user.EventLeaveFragment"
-        android:label="Event"
-        tools:layout="@layout/fragment_event_leave">
-        <action
-            android:id="@+id/action_eventLeaveFragment_to_navigation_home"
-            app:destination="@id/navigation_home" />
-    </fragment>
 </navigation>
 
