@@ -9,10 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,38 +21,80 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText emailInput;
     private TextInputEditText facilityInput;
     private Button submitButton;
+    private Firebase firebaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_page);
 
+        // Initialize Firebase helper
+        firebaseHelper = new Firebase(this);
+
+        // Check if the device ID already exists in Firebase
+        firebaseHelper.checkThisUserExist(exist -> {
+            if (!exist) {
+                setContentView(R.layout.home_page);
+                initializeViews();
+            } else {
+                // User already exists
+                User epicUser = firebaseHelper.getThisUser();
+                String fac = epicUser.getFacility();
+
+                if (fac == null || fac.isEmpty()) {
+                    // Facility is null, navigate to UserActivity
+                    Intent userIntent = new Intent(MainActivity.this, UserActivity.class);
+                    startActivity(userIntent);
+                } else {
+                    // Facility is not null, navigate to OrganizerActivity
+                    Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
+                    startActivity(organizerIntent);
+                }
+                finish(); // Close MainActivity
+            }
+        });
+    }
+
+    private void initializeViews() {
         firstNameInput = findViewById(R.id.firstNameInput);
         lastNameInput = findViewById(R.id.lastNameInput);
         emailInput = findViewById(R.id.emailInput);
         facilityInput = findViewById(R.id.facilityInput);
         submitButton = findViewById(R.id.submitButton);
+
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 navigateBasedOnFacility();
             }
-        });        
+        });
     }
-        private void navigateBasedOnFacility() {
-            // Get text from the facility input
-            String facilityText = facilityInput.getText().toString().trim();
 
-            // Check if facility field is empty
-            if (facilityText.isEmpty()) {
-                // Facility is empty, navigate to User UI
+    private void navigateBasedOnFacility() {
+        String firstName = firstNameInput.getText().toString().trim();
+        String lastName = lastNameInput.getText().toString().trim();
+        String email = emailInput.getText().toString().trim();
+        String facility = facilityInput.getText().toString().trim();
+
+        // Create a map and put values into it
+        Map<String, Object> map = new HashMap<>();
+        map.put("firstName", firstName);
+        map.put("lastName", lastName);
+        map.put("email", email);
+        map.put("facility", facility);
+
+        User tempUser = new User(map);
+
+        // Initialize user in Firebase
+        firebaseHelper.InitializeThisUser(tempUser, () -> {
+            // User successfully initialized, now navigate
+            if (facility.isEmpty()) {
                 Intent userIntent = new Intent(MainActivity.this, UserActivity.class);
                 startActivity(userIntent);
             } else {
-                // Facility is filled, navigate to Organizer UI
                 Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
                 startActivity(organizerIntent);
             }
-        }
-
+            finish(); // Close MainActivity
+        });
+    }
 }
