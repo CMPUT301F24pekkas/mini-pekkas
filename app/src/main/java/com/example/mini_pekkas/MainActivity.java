@@ -70,14 +70,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void navigateBasedOnFacility() {
-        String firstName = firstNameInput.getText().toString().trim();
+        String firstname = firstNameInput.getText().toString().trim();
         String lastName = lastNameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
         String facility = facilityInput.getText().toString().trim();
 
         // Create a map and put values into it
         Map<String, Object> map = new HashMap<>();
-        map.put("firstName", firstName);
+        map.put("name", firstname);
         map.put("lastName", lastName);
         map.put("email", email);
         map.put("facility", facility);
