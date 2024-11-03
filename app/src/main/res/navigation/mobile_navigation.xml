@@ -4,6 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     app:startDestination="@id/navigation_home">
+    <action
+        android:id="@+id/action_global_navigation_home"
+        app:destination="@id/navigation_home"
+        app:popUpTo="@id/navigation_home"
+        app:popUpToInclusive="true" />
 
     <fragment
         android:id="@+id/navigation_home"
@@ -11,33 +16,20 @@
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_navigation_home_to_navigation_event_org2"
-            app:destination="@id/navigation_event_org2" />
+            android:id="@+id/action_navigation_home_to_eventLeaveFragment"
+            app:destination="@id/eventLeaveFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_event"
         android:name="com.example.mini_pekkas.ui.event.user.EventFragment"
         android:label="@string/title_event"
-        tools:layout="@layout/fragment_event" />
+        tools:layout="@layout/fragment_event" >
+        <action
+            android:id="@+id/action_navigation_event_to_eventLeaveFragment"
+            app:destination="@id/eventLeaveFragment" />
+    </fragment>
 
-    <fragment
-        android:id="@+id/navigation_create_event"
-        android:name="com.example.mini_pekkas.ui.event.organizer.EventCreateFragment"
-        android:label="Create Event"
-        tools:layout="@layout/fragment_create_event" />
-
-    <fragment
-        android:id="@+id/navigation_event_org"
-        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment"
-        android:label="Event Organizer"
-        tools:layout="@layout/fragment_event_org" />
-
-    <fragment
-        android:id="@+id/navigation_event_org2"
-        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment2"
-        android:label="Event Organizer"
-        tools:layout="@layout/fragment_event_org2" />
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
@@ -48,23 +40,20 @@
         android:id="@+id/navigation_profile"
         android:name="com.example.mini_pekkas.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_profile">
-        <action
-            android:id="@+id/action_navigation_profile_to_navigation_organizer_profile"
-            app:destination="@id/navigation_organizer_profile" />
-    </fragment>
-    <fragment
-        android:id="@+id/navigation_organizer_profile"
-        android:name="com.example.mini_pekkas.ui.profile.OrganizerProfileFragment"
-        android:label="OrganizerProfileFragment">
-        <action
-            android:id="@+id/navigation_organizer_profile_to_navigation_profile"
-            app:destination="@id/navigation_profile" />
-    </fragment>
+        tools:layout="@layout/fragment_profile"/>
     <fragment
         android:id="@+id/navigation_camera"
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
         android:label="@string/title_camera"
         tools:layout="@layout/fragment_camera" />
+    <fragment
+        android:id="@+id/eventLeaveFragment"
+        android:name="com.example.mini_pekkas.ui.event.user.EventLeaveFragment"
+        android:label="Event"
+        tools:layout="@layout/fragment_event_leave">
+        <action
+            android:id="@+id/action_eventLeaveFragment_to_navigation_home"
+            app:destination="@id/navigation_home" />
+    </fragment>
 </navigation>
 

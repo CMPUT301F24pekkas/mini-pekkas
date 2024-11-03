@@ -21,6 +21,7 @@ public class Event {
     private int maxAttendees;
     private ArrayList<User> attendees;
     private ArrayList<User> waitlist;
+    private boolean isUserInWaitlist;
     private String checkinID;
     private String checkinRq;
     private boolean geo;
@@ -29,7 +30,7 @@ public class Event {
 
     // Constructors
     public Event(String id, String name, User eventHost, String description, String startDate, String endDate, int price,
-                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees, ArrayList<User> attendees,
+                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees,
                  ArrayList<User> waitlist, String checkinID, String checkinRq, boolean geo) {
         this.id = id;
         this.name = name;
@@ -42,7 +43,6 @@ public class Event {
         this.facilityGeoLat = facilityGeoLat;
         this.facilityGeoLong = facilityGeoLong;
         this.maxAttendees = maxAttendees;
-        this.attendees = attendees;
         this.waitlist = waitlist;
         this.checkinID = checkinID;
         this.checkinRq = checkinRq;

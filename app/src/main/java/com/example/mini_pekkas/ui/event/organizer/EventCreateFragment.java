@@ -15,22 +15,6 @@ import com.example.mini_pekkas.QRCodeGenerator;
 import com.example.mini_pekkas.databinding.FragmentCreateEventBinding;
 import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
 
-
-// TODO:
-//  - Save the event onto the firebase
-//  - Create a QR code and replace the image with the qr code
-//  figure out how to save the hash code for qr code
-//  - I didn't put any prompts for restrictions yet,
-//  like if the user inputted something incorrectly
-//  - Pull up the start and end dates by using the built-in Android Studio
-//  - Same thing with the time, I think it's like some kind of Dialogue Fragment
-//  - I put in code so that when you press add, the QR code dialogue shows up
-//  I didn't put anything for the cancel button though
-//  - When you confirm on the QR dialogue it should go to the EventOrgFragment view
-//  - We can figure out geo location later
-// xmls used in this class:
-// fragment_create_event.xml, fragment_create_qr.xml
-
 public class EventCreateFragment extends Fragment {
 
     private FragmentCreateEventBinding binding;

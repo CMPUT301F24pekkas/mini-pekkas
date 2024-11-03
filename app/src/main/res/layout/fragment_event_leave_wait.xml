@@ -28,19 +28,19 @@
             android:layout_marginStart="20sp"
             android:layout_marginTop="20sp"
             android:layout_marginEnd="20dp"
-            android:text="Join waitlist"
+            android:text="Leave waitlist"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textColor="#000000"
             android:textSize="30sp" />
 
         <TextView
-            android:id="@+id/textView11"
+            android:id="@+id/textView33"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20sp"
             android:layout_marginTop="10sp"
             android:layout_marginEnd="20dp"
-            android:text="This event requires participants to be in a specific area. Are you sure you would like to join?"
+            android:text="Are you sure you want to leave the waitlist?"
             android:textColor="#5F5959"
             android:textSize="20sp" />
 
@@ -51,15 +51,14 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/joinWaitButton"
+                android:id="@+id/leaveConfirmButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginStart="130dp"
+                android:layout_gravity="end"                android:layout_marginStart="130dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="20sp"
                 android:layout_weight="1"
-                android:text="Join" />
+                android:text="Leave" />
 
             <Button
                 android:id="@+id/cancelWaitButton"
