@@ -97,6 +97,7 @@ public class OrganizerProfileViewModel extends ViewModel {
                     User user = firebaseHelper.getThisUser();
                     firstName.setValue(user.getName());
                     email.setValue(user.getEmail());
+                    organizerLocation.setValue((user.getFacility()));
                 }
             }
         });
