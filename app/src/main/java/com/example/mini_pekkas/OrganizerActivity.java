@@ -23,7 +23,7 @@ public class OrganizerActivity extends AppCompatActivity {
 
         BottomNavigationView navView = findViewById(R.id.organizer_view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_org_add, R.id.navigation_org_event, R.id.navigation_org_home,
+                R.id.navigation_org_add, R.id.navigation_org_camera, R.id.navigation_org_home,
                 R.id.navigation_org_profile, R.id.navigation_org_notifications)
                 .build();
 
