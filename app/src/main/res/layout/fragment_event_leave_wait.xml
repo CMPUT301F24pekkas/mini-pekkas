@@ -51,10 +51,11 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/leaveConfirmButton"
+                android:id="@+id/leaveWaitButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"                android:layout_marginStart="130dp"
+                android:layout_gravity="end"
+                android:layout_marginStart="130dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="20sp"
                 android:layout_weight="1"

@@ -134,7 +134,7 @@ public class EventFragment extends Fragment {
         builder.setView(dialogView);
 
         TextView messageView = dialogView.findViewById(R.id.textView33);
-        Button leaveButton = dialogView.findViewById(R.id.leaveConfirmButton);
+        Button leaveButton = dialogView.findViewById(R.id.leaveWaitButton);
         Button cancelButton = dialogView.findViewById(R.id.cancelWaitButton);
 
         AlertDialog dialog = builder.create();
