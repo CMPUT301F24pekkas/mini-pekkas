@@ -53,18 +53,25 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     // UI testing
-    testImplementation("junit:junit")
-    androidTestImplementation("androidx.test.ext:junit")
-    androidTestImplementation("androidx.test.espresso:espresso-core")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
     // Implement android.jar for javadoc, replace with your own filepath
     // implementation(files("/home/ryan/Android/Sdk/platforms/android-34/android.jar"))
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
     // https://firebase.google.com/docs/android/setup#available-libraries
-    implementation("com.google.firebase:firebase-firestore")
+
+    implementation("com.google.firebase:firebase-firestore:25.1.1")
+    // for the qr code
+    implementation("com.google.zxing:core:3.4.1") // Core library
+    implementation("com.google.zxing:javase:3.4.1")// Optional, for the MatrixToImageWriter
+    implementation("com.google.zxing:android-core:3.3.0") // Android-specific library
+    implementation("com.google.zxing:android-integration:3.3.0") // Optional, for integration with Android
 }
+

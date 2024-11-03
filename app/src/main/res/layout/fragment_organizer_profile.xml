@@ -110,18 +110,18 @@
         app:layout_constraintTop_toBottomOf="@id/phone_label" />
 
 
-    <TextView
-        android:id="@+id/organizer_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:text="Organizer View"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/phone_input"
-        app:layout_constraintVertical_bias="0.74" />
+<!--    <TextView-->
+<!--        android:id="@+id/organizer_label"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="16dp"-->
+<!--        android:layout_marginTop="24dp"-->
+<!--        android:text="Organizer View"-->
+<!--        android:textSize="14sp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/phone_input"-->
+<!--        app:layout_constraintVertical_bias="0.74" />-->
 
     <TextView
         android:id="@+id/organization_location_label"
@@ -151,15 +151,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/organization_location_label" />
 
-    <Switch
-        android:id="@+id/organizer_toggle"
-        android:layout_width="50dp"
-        android:layout_height="33dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/organizer_label"
-        app:layout_constraintTop_toBottomOf="@+id/phone_input"
-        app:layout_constraintVertical_bias="0.774" />
+<!--    <Switch-->
+<!--        android:id="@+id/organizer_toggle"-->
+<!--        android:layout_width="50dp"-->
+<!--        android:layout_height="33dp"-->
+<!--        android:layout_marginStart="16dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toEndOf="@id/organizer_label"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/phone_input"-->
+<!--        app:layout_constraintVertical_bias="0.774" />-->
 
     <ImageButton
         android:id="@+id/edit_button"

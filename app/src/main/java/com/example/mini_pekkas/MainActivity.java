@@ -9,10 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,88 +21,80 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText emailInput;
     private TextInputEditText facilityInput;
     private Button submitButton;
+    private Firebase firebaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_page);
 
+        // Initialize Firebase helper
+        firebaseHelper = new Firebase(this);
+
+        // Check if the device ID already exists in Firebase
+        firebaseHelper.checkThisUserExist(exist -> {
+            if (!exist) {
+                setContentView(R.layout.home_page);
+                initializeViews();
+            } else {
+                // User already exists
+                User epicUser = firebaseHelper.getThisUser();
+                String fac = epicUser.getFacility();
+
+                if (fac == null || fac.isEmpty()) {
+                    // Facility is null, navigate to UserActivity
+                    Intent userIntent = new Intent(MainActivity.this, UserActivity.class);
+                    startActivity(userIntent);
+                } else {
+                    // Facility is not null, navigate to OrganizerActivity
+                    Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
+                    startActivity(organizerIntent);
+                }
+                finish(); // Close MainActivity
+            }
+        });
+    }
+
+    private void initializeViews() {
         firstNameInput = findViewById(R.id.firstNameInput);
         lastNameInput = findViewById(R.id.lastNameInput);
         emailInput = findViewById(R.id.emailInput);
         facilityInput = findViewById(R.id.facilityInput);
         submitButton = findViewById(R.id.submitButton);
+
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 navigateBasedOnFacility();
             }
         });
-
-
-        /*
-        What follows below are firebase functions I have to test in main because it needs special permissions
-        Clean and remove this calls when you are done testing. They should be called in their respective UI fragment
-        You can also let Android studio compress these into lambda functions for readability. I left them in here for clarity
-         */
-
-        // Initialize Firebase class
-        Firebase firebaseHelper = new Firebase(this);
-
-        // Finds the user document for the given device. Makes a new one if it doesn't exist
-        // Creates a new user Class. See implementation in User.java
-        firebaseHelper.getUser(new Firebase.OnDocumentRetrievedListener() {
-            @Override
-            public void onDocumentRetrieved(DocumentSnapshot documentSnapshot) {
-                User thisUser = new User(documentSnapshot.getData());
-            }
-
-            // All my default error handler just prints the error. Not necessary to implement
-            @Override
-            public void onError(Exception e) {
-                Firebase.OnDocumentRetrievedListener.super.onError(e);
-            }
-        });
-
-        // Finds a list of events in users-in-events collection
-        // Replace eventList with your own event list
-        firebaseHelper.getWaitlist(new Firebase.OnDocumentListRetrievedListener() {
-            @Override
-            public void onDocumentsRetrieved(List<DocumentSnapshot> documentSnapshots) {
-                ArrayList<Event> eventList = new ArrayList<>();
-                for (DocumentSnapshot documentSnapshot : documentSnapshots) {
-                    Event event = new Event(documentSnapshot.getData());
-                    eventList.add(event);
-                };
-            }
-        });
-
-        // Checks if the current user is an admin from the admins collection
-        firebaseHelper.isAdmin(new Firebase.AdminCheckListener() {
-            @Override
-            public void onAdminCheckComplete(boolean isAdmin) {
-                if (isAdmin) {
-                    // User is an admin. Render admin UI
-                } else {
-                    // User is not an admin. Render user UI
-                }
-            }
-        });
     }
-        private void navigateBasedOnFacility() {
-            // Get text from the facility input
-            String facilityText = facilityInput.getText().toString().trim();
 
-            // Check if facility field is empty
-            if (facilityText.isEmpty()) {
-                // Facility is empty, navigate to User UI
+    private void navigateBasedOnFacility() {
+        String firstName = firstNameInput.getText().toString().trim();
+        String lastName = lastNameInput.getText().toString().trim();
+        String email = emailInput.getText().toString().trim();
+        String facility = facilityInput.getText().toString().trim();
+
+        // Create a map and put values into it
+        Map<String, Object> map = new HashMap<>();
+        map.put("firstName", firstName);
+        map.put("lastName", lastName);
+        map.put("email", email);
+        map.put("facility", facility);
+
+        User tempUser = new User(map);
+
+        // Initialize user in Firebase
+        firebaseHelper.InitializeThisUser(tempUser, () -> {
+            // User successfully initialized, now navigate
+            if (facility.isEmpty()) {
                 Intent userIntent = new Intent(MainActivity.this, UserActivity.class);
                 startActivity(userIntent);
             } else {
-                // Facility is filled, navigate to Organizer UI
                 Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
                 startActivity(organizerIntent);
             }
-        }
-
+            finish(); // Close MainActivity
+        });
+    }
 }
