@@ -16,7 +16,6 @@ public class OrganizerProfileViewModel extends ViewModel {
     private final MutableLiveData<String> lastName;
     private final MutableLiveData<String> email;
     private final MutableLiveData<String> phoneNumber;
-    private final MutableLiveData<Boolean> isOrganizer;
     private final MutableLiveData<String> organizerLocation;
     private final Firebase firebaseHelper;
 
@@ -26,7 +25,6 @@ public class OrganizerProfileViewModel extends ViewModel {
         lastName = new MutableLiveData<>();
         email = new MutableLiveData<>();
         phoneNumber = new MutableLiveData<>();
-        isOrganizer = new MutableLiveData<>();
         organizerLocation = new MutableLiveData<>(); // Initialize organizer location
         firebaseHelper = new Firebase(context);
 
@@ -35,10 +33,21 @@ public class OrganizerProfileViewModel extends ViewModel {
         lastName.setValue("Organizer Last Name");
         email.setValue("organizer@example.com");
         phoneNumber.setValue("123-456-7890");
-        isOrganizer.setValue(true);  // Default to organizer view
         organizerLocation.setValue("Organizer Location"); // Default organizer location
         loadUserProfile();
     }
+    public void updateProfileInFirebase() {
+        User updatedUser = new User(
+                firstName.getValue(),
+                lastName.getValue(),
+                email.getValue(),
+                phoneNumber.getValue(),
+                organizerLocation.getValue()
+        );
+
+        firebaseHelper.updateThisUser(updatedUser);
+    }
+
 
     // Getters
     public LiveData<String> getFirstName() {
@@ -57,9 +66,6 @@ public class OrganizerProfileViewModel extends ViewModel {
         return phoneNumber;
     }
 
-    public LiveData<Boolean> getIsOrganizer() {
-        return isOrganizer;
-    }
 
     public LiveData<String> getOrganizerLocation() { // New getter for organizer location
         return organizerLocation;
@@ -82,9 +88,6 @@ public class OrganizerProfileViewModel extends ViewModel {
         phoneNumber.setValue(phone);
     }
 
-    public void setIsOrganizer(Boolean isOrganizerStatus) {
-        isOrganizer.setValue(isOrganizerStatus);
-    }
 
     public void setOrganizerLocation(String location) { // New setter for organizer location
         organizerLocation.setValue(location);
@@ -96,7 +99,9 @@ public class OrganizerProfileViewModel extends ViewModel {
                 if (firebaseHelper.getThisUser() != null) {
                     User user = firebaseHelper.getThisUser();
                     firstName.setValue(user.getName());
+                    lastName.setValue(user.getLastname());
                     email.setValue(user.getEmail());
+                    phoneNumber.setValue(user.getPhone());
                     organizerLocation.setValue((user.getFacility()));
                 }
             }

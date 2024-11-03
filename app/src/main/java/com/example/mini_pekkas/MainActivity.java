@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText firstNameInput;
     private TextInputEditText lastNameInput;
     private TextInputEditText emailInput;
+    private TextInputEditText phoneInput;
     private TextInputEditText facilityInput;
     private Button submitButton;
     private Firebase firebaseHelper;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         firstNameInput = findViewById(R.id.firstNameInput);
         lastNameInput = findViewById(R.id.lastNameInput);
         emailInput = findViewById(R.id.emailInput);
+        phoneInput = findViewById(R.id.phoneInput);
         facilityInput = findViewById(R.id.facilityInput);
         submitButton = findViewById(R.id.submitButton);
 
@@ -73,13 +75,15 @@ public class MainActivity extends AppCompatActivity {
         String firstname = firstNameInput.getText().toString().trim();
         String lastName = lastNameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
+        String phone = phoneInput.getText().toString().trim();
         String facility = facilityInput.getText().toString().trim();
 
         // Create a map and put values into it
         Map<String, Object> map = new HashMap<>();
         map.put("name", firstname);
-        map.put("lastName", lastName);
+        map.put("lastname", lastName);
         map.put("email", email);
+        map.put("phone", phone);
         map.put("facility", facility);
 
         User tempUser = new User(map);

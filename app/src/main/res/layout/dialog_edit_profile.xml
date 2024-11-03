@@ -5,29 +5,61 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- First Name -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="First Name"
+        android:textSize="16sp"
+        android:textColor="@android:color/black" />
+
     <EditText
         android:id="@+id/first_name_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="First Name" />
+        android:hint="Enter First Name" />
+
+    <!-- Last Name -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Last Name"
+        android:textSize="16sp"
+        android:textColor="@android:color/black" />
 
     <EditText
         android:id="@+id/last_name_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Last Name" />
+        android:hint="Enter Last Name" />
+
+    <!-- Email -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Email"
+        android:textSize="16sp"
+        android:textColor="@android:color/black" />
 
     <EditText
         android:id="@+id/dialog_email_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        />
+        android:hint="Enter Email" />
+
+    <!-- Phone Number -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phone Number"
+        android:textSize="16sp"
+        android:textColor="@android:color/black" />
 
     <EditText
         android:id="@+id/dialog_phone_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Phone NUmber"
-        />
+        android:hint="Enter Phone Number" />
+
+
 </LinearLayout>

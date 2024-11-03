@@ -84,14 +84,14 @@ public class EventFragment extends Fragment {
     // Creates a user with mock data
     private void createMockUser() {
         // Sample user data
-        String name = "John Doe";
+        String name = "John";
+        String lastname = "Doe";
         String email = "johndoe@example.com";
         String phone = "123-456-7890";
         String facility = "Community Center";
-        Boolean isOrganizer = false; // or true if the user is an organizer
-        String profilePhoto = "profile_photo_url"; // A URL or path to the profile photo
+        //String profilePhoto = "profile_photo_url"; // A URL or path to the profile photo
 
-        mockUser = new User(name, email, phone, facility, isOrganizer, profilePhoto);
+        mockUser = new User(name, lastname, email, phone, facility);
     }
 
     // If user is not currently in waitlist, takes them to confirmation screen to join waitlist
