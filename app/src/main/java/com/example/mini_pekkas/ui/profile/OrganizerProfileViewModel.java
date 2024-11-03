@@ -36,6 +36,23 @@ public class OrganizerProfileViewModel extends ViewModel {
         organizerLocation.setValue("Organizer Location"); // Default organizer location
         loadUserProfile();
     }
+
+    private void loadUserProfile() {
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    User user = firebaseHelper.getThisUser();
+                    firstName.setValue(user.getName());
+                    lastName.setValue(user.getLastname());
+                    email.setValue(user.getEmail());
+                    phoneNumber.setValue(user.getPhone());
+                    organizerLocation.setValue((user.getFacility()));
+                }
+            }
+        });
+    }
+
     public void updateProfileInFirebase() {
         User updatedUser = new User(
                 firstName.getValue(),
@@ -91,20 +108,5 @@ public class OrganizerProfileViewModel extends ViewModel {
 
     public void setOrganizerLocation(String location) { // New setter for organizer location
         organizerLocation.setValue(location);
-    }
-    private void loadUserProfile() {
-        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
-            @Override
-            public void onInitialized() {
-                if (firebaseHelper.getThisUser() != null) {
-                    User user = firebaseHelper.getThisUser();
-                    firstName.setValue(user.getName());
-                    lastName.setValue(user.getLastname());
-                    email.setValue(user.getEmail());
-                    phoneNumber.setValue(user.getPhone());
-                    organizerLocation.setValue((user.getFacility()));
-                }
-            }
-        });
     }
 }
