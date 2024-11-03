@@ -2,6 +2,11 @@ package com.example.mini_pekkas.ui.event.user;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.User;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.example.mini_pekkas.R;
 
@@ -14,7 +19,7 @@ public class EventViewModel extends ViewModel {
     private final MutableLiveData<String> eventDescription;
     private final MutableLiveData<String> eventDetails;
     private final MutableLiveData<Integer> eventImage;
-
+    private final MutableLiveData<Event> event;
 
 
     public EventViewModel() {
@@ -37,6 +42,12 @@ public class EventViewModel extends ViewModel {
 
         // placeholder for images for now
         eventImage.setValue(R.drawable.ic_launcher_background);
+
+        // Mock Data Event
+
+        event = new MutableLiveData<>();
+        event.setValue(mockEvent());
+
     }
 
     // getters for all the text views
@@ -62,6 +73,36 @@ public class EventViewModel extends ViewModel {
 
     public MutableLiveData<Integer> getEventImage() {
         return eventImage;
+    }
+
+    public MutableLiveData<Event> getEvent() { return event; }
+
+
+    // Mock data
+    private Event mockEvent() {
+        Map<String, Object> user1Data = new HashMap<>();
+        user1Data.put("name", "John Doe");
+        user1Data.put("email", "john@example.com");
+        user1Data.put("phone", "123-456-7890");
+        user1Data.put("isOrganizer", false);
+
+        Map<String, Object> user2Data = new HashMap<>();
+        user2Data.put("name", "Alice Smith");
+        user2Data.put("email", "alice@example.com");
+        user2Data.put("phone", "098-765-4321");
+        user2Data.put("isOrganizer", false);
+
+        User user1 = new User(user1Data);
+        User user2 = new User(user2Data);
+
+        ArrayList<User> waitlist = new ArrayList<>();
+        waitlist.add(user1);
+
+        return new Event("1", "Sample Event", user2, "Sample event description",
+                "2024-11-05", "2024-11-06", 50,
+                "Community Hall", 37.7749, -122.4194,
+                100, waitlist,
+                "CHK123", "REQ456", true);
     }
 
 }
