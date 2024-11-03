@@ -99,7 +99,7 @@ public class Firebase {
      * Private function to fetch the user document. Serves as an updater that any getter functions should call
      * @param listener a void listener that runs on a successful fetch
      */
-    private void fetchUserDocument(InitializationListener listener) {
+    public void fetchUserDocument(InitializationListener listener) {
         userCollection.document(this.deviceID)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {

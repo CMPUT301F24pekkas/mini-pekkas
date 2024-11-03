@@ -4,6 +4,15 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.User;
+
+import android.content.Context;
+
+import java.util.HashMap;
+import java.util.Map;
+
+
 public class ProfileViewModel extends ViewModel {
 
     // Data for the full name, userId, email, phone number, and organizer status
@@ -13,8 +22,9 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> phoneNumber;
     private final MutableLiveData<Boolean> isOrganizer;
     private final MutableLiveData<String> pfpText;
+    private final Firebase firebaseHelper;
 
-    public ProfileViewModel() {
+    public ProfileViewModel(Context context) {
         // Initialize LiveData objects with default values
         firstName = new MutableLiveData<>();
         lastName = new MutableLiveData<>();
@@ -22,6 +32,7 @@ public class ProfileViewModel extends ViewModel {
         phoneNumber = new MutableLiveData<>();
         isOrganizer = new MutableLiveData<>();
         pfpText = new MutableLiveData<>();
+        firebaseHelper = new Firebase(context);
 
         // Set default values for these fields
         pfpText.setValue(" ");
@@ -30,6 +41,7 @@ public class ProfileViewModel extends ViewModel {
         email.setValue("example@example.com");
         phoneNumber.setValue("123-456-7890");
         isOrganizer.setValue(false);  // Default to non-organizer view
+        loadUserProfile();
     }
 
     // getters
@@ -80,5 +92,33 @@ public class ProfileViewModel extends ViewModel {
     }
     public void setPfpText(String text) {
         pfpText.setValue(text);
+    }
+
+    private void loadUserProfile() {
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    User user = firebaseHelper.getThisUser();
+                    firstName.setValue(user.getName());
+                    email.setValue(user.getEmail());
+                }
+            }
+        });
+    }
+
+    public void saveUserProfile() {
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("name", firstName);
+                    map.put("lastName", lastName);
+                    map.put("email", email);
+                    map.put("phone",phoneNumber);
+                }
+            }
+        });
     }
 }

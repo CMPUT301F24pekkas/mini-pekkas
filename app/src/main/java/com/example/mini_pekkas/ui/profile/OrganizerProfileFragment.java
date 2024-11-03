@@ -29,7 +29,8 @@ public class OrganizerProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        organizerProfileViewModel = new ViewModelProvider(this).get(OrganizerProfileViewModel.class);
+        organizerProfileViewModel = new ViewModelProvider(this, new OrganizerProfileViewModelFactory(getActivity()))
+                .get(OrganizerProfileViewModel.class);
         binding = FragmentOrganizerProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
