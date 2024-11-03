@@ -17,13 +17,6 @@ import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrg2Binding;
 
-// TODO:
-//  - This page only shows after pressing confirm on the choosing participants dialogue
-//  not sure exactly how it should work but I'm sure it uses the mobile_navigation.xml in navigation
-//  - I haven't done the list views yet for chosen, canceled, wait list and enrolled
-//  so those buttons shouldn't be doing anything for now
-//  - Also don't really have something planned for edit event so just try doing the other things for now
-
 public class EventOrgFragment2 extends Fragment {
 
     private FragmentEventOrg2Binding binding;

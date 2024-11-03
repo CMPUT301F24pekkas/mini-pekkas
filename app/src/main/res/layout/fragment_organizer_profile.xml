@@ -10,7 +10,7 @@
         android:id="@+id/user_profile_image"
         android:layout_width="101dp"
         android:layout_height="100dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="36dp"
         android:src="@drawable/user_picture"
         app:layout_constraintEnd_toStartOf="@+id/first_name"
@@ -19,9 +19,9 @@
 
     <TextView
         android:id="@+id/first_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:text="First Name"
         android:textSize="36sp"

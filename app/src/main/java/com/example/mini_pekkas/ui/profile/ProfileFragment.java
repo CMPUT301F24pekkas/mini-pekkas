@@ -27,8 +27,8 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        // ViewModel setup
-        profileViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
+        profileViewModel = new ViewModelProvider(this, new ProfileViewModelFactory(getActivity()))
+                .get(ProfileViewModel.class);
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         return binding.getRoot(); // Return root view from binding
     }
