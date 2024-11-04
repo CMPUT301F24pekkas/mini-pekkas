@@ -20,17 +20,17 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> lastName;
     private final MutableLiveData<String> email;
     private final MutableLiveData<String> phoneNumber;
-    private final MutableLiveData<Boolean> isOrganizer;
+    private final MutableLiveData<String> organizerLocation;
     private final MutableLiveData<String> pfpText;
     private final Firebase firebaseHelper;
 
     public ProfileViewModel(Context context) {
+        organizerLocation = new MutableLiveData<>();;
         // Initialize LiveData objects with default values
         firstName = new MutableLiveData<>();
         lastName = new MutableLiveData<>();
         email = new MutableLiveData<>();
         phoneNumber = new MutableLiveData<>();
-        isOrganizer = new MutableLiveData<>();
         pfpText = new MutableLiveData<>();
         firebaseHelper = new Firebase(context);
 
@@ -40,8 +40,33 @@ public class ProfileViewModel extends ViewModel {
         lastName.setValue("Name123");
         email.setValue("example@example.com");
         phoneNumber.setValue("123-456-7890");
-        isOrganizer.setValue(false);  // Default to non-organizer view
         loadUserProfile();
+    }
+    private void loadUserProfile() {
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    User user = firebaseHelper.getThisUser();
+                    firstName.setValue(user.getName());
+                    lastName.setValue(user.getLastname());
+                    email.setValue(user.getEmail());
+                    phoneNumber.setValue(user.getPhone());
+                }
+            }
+        });
+    }
+
+    public void updateProfileInFirebase() {
+        User updatedUser = new User(
+                firstName.getValue(),
+                lastName.getValue(),
+                email.getValue(),
+                phoneNumber.getValue(),
+                organizerLocation.getValue()
+        );
+
+        firebaseHelper.updateThisUser(updatedUser);
     }
 
     // getters
@@ -61,9 +86,6 @@ public class ProfileViewModel extends ViewModel {
         return phoneNumber;
     }
 
-    public LiveData<Boolean> getIsOrganizer() {
-        return isOrganizer;
-    }
 
     public LiveData<String> getPfpText() {
         return pfpText;
@@ -87,38 +109,9 @@ public class ProfileViewModel extends ViewModel {
         phoneNumber.setValue(phone);
     }
 
-    public void setIsOrganizer(Boolean isOrganizerStatus) {
-        isOrganizer.setValue(isOrganizerStatus);
-    }
     public void setPfpText(String text) {
         pfpText.setValue(text);
     }
 
-    private void loadUserProfile() {
-        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
-            @Override
-            public void onInitialized() {
-                if (firebaseHelper.getThisUser() != null) {
-                    User user = firebaseHelper.getThisUser();
-                    firstName.setValue(user.getName());
-                    email.setValue(user.getEmail());
-                }
-            }
-        });
-    }
 
-    public void saveUserProfile() {
-        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
-            @Override
-            public void onInitialized() {
-                if (firebaseHelper.getThisUser() != null) {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("name", firstName);
-                    map.put("lastName", lastName);
-                    map.put("email", email);
-                    map.put("phone",phoneNumber);
-                }
-            }
-        });
-    }
 }
