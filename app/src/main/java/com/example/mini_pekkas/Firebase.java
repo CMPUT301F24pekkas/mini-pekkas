@@ -11,6 +11,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class Firebase {
     private final String deviceID;
     private final CollectionReference userCollection;
     private final CollectionReference eventCollection;
-    private final CollectionReference userInEventCollection;
+    private final CollectionReference userEventsCollection;
     private final CollectionReference adminCollection;
 
     private DocumentSnapshot userDocument;
@@ -38,7 +39,7 @@ public class Firebase {
         // Initialize the collection references
         userCollection = db.collection("users");
         eventCollection = db.collection("events");
-        userInEventCollection = db.collection("users-in-events");
+        userEventsCollection = db.collection("user-events");
         adminCollection = db.collection("admins");
 
         // Get the device id
@@ -79,6 +80,16 @@ public class Firebase {
      */
     public interface InitializationListener {
         void onInitialized();
+        default void onError(Exception e) {
+            Log.e(TAG, "Error initializing data: ", e);
+        }
+    }
+
+    /**
+     * Interface for functions that need to retrieve the document ID. Ensure that the data is initialized successfully before calling the listener
+     */
+    public interface IDRetrievalListener {
+        void onRetrievalCompleted(String id);
         default void onError(Exception e) {
             Log.e(TAG, "Error initializing data: ", e);
         }
@@ -193,6 +204,56 @@ public class Firebase {
     }
 
     // TODO add event functions
+
+    /**
+     * Delete an event from the events collection
+     * @param event an event object to be deleted
+     */
+    public void deleteEvent(Event event) {
+        String eventID = event.getId();
+        eventCollection.document(eventID).delete();
+    }
+
+    /**
+     * Update an event in the events collection
+     * @param event an event object to be updated
+     */
+    public void updateEvent(Event event) {
+        String eventID = event.getId();
+        eventCollection.document(eventID).set(event.toMap());
+    }
+
+    /**
+     * Add an event to the events collection
+     * @param event an event object to be added
+     */
+    public void addEvent(Event event, IDRetrievalListener listener) {
+        eventCollection.add(event.toMap())
+                .addOnSuccessListener(documentReference -> {
+                    // Retrieve the ID of the document, pass into user retrieval listener
+                    String id = documentReference.getId();
+                    event.setId(id);
+
+                    listener.onRetrievalCompleted(id);
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
+    }
+
+    /**
+     * Waitlist this user into the wait
+     * @param event an event object to be waitlisted into
+     */
+    private void waitlistEvent(Event event) {
+        // Set waitlist to an empty array of user references
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("eventID", event.getId());
+        map.put("userID", this.deviceID);
+        map.put("status", "waitlist");
+
+        userEventsCollection.add(map);
+    }
+
+
     // TODO add admin functions. Allows for deletion of any document
 }
 

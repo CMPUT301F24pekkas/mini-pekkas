@@ -1,9 +1,10 @@
 package com.example.mini_pekkas;
 
-import java.util.ArrayList;
-import java.util.Map;
-
 import android.graphics.Bitmap;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Event {
     // Attributes
@@ -144,5 +145,29 @@ public class Event {
         this.geo = map.get("geo") != null ? (boolean) map.get("geo") : false;
         this.waitlistQR = (Bitmap) map.get("waitlistQR");
         this.detailsQR = (Bitmap) map.get("detailsQR");
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("title", title);
+        map.put("name", name);
+        map.put("eventHost", eventHost);
+        map.put("description", description);
+        map.put("startDate", startDate);
+        map.put("endDate", endDate);
+        map.put("price", price);
+        map.put("facility", facility);
+        map.put("facilityGeoLat", facilityGeoLat);
+        map.put("facilityGeoLong", facilityGeoLong);
+        map.put("maxAttendees", maxAttendees);
+        map.put("attendees", attendees);
+        map.put("waitlist", waitlist);
+        map.put("checkinID", checkinID);
+        map.put("checkinRq", checkinRq);
+        map.put("geo", geo);
+        map.put("waitlistQR", waitlistQR);
+        map.put("detailsQR", detailsQR);
+        return map;
     }
 }
