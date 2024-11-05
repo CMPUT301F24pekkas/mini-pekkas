@@ -11,10 +11,10 @@
         android:label="Organizer Create Event"
         tools:layout="@layout/fragment_create_event"/>
     <fragment
-        android:id="@+id/navigation_org_event"
-        android:name="com.example.mini_pekkas.ui.event.organizer.EventOrgFragment"
-        android:label="Organizer Event"
-        tools:layout="@layout/fragment_event_org" />
+        android:id="@+id/navigation_org_camera"
+        android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
+        android:label="@string/title_camera"
+        tools:layout="@layout/fragment_camera" />
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"

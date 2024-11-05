@@ -8,10 +8,9 @@
         android:visible="true" />
 
     <item
-        android:id="@+id/navigation_org_event"
-        android:icon="@drawable/ticket"
-        android:title="@string/title_event" />
-
+        android:id="@+id/navigation_org_camera"
+        android:icon="@drawable/camera"
+        android:title="@string/title_camera" />
 
     <item
         android:id="@+id/navigation_org_add"
