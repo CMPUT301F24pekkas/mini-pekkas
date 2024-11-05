@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class accesses the firestore and contains functions to return important information
@@ -46,7 +47,12 @@ public class Firebase {
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // Fetch the user document
-        fetchUserDocument(() -> {Log.d(TAG, "User document fetched");});
+        fetchUserDocument(() -> {
+            userDocument.getReference().addSnapshotListener((value, error) -> {
+                // Update the user document whenever it gets updated
+                userDocument = value;
+                });
+            });
     }
 
 
@@ -107,7 +113,7 @@ public class Firebase {
     }
 
     /**
-     * Private function to fetch the user document. Serves as an updater that any getter functions should call
+     * Private function to fetch the user document.
      * @param listener a void listener that runs on a successful fetch
      */
     public void fetchUserDocument(InitializationListener listener) {
@@ -165,14 +171,10 @@ public class Firebase {
 
     /**
      * Gets and returns a User object stored in UserDocument
-     * @return the user document as a User object. Or null if the user document doesn't exist
+     * @return the user document as a User object. Throws an error if the document does not exist
      */
     public User getThisUser() {
-        if (userDocument == null) {
-            return null;
-        } else {
-            return new User(userDocument.getData());
-        }
+        return new User(Objects.requireNonNull(userDocument.getData()));
     }
 
 
@@ -193,7 +195,7 @@ public class Firebase {
 
     /**
      * Deletes this user, essentially starting with a clean slate
-     * @// TODO: 11/2/24   Also need to delete from user-in-event
+     * also deletes all reverent documents in user-events collection
      */
     public void deleteThisUser() {
         userCollection.document(this.deviceID)
@@ -201,17 +203,34 @@ public class Firebase {
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully deleted"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting user", e));
         userDocument = null;
+
+        // Delete all user document from the user-events collection
+        userEventsCollection.whereEqualTo("userID", this.deviceID).get()
+                .addOnSuccessListener(task -> {
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        document.getReference().delete();
+                    }
+                });
     }
 
     // TODO add event functions
 
     /**
-     * Delete an event from the events collection
+     * Delete an event from the events and user-events collection
      * @param event an event object to be deleted
      */
     public void deleteEvent(Event event) {
         String eventID = event.getId();
+        // Delete the event document
         eventCollection.document(eventID).delete();
+
+        // Delete all event document from the user-events collection
+        userEventsCollection.whereEqualTo("eventID", eventID).get()
+                .addOnSuccessListener(task -> {
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        document.getReference().delete();
+                    }
+                });
     }
 
     /**
@@ -239,21 +258,77 @@ public class Firebase {
                 .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
     }
 
+
     /**
-     * Waitlist this user into the wait
+     * Waitlist this user into the event
      * @param event an event object to be waitlisted into
      */
-    private void waitlistEvent(Event event) {
+    public void waitlistEvent(Event event) {
         // Set waitlist to an empty array of user references
         HashMap<String, Object> map = new HashMap<>();
         map.put("eventID", event.getId());
         map.put("userID", this.deviceID);
-        map.put("status", "waitlist");
+        map.put("status", "waitlisted");
 
         userEventsCollection.add(map);
     }
 
+    /**
+     * Enroll this user into the event
+     * @param event an event object to be enrolled into
+     */
+    public void enrollEvent(Event event) {
+        // Set waitlist to an empty array of user references
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("eventID", event.getId());
+        map.put("userID", this.deviceID);
+        map.put("status", "enrolled");
 
-    // TODO add admin functions. Allows for deletion of any document
+        userEventsCollection.whereEqualTo("eventID", event.getId()).get()
+                .addOnSuccessListener(task -> {
+                    // Get and update the one document that matches the query
+                    DocumentSnapshot document = task.getDocuments().get(0);
+                    document.getReference().update(map);
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Error enrolling user", e));
+    }
+
+    /**
+     * Cancel the event, removing oneself from the waitlist or enrolling
+     * @param event an event object to be waitlisted into
+     */
+    public void cancelEvent(Event event) {
+        // Set waitlist to an empty array of user references
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("eventID", event.getId());
+        map.put("userID", this.deviceID);
+        map.put("status", "cancelled");
+
+        userEventsCollection.whereEqualTo("eventID", event.getId()).get()
+                .addOnSuccessListener(task -> {
+                    // Get and update the one document that matches the query
+                    DocumentSnapshot document = task.getDocuments().get(0);
+                    document.getReference().update(map);
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Error cancelling user", e));
+    }
+
+
+    // TODO add admin functions. Allows for deletion of various types of data
+    /**
+     * Checks if this user is an admin
+     * @param listener the listener that is called when the check is complete. Returns true if the user is an admin
+     */
+    public void isThisUserAdmin(CheckListener listener){
+        adminCollection.whereEqualTo("deviceID", this.deviceID).get()
+                .addOnSuccessListener(result -> {
+                    // If the result is not empty, the user is an admin
+                    boolean exist = !result.isEmpty();
+                    listener.onCheckComplete(exist);
+                });
+    }
+
+    // Get all users...
+    // Get all events...
 }
 
