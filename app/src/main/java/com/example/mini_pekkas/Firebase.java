@@ -12,11 +12,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * This class accesses the firestore and contains functions to return important information
+ * @version 1.1 10/10/2023: Added event functionality
  */
 public class Firebase {
     private final FirebaseFirestore db;
@@ -47,12 +47,10 @@ public class Firebase {
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // Fetch the user document
-        fetchUserDocument(() -> {
-            userDocument.getReference().addSnapshotListener((value, error) -> {
-                // Update the user document whenever it gets updated
-                userDocument = value;
-                });
-            });
+        fetchUserDocument(() -> userDocument.getReference().addSnapshotListener((value, error) -> {
+            // Update the user document whenever data gets updated
+            this.userDocument = value;
+            }));
     }
 
 
@@ -61,24 +59,24 @@ public class Firebase {
      * onDocumentRetrieved is called when the document is retrieved successfully. Data should be collected here
      * onError handles any errors that occur. Default behaviour logs the error to console
      */
-    public interface OnDocumentRetrievedListener {
-        void onDocumentRetrieved(DocumentSnapshot documentSnapshot);
-        default void onError(Exception e) {
-            Log.e(TAG, "Error getting document: ", e);
-        }
-    }
+//    public interface OnDocumentRetrievedListener {
+//        void onDocumentRetrieved(DocumentSnapshot documentSnapshot);
+//        default void onError(Exception e) {
+//            Log.e(TAG, "Error getting document: ", e);
+//        }
+//    }
 
     /**
      * all document request must implement this interface if it retrieves multiple document
      * onDocumentsRetrieved is called when all documents are retrieved successfully. Data should be collected here
      * onError handles any errors that occur. Default behaviour logs the error to console
      */
-    public interface OnDocumentListRetrievedListener {
-        void onDocumentsRetrieved(List<DocumentSnapshot> documentSnapshots);
-        default void onError(Exception e) {
-            Log.e(TAG, "Error getting documents: ", e);
-        }
-    }
+//    public interface OnDocumentListRetrievedListener {
+//        void onDocumentsRetrieved(List<DocumentSnapshot> documentSnapshots);
+//        default void onError(Exception e) {
+//            Log.e(TAG, "Error getting documents: ", e);
+//        }
+//    }
 
 
     /**
@@ -94,7 +92,7 @@ public class Firebase {
     /**
      * Interface for functions that need to retrieve the document ID. Ensure that the data is initialized successfully before calling the listener
      */
-    public interface IDRetrievalListener {
+    public interface DataRetrievalListener {
         void onRetrievalCompleted(String id);
         default void onError(Exception e) {
             Log.e(TAG, "Error initializing data: ", e);
@@ -171,7 +169,7 @@ public class Firebase {
 
     /**
      * Gets and returns a User object stored in UserDocument
-     * @return the user document as a User object. Throws an error if the document does not exist
+     * @return the user document as a User object. Throws an error if the user is not yet retrieved
      */
     public User getThisUser() {
         return new User(Objects.requireNonNull(userDocument.getData()));
@@ -187,9 +185,7 @@ public class Firebase {
                 .set(user.toMap())
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "User successfully updated"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error updating user", e));
-
-        // Then update the user document
-        fetchUserDocument(() -> {});
+        // Snapshot retrieve listener then updates the current copy
     }
 
 
@@ -216,6 +212,30 @@ public class Firebase {
     // TODO add event functions
 
     /**
+     * Add an event to the events collection
+     * @param event an event object to be added
+     */
+    public void addEvent(Event event, DataRetrievalListener listener) {
+        eventCollection.add(event.toMap())
+                .addOnSuccessListener(documentReference -> {
+                    // Retrieve the ID of the document, pass into user retrieval listener
+                    String id = documentReference.getId();
+                    event.setId(id);
+
+                    listener.onRetrievalCompleted(id);
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
+    }
+
+    /**
+     * Add an event to the events collection. Listener optional
+     * @param event an event object to be added
+     */
+    public void addEvent(Event event) {
+        addEvent(event, id -> {});
+    }
+
+    /**
      * Delete an event from the events and user-events collection
      * @param event an event object to be deleted
      */
@@ -239,28 +259,15 @@ public class Firebase {
      */
     public void updateEvent(Event event) {
         String eventID = event.getId();
-        eventCollection.document(eventID).set(event.toMap());
+        eventCollection.document(eventID).set(event.toMap())
+                .addOnFailureListener(e -> Log.w(TAG, "Error updating event", e));
+
     }
 
-    /**
-     * Add an event to the events collection
-     * @param event an event object to be added
-     */
-    public void addEvent(Event event, IDRetrievalListener listener) {
-        eventCollection.add(event.toMap())
-                .addOnSuccessListener(documentReference -> {
-                    // Retrieve the ID of the document, pass into user retrieval listener
-                    String id = documentReference.getId();
-                    event.setId(id);
-
-                    listener.onRetrievalCompleted(id);
-                })
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
-    }
-
+    // TODO enrollment functionality
 
     /**
-     * Waitlist this user into the event
+     * Waitlist this user into the event. Creates a new entry in the user-events collection
      * @param event an event object to be waitlisted into
      */
     public void waitlistEvent(Event event) {
@@ -280,11 +287,10 @@ public class Firebase {
     public void enrollEvent(Event event) {
         // Set waitlist to an empty array of user references
         HashMap<String, Object> map = new HashMap<>();
-        map.put("eventID", event.getId());
-        map.put("userID", this.deviceID);
         map.put("status", "enrolled");
 
-        userEventsCollection.whereEqualTo("eventID", event.getId()).get()
+        // Find the document that matches the user to event query
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Get and update the one document that matches the query
                     DocumentSnapshot document = task.getDocuments().get(0);
@@ -300,11 +306,10 @@ public class Firebase {
     public void cancelEvent(Event event) {
         // Set waitlist to an empty array of user references
         HashMap<String, Object> map = new HashMap<>();
-        map.put("eventID", event.getId());
-        map.put("userID", this.deviceID);
         map.put("status", "cancelled");
 
-        userEventsCollection.whereEqualTo("eventID", event.getId()).get()
+        // Find the document that matches the user to event query
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Get and update the one document that matches the query
                     DocumentSnapshot document = task.getDocuments().get(0);
@@ -313,6 +318,18 @@ public class Firebase {
                 .addOnFailureListener(e -> Log.e(TAG, "Error cancelling user", e));
     }
 
+    /**
+     * Get the current status of the user in the event
+     */
+    public void getStatusInEvent(Event event, DataRetrievalListener listener) {
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
+                .addOnSuccessListener(task -> {
+                    // Get the one document that matches the query
+                    DocumentSnapshot document = task.getDocuments().get(0);
+                    // Return the status as a string: waitlisted, enrolled, cancelled
+                    listener.onRetrievalCompleted(Objects.requireNonNull(document.get("status")).toString());
+                });
+    }
 
     // TODO add admin functions. Allows for deletion of various types of data
     /**
