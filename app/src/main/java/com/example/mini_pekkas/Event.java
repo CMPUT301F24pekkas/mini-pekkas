@@ -8,13 +8,12 @@ import android.graphics.Bitmap;
 public class Event {
     // Attributes
     private String id;
-    private String title;
     private String name;
     private User eventHost;
     private String description;
     private String startDate;
     private String endDate;
-    private int price;
+    private float price;
     private String facility;
     private double facilityGeoLat;
     private double facilityGeoLong;
@@ -22,16 +21,15 @@ public class Event {
     private ArrayList<User> attendees;
     private ArrayList<User> waitlist;
     private boolean isUserInWaitlist;
-    private String checkinID;
-    private String checkinRq;
+    private String QrCode;
     private boolean geo;
     private Bitmap waitlistQR;
     private Bitmap detailsQR;
 
     // Constructors
-    public Event(String id, String name, User eventHost, String description, String startDate, String endDate, int price,
+    public Event(String id, String name, User eventHost, String description, String startDate, String endDate, float price,
                  String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees,
-                 ArrayList<User> waitlist, String checkinID, String checkinRq, boolean geo) {
+                 ArrayList<User> waitlist, String QrCode, boolean geo) {
         this.id = id;
         this.name = name;
         this.eventHost = eventHost;
@@ -44,8 +42,7 @@ public class Event {
         this.facilityGeoLong = facilityGeoLong;
         this.maxAttendees = maxAttendees;
         this.waitlist = waitlist;
-        this.checkinID = checkinID;
-        this.checkinRq = checkinRq;
+        this.QrCode = QrCode;
         this.geo = geo;
     }
 
@@ -72,7 +69,7 @@ public class Event {
     public String getEndDate() { return endDate; }
     public void setEndDate(String endDate) { this.endDate = endDate; }
 
-    public int getPrice() { return price; }
+    public float getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
 
     public String getFacility() { return facility; }
@@ -93,11 +90,10 @@ public class Event {
     public ArrayList<User> getWaitlist() { return waitlist; }
     public void setWaitlist(ArrayList<User> waitlist) { this.waitlist = waitlist; }
 
-    public String getCheckinID() { return checkinID; }
-    public void setCheckinID(String checkinID) { this.checkinID = checkinID; }
 
-    public String getCheckinRq() { return checkinRq; }
-    public void setCheckinRq(String checkinRq) { this.checkinRq = checkinRq; }
+
+    public String getQrCode() { return QrCode; }
+    public void setQrCode(String Qrcode) { this.QrCode = Qrcode; }
 
     public boolean isGeo() { return geo; }
     public void setGeo(boolean geo) { this.geo = geo; }
@@ -126,7 +122,6 @@ public class Event {
 
     public Event(Map<String, Object> map) {
         this.id = (String) map.get("id");
-        this.title = (String) map.get("title");
         this.name = (String) map.get("name");
         this.eventHost = (User) map.get("eventHost");
         this.description = (String) map.get("description");
@@ -139,8 +134,7 @@ public class Event {
         this.maxAttendees = map.get("maxAttendees") != null ? (int) map.get("maxAttendees") : 0;
         this.attendees = (ArrayList<User>) map.get("attendees");
         this.waitlist = (ArrayList<User>) map.get("waitlist");
-        this.checkinID = (String) map.get("checkinID");
-        this.checkinRq = (String) map.get("checkinRq");
+        this.QrCode = (String) map.get("QrCode");
         this.geo = map.get("geo") != null ? (boolean) map.get("geo") : false;
         this.waitlistQR = (Bitmap) map.get("waitlistQR");
         this.detailsQR = (Bitmap) map.get("detailsQR");

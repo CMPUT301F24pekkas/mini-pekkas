@@ -102,7 +102,7 @@ public class EventViewModel extends ViewModel {
                 "2024-11-05", "2024-11-06", 50,
                 "Community Hall", 37.7749, -122.4194,
                 100, waitlist,
-                "CHK123", "REQ456", true);
+                "CHK123", true);
     }
 
 }
