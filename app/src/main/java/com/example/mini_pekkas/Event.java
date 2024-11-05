@@ -24,8 +24,7 @@ public class Event {
     private boolean isUserInWaitlist;
     private String QrCode;
     private boolean geo;
-    private Bitmap waitlistQR;
-    private Bitmap detailsQR;
+
 
     // Constructors
     public Event(String id, String name, User eventHost, String description, String startDate, String endDate, float price,
@@ -99,24 +98,6 @@ public class Event {
     public boolean isGeo() { return geo; }
     public void setGeo(boolean geo) { this.geo = geo; }
 
-    public Bitmap getDetailsQR() {
-        return detailsQR;
-    }
-    public void setDetailsQR (Bitmap detailsQR) {
-        this.detailsQR = detailsQR;
-    }
-
-    public Bitmap getWaitlistQR() {
-        return waitlistQR;
-    }
-
-    public void setWaitlistQR(Bitmap waitlistQR) {
-        this.waitlistQR = waitlistQR;
-    }
-
-
-
-
     public Bitmap getQRCodeFromID(int width, int height) {
         return null;
     }
@@ -137,14 +118,12 @@ public class Event {
         this.waitlist = (ArrayList<User>) map.get("waitlist");
         this.QrCode = (String) map.get("QrCode");
         this.geo = map.get("geo") != null ? (boolean) map.get("geo") : false;
-        this.waitlistQR = (Bitmap) map.get("waitlistQR");
-        this.detailsQR = (Bitmap) map.get("detailsQR");
+
     }
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
-        map.put("title", title);
         map.put("name", name);
         map.put("eventHost", eventHost);
         map.put("description", description);
@@ -157,11 +136,9 @@ public class Event {
         map.put("maxAttendees", maxAttendees);
         map.put("attendees", attendees);
         map.put("waitlist", waitlist);
-        map.put("checkinID", checkinID);
-        map.put("checkinRq", checkinRq);
         map.put("geo", geo);
-        map.put("waitlistQR", waitlistQR);
-        map.put("detailsQR", detailsQR);
+        map.put("QrCode", QrCode);
+
         return map;
     }
 }
