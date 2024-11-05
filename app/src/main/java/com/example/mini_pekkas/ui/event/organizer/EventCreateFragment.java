@@ -3,6 +3,7 @@ package com.example.mini_pekkas.ui.event.organizer;
 import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,18 +29,20 @@ import java.util.Map;
 public class EventCreateFragment extends Fragment {
 
     private FragmentCreateEventBinding binding;
-
+    private Firebase firebaseHelper;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCreateEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
+        //initialize firebase
+        firebaseHelper = new Firebase(requireContext());
         // button to show qr confirm dialogue
         Button addButton = binding.addEventButton;
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Event event = CreateEvent(v);
+                Event event = CreateEvent();
+                firebaseHelper.addEvent(event);
 
                 // inflate the fragment
                 FragmentCreateQrBinding qrBinding = FragmentCreateQrBinding.inflate(LayoutInflater.from(getContext()));
@@ -57,8 +60,40 @@ public class EventCreateFragment extends Fragment {
             }
 
         });
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Event event = CreateEvent();
+                firebaseHelper.addEvent(event);
+                //clear input
+                ClearInput();
+                // inflate the fragment
+                FragmentCreateQrBinding qrBinding = FragmentCreateQrBinding.inflate(LayoutInflater.from(getContext()));
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setView(qrBinding.getRoot());
+                AlertDialog dialog = builder.create();
+
+                // generate the qr code
+                Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode("https://example.com", 300, 300); // Replace with your desired URL
+                if (qrCodeBitmap != null) {
+                    qrBinding.qrDialogueImageView.setImageBitmap(qrCodeBitmap); // Set the generated QR code to the ImageView
+                }
+
+                dialog.show();
+
+            }
+
+        });
+        Button cancelButton = binding.cancelEventButton;
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClearInput();
+            }
+        });
 
         return root;
+
     }
     /*TODO
     get geolocation (optional)
@@ -67,7 +102,7 @@ public class EventCreateFragment extends Fragment {
     checkinID
     checkinRQ (is this the QR code??)
      */
-    public Event CreateEvent(View view){
+    public Event CreateEvent(){
         //get all input data
         //hardcoded values set (change later)
         double latitude = 40.730610;
@@ -77,25 +112,24 @@ public class EventCreateFragment extends Fragment {
         String QrCode = "QrCodePlaceholder";
         ArrayList<User> waitlist = new ArrayList<>();
 
-        EditText editEventTitle = view.findViewById(R.id.createEventEditText);
-        EditText editEventLocation = view.findViewById(R.id.createEventLocationEditText);
-        EditText editStartDate = view.findViewById(R.id.editStartDate);
-        EditText editEndDate = view.findViewById(R.id.editEndDate);
-        EditText editStartTime = view.findViewById(R.id.editStartTime);
-        EditText editEndTime = view.findViewById(R.id.editEndTime);
-        EditText editEventDescription = view.findViewById(R.id.editDescription);
-        EditText editEventDetails = view.findViewById(R.id.editDetails);
+        EditText editEventTitle = binding.createEventEditText;
+        EditText editEventLocation = binding.createEventLocationEditText;
+        EditText editStartDate = binding.editStartDate;
+        EditText editEndDate = binding.editEndDate;
+        EditText editStartTime = binding.editStartTime;
+        EditText editEndTime = binding.editEndTime;
+        EditText editEventDescription = binding.editDescription;
+        EditText editEventDetails = binding.editDetails;
 
-        CheckBox checkGeo = view.findViewById(R.id.geoCheckBox);
-        boolean geo = false;
-        if (checkGeo.isChecked()) {
-            geo = true;
-        }
+        CheckBox checkGeo = binding.geoCheckBox;
 
-        CheckBox checkMaxCapacity = view.findViewById(R.id.maxPartCheckBox);
+        boolean checked = checkGeo.isChecked();
+
+
+        CheckBox checkMaxCapacity = binding.maxPartCheckBox;
         int maxCapacity = -1;
+        EditText editMaxCapacity = binding.editMaxPart;
         if (checkMaxCapacity.isChecked()) {
-            EditText editMaxCapacity = view.findViewById(R.id.editMaxPart);
             String strMaxCapacity = editMaxCapacity.getText().toString();
             maxCapacity = Integer.parseInt(strMaxCapacity);
         }
@@ -109,12 +143,25 @@ public class EventCreateFragment extends Fragment {
         String EventDescription = editEventDescription.getText().toString();
         String eventDetails = editEventDetails.getText().toString();
 
-        Firebase firebaseHelper = new Firebase(view.getContext());
+
         User Host = firebaseHelper.getThisUser();
         String facility = Host.getFacility();
         Event event = new Event(event_id, eventTitle, Host,EventDescription, StartDate, EndDate,
-                price, facility, latitude, longitude, maxCapacity, waitlist, QrCode, geo);
+                price, facility, latitude, longitude, maxCapacity, waitlist, QrCode, checked);
         return event;
+    }
+    private void ClearInput(){
+        binding.createEventEditText.getText().clear();
+        binding.createEventLocationEditText.getText().clear();
+        binding.editStartDate.getText().clear();
+        binding.editEndDate.getText().clear();
+        binding.editStartTime.getText().clear();
+        binding.editEndTime.getText().clear();
+        binding.editDescription.getText().clear();
+        binding.editDetails.getText().clear();
+        binding.editMaxPart.getText().clear();
+        binding.maxPartCheckBox.setChecked(false);
+        binding.geoCheckBox.setChecked(false);
     }
     @Override
     public void onDestroyView() {
