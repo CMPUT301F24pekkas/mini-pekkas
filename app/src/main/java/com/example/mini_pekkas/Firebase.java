@@ -16,7 +16,7 @@ import java.util.Objects;
 
 /**
  * This class accesses the firestore and contains functions to return important information
- * @version 1.1 10/10/2023: Added event functionality
+ * @version 1.11 11/05/20224 added getUsers, fixed event add bug
  */
 public class Firebase {
     private final FirebaseFirestore db;
@@ -95,10 +95,9 @@ public class Firebase {
     public interface DataRetrievalListener {
         void onRetrievalCompleted(String id);
         default void onError(Exception e) {
-            Log.e(TAG, "Error initializing data: ", e);
+            Log.e(TAG, "Error retrieving data: ", e);
         }
     }
-
 
     /**
      * Interface for functions that check a conditional. Returns true if the conditional is met
@@ -107,6 +106,16 @@ public class Firebase {
         void onCheckComplete(boolean exist);
         default void onError(Exception e) {
             Log.e(TAG, "Error checking conditional: ", e);
+        }
+    }
+
+    /**
+     * Interface for getEvent. Fetches and returns an event object
+     */
+    public interface EventRetrievalListener {
+        void onEventRetrievalCompleted(Event event);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting data: ", e);
         }
     }
 
@@ -222,6 +231,9 @@ public class Firebase {
                     String id = documentReference.getId();
                     event.setId(id);
 
+                    // And update the id field in firestore
+                    documentReference.update("id", id);
+
                     listener.onRetrievalCompleted(id);
                 })
                 .addOnFailureListener(e -> Log.w(TAG, "Error adding event", e));
@@ -262,6 +274,26 @@ public class Firebase {
         eventCollection.document(eventID).set(event.toMap())
                 .addOnFailureListener(e -> Log.w(TAG, "Error updating event", e));
 
+    }
+
+    /**
+     * Get an event from the events collection
+     * @param eventID the ID of the event to be retrieved
+     * @param listener a listener that returns the event object
+     */
+    public void getEvent(String eventID, EventRetrievalListener listener) {
+        eventCollection.document(eventID).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    // Throw an error if the document does not exist
+                    if (!documentSnapshot.exists()) {
+                        listener.onError(new Exception("Event does not exist"));
+                    } else {
+                        // Else return the event object
+                        Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
+                        listener.onEventRetrievalCompleted(event);
+                    }
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "Error getting event", e));
     }
 
     // TODO enrollment functionality
