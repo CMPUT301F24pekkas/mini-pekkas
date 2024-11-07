@@ -18,12 +18,22 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.TextDrawable;
 import com.example.mini_pekkas.databinding.FragmentProfileBinding;
-
+/**
+ * Fragment representing the user's profile screen, displaying and editing user information.
+ */
 public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
     private ProfileViewModel profileViewModel;
 
+    /**
+     * Inflates the profile layout and initializes the ViewModel.
+     *
+     * @param inflater LayoutInflater to inflate the layout.
+     * @param container Container for the fragment's UI.
+     * @param savedInstanceState Saved state for restoring the fragment.
+     * @return The root view of the inflated layout.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -32,7 +42,12 @@ public class ProfileFragment extends Fragment {
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         return binding.getRoot(); // Return root view from binding
     }
-
+    /**
+     * Sets up the profile UI with data from the ViewModel and observes changes to update the UI.
+     *
+     * @param view Root view created for the fragment.
+     * @param savedInstanceState Saved state for restoring the fragment.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -80,13 +95,20 @@ public class ProfileFragment extends Fragment {
 //            }
 //        });
     }
-
+    /**
+     * Updates the profile image with an initial letter from the first name.
+     *
+     * @param firstName The first name used to generate the initial.
+     */
     private void updateProfileImageWithInitial(String firstName) {
         String initial = firstName != null && !firstName.isEmpty() ? String.valueOf(firstName.charAt(0)).toUpperCase() : "?";
         TextDrawable textDrawable = new TextDrawable(initial);
         binding.profileImage.setImageDrawable(textDrawable);
     }
-
+    /**
+     * Shows a dialog allowing the user to edit their profile information.
+     * Updates the ViewModel with new data and saves changes to Firebase.
+     */
     private void showEditDialog() {
 
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -121,7 +143,9 @@ public class ProfileFragment extends Fragment {
                 .create()
                 .show();
     }
-
+    /**
+     * Clears the binding reference when the view is destroyed.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

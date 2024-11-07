@@ -8,7 +8,10 @@ import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.User;
 
 import android.content.Context;
-
+/**
+ * ViewModel for managing and exposing organizer profile data to the UI.
+ * Interacts with Firebase to load and update profile information.
+ */
 public class OrganizerProfileViewModel extends ViewModel {
 
     // Data for the full name, userId, email, phone number, organizer status, and organizer location
@@ -18,7 +21,12 @@ public class OrganizerProfileViewModel extends ViewModel {
     private final MutableLiveData<String> phoneNumber;
     private final MutableLiveData<String> organizerLocation;
     private final Firebase firebaseHelper;
-
+    /**
+     * Constructor that initializes the ViewModel, sets default profile values,
+     * and loads the user's profile from Firebase.
+     *
+     * @param context Context required for Firebase initialization.
+     */
     public OrganizerProfileViewModel(Context context) {
         // Initialize LiveData objects with default values
         firstName = new MutableLiveData<>();
@@ -36,7 +44,10 @@ public class OrganizerProfileViewModel extends ViewModel {
         organizerLocation.setValue("Organizer Location"); // Default organizer location
         loadUserProfile();
     }
-
+    /**
+     * Loads the user profile data from Firebase and updates the LiveData fields.
+     * Uses Firebase to fetch the user's document and populate the profile fields.
+     */
     private void loadUserProfile() {
         firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
             @Override
@@ -52,7 +63,9 @@ public class OrganizerProfileViewModel extends ViewModel {
             }
         });
     }
-
+    /**
+     * Updates the user profile in Firebase using the current values in LiveData fields.
+     */
     public void updateProfileInFirebase() {
         User updatedUser = new User(
                 firstName.getValue(),
@@ -65,48 +78,95 @@ public class OrganizerProfileViewModel extends ViewModel {
         firebaseHelper.updateThisUser(updatedUser);
     }
 
-
-    // Getters
+    /**
+     * Gets the LiveData for the organizer's first name.
+     *
+     * @return LiveData containing the first name.
+     */
     public LiveData<String> getFirstName() {
         return firstName;
     }
 
+    /**
+     * Gets the LiveData for the organizer's last name.
+     *
+     * @return LiveData containing the last name.
+     */
     public LiveData<String> getLastName() {
         return lastName;
     }
 
+    /**
+     * Gets the LiveData for the organizer's email.
+     *
+     * @return LiveData containing the email.
+     */
     public LiveData<String> getEmail() {
         return email;
     }
 
+    /**
+     * Gets the LiveData for the organizer's phone number.
+     *
+     * @return LiveData containing the phone number.
+     */
     public LiveData<String> getPhoneNumber() {
         return phoneNumber;
     }
 
-
-    public LiveData<String> getOrganizerLocation() { // New getter for organizer location
+    /**
+     * Gets the LiveData for the organizer's location.
+     *
+     * @return LiveData containing the organizer location.
+     */
+    public LiveData<String> getOrganizerLocation() {
         return organizerLocation;
     }
 
     // Setters
+
+    /**
+     * Sets the first name of the organizer.
+     *
+     * @param name The new first name to set.
+     */
     public void setFirstName(String name) {
         firstName.setValue(name);
     }
 
+    /**
+     * Sets the last name of the organizer.
+     *
+     * @param id The new last name to set.
+     */
     public void setLastName(String id) {
         lastName.setValue(id);
     }
 
+    /**
+     * Sets the email of the organizer.
+     *
+     * @param userEmail The new email to set.
+     */
     public void setEmail(String userEmail) {
         email.setValue(userEmail);
     }
 
+    /**
+     * Sets the phone number of the organizer.
+     *
+     * @param phone The new phone number to set.
+     */
     public void setPhoneNumber(String phone) {
         phoneNumber.setValue(phone);
     }
 
-
-    public void setOrganizerLocation(String location) { // New setter for organizer location
+    /**
+     * Sets the location of the organizer.
+     *
+     * @param location The new location to set.
+     */
+    public void setOrganizerLocation(String location) {
         organizerLocation.setValue(location);
     }
 }

@@ -12,7 +12,10 @@ import android.content.Context;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * ViewModel class for managing user profile data in the UI, including name, email,
+ * phone number, and other user information.
+ */
 public class ProfileViewModel extends ViewModel {
 
     // Data for the full name, userId, email, phone number, and organizer status
@@ -23,7 +26,12 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> organizerLocation;
     private final MutableLiveData<String> pfpText;
     private final Firebase firebaseHelper;
-
+    /**
+     * Initializes a new ProfileViewModel instance with default profile values and
+     * Firebase integration for data fetching and updating.
+     *
+     * @param context The context from which this ViewModel is created.
+     */
     public ProfileViewModel(Context context) {
         organizerLocation = new MutableLiveData<>();;
         // Initialize LiveData objects with default values
@@ -42,6 +50,10 @@ public class ProfileViewModel extends ViewModel {
         phoneNumber.setValue("123-456-7890");
         loadUserProfile();
     }
+    /**
+     * Fetches the user profile data from Firebase and sets the LiveData fields
+     * with the retrieved user information.
+     */
     private void loadUserProfile() {
         firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
             @Override
@@ -56,7 +68,9 @@ public class ProfileViewModel extends ViewModel {
             }
         });
     }
-
+    /**
+     * Updates the current user profile data in Firebase with the modified values from the LiveData fields.
+     */
     public void updateProfileInFirebase() {
         User updatedUser = new User(
                 firstName.getValue(),
@@ -70,48 +84,83 @@ public class ProfileViewModel extends ViewModel {
     }
 
     // getters
+    /**
+     * @return LiveData object for the user's first name.
+     */
     public LiveData<String> getFirstName() {
         return firstName;
     }
 
+    /**
+     * @return LiveData object for the user's last name.
+     */
     public LiveData<String> getLastName() {
         return lastName;
     }
 
+    /**
+     * @return LiveData object for the user's email address.
+     */
     public LiveData<String> getEmail() {
         return email;
     }
 
+    /**
+     * @return LiveData object for the user's phone number.
+     */
     public LiveData<String> getPhoneNumber() {
         return phoneNumber;
     }
 
-
+    /**
+     * @return LiveData object for the profile picture text (initials or placeholder).
+     */
     public LiveData<String> getPfpText() {
         return pfpText;
     }
 
-
-    // Setters
+    /**
+     * Sets the user's first name.
+     *
+     * @param name The first name to set.
+     */
     public void setFirstName(String name) {
         firstName.setValue(name);
     }
 
+    /**
+     * Sets the user's last name.
+     *
+     * @param id The last name to set.
+     */
     public void setLastName(String id) {
         lastName.setValue(id);
     }
 
+    /**
+     * Sets the user's email address.
+     *
+     * @param userEmail The email address to set.
+     */
     public void setEmail(String userEmail) {
         email.setValue(userEmail);
     }
 
+    /**
+     * Sets the user's phone number.
+     *
+     * @param phone The phone number to set.
+     */
     public void setPhoneNumber(String phone) {
         phoneNumber.setValue(phone);
     }
 
+    /**
+     * Sets the profile picture text, typically an initial or placeholder character.
+     *
+     * @param text The profile picture text to set.
+     */
     public void setPfpText(String text) {
         pfpText.setValue(text);
     }
-
-
 }
