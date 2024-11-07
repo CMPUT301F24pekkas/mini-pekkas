@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.mini_pekkas.Firebase;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -24,11 +25,13 @@ public class EventFragment extends Fragment {
     private FragmentEventBinding binding;
     private User mockUser;
     private EventViewModel eventViewModel;
+    private Firebase firebaseHelper;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
         createMockUser(); // Mock user for testing
+        firebaseHelper = new Firebase(requireContext());
 
 
         binding = FragmentEventBinding.inflate(inflater, container, false);
@@ -109,6 +112,7 @@ public class EventFragment extends Fragment {
             Event event = eventViewModel.getEvent().getValue();
             if (!event.getWaitlist().contains(mockUser)) {
                 event.getWaitlist().add(mockUser);
+                firebaseHelper.waitlistEvent(event);
                 Toast.makeText(getContext(), "You have joined the waitlist!", Toast.LENGTH_SHORT).show();
                 updateButtonText(button);
             }
@@ -140,6 +144,7 @@ public class EventFragment extends Fragment {
             Event event = eventViewModel.getEvent().getValue();
             if (event != null && event.getWaitlist().contains(mockUser)) {
                 event.getWaitlist().remove(mockUser);
+                firebaseHelper.cancelEvent(event);
                 Toast.makeText(getContext(), "You have left the waitlist!", Toast.LENGTH_SHORT).show();
                 updateButtonText(button);
             }
