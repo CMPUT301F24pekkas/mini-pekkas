@@ -333,8 +333,9 @@ public class Firebase {
     /**
      * This function is called whenever an event is created. Sets this user as the organizer
      * @param event an event object that's being organized
+     * @param listener Optional InitializationListener listener that is called after the event is organized
      */
-    private void organizeEvent(Event event) {
+    private void organizeEvent(Event event, InitializationListener listener) {
         // Set waitlist to an empty array of user references
         HashMap<String, Object> map = new HashMap<>();
         map.put("eventID", event.getId());
@@ -342,15 +343,23 @@ public class Firebase {
         map.put("status", "organized");
 
         userEventsCollection.add(map)
-                .addOnFailureListener(e -> Log.e(TAG, "Error organizing user", e));
+                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                .addOnFailureListener(listener::onError);
     }
 
+    /**
+     * Overload of the {@link #organizeEvent(Event, InitializationListener)} with no listener
+     */
+    private void organizeEvent(Event event) {
+        organizeEvent(event, () -> {});
+    }
 
     /**
      * Waitlist this user into the event. Creates a new entry in the user-events collection
      * @param event an event object to be waitlisted into
+     * @param listener Optional InitializationListener listener that is called after the event is waitlisted
      */
-    public void waitlistEvent(Event event) {
+    public void waitlistEvent(Event event, InitializationListener listener) {
         // Set waitlist to an empty array of user references
         HashMap<String, Object> map = new HashMap<>();
         map.put("eventID", event.getId());
@@ -358,45 +367,73 @@ public class Firebase {
         map.put("status", "waitlisted");
 
         userEventsCollection.add(map)
-                .addOnFailureListener(e -> Log.e(TAG, "Error waitlisting user", e));
+                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #waitlistEvent(Event, InitializationListener)} with no listener
+     */
+    public void waitlistEvent(Event event) {
+        waitlistEvent(event, () -> {});
     }
 
     /**
      * Enroll this user into the event
      * @param event an event object to be enrolled into
+     * @param listener Optional InitializationListener listener that is called after the event is enrolled
      */
-    public void enrollEvent(Event event) {
+    public void enrollEvent(Event event, InitializationListener listener) {
         // Find the document that matches the user to event query
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Get and update the one document that matches the query
                     DocumentSnapshot document = task.getDocuments().get(0);
                     // Update the status
-                    document.getReference().update("status", "enrolled");
+                    document.getReference().update("status", "enrolled")
+                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnFailureListener(listener::onError);
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error enrolling user", e));
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #enrollEvent(Event, InitializationListener)} with no listener
+     */
+    public void enrollEvent(Event event) {
+        enrollEvent(event, () -> {});
     }
 
     /**
      * Cancel the event, removing oneself from the waitlist or enrolling
      * @param event an event object to be waitlisted into
+     * @param listener Optional InitializationListener listener that is called after the event is waitlisted
      */
-    public void cancelEvent(Event event) {
+    public void cancelEvent(Event event, InitializationListener listener) {
         // Find the document that matches the user to event query
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Get and update the one document that matches the query
                     DocumentSnapshot document = task.getDocuments().get(0);
                     // Update the status
-                    document.getReference().update("status", "cancelled");
+                    document.getReference().update("status", "cancelled")
+                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnFailureListener(listener::onError);
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error cancelling user", e));
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #cancelEvent(Event, InitializationListener)} with no listener
+     */
+    public void cancelEvent(Event event) {
+        cancelEvent(event, () -> {});
     }
 
     /**
      * Get the current status of the user in the event
      * @param event an event object to get the status of
-     * @param listener a DataRetrievalListener listener that returns the status of the user in the event
+     * @param listener A DataRetrievalListener listener that returns the status of the user in the event
      */
     public void getStatusInEvent(Event event, DataRetrievalListener listener) {
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
