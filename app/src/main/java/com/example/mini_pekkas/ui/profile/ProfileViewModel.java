@@ -27,6 +27,7 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> phoneNumber;
     private final MutableLiveData<String> organizerLocation;
     private final MutableLiveData<String> pfpText;
+    private final MutableLiveData<String> profilePictureUrl;
     private final Firebase firebaseHelper;
     /**
      * Initializes a new ProfileViewModel instance with default profile values and
@@ -42,6 +43,7 @@ public class ProfileViewModel extends ViewModel {
         email = new MutableLiveData<>();
         phoneNumber = new MutableLiveData<>();
         pfpText = new MutableLiveData<>();
+        profilePictureUrl = new MutableLiveData<>();
         firebaseHelper = new Firebase(context);
 
         // Set default values for these fields
@@ -50,6 +52,7 @@ public class ProfileViewModel extends ViewModel {
         lastName.setValue("Name123");
         email.setValue("example@example.com");
         phoneNumber.setValue("123-456-7890");
+        profilePictureUrl.setValue("");
         loadUserProfile();
     }
     /**
@@ -66,6 +69,7 @@ public class ProfileViewModel extends ViewModel {
                     lastName.setValue(user.getLastname());
                     email.setValue(user.getEmail());
                     phoneNumber.setValue(user.getPhone());
+                    profilePictureUrl.setValue(user.getProfilePhotoUrl());
                 }
             }
         });
@@ -80,7 +84,7 @@ public class ProfileViewModel extends ViewModel {
                 email.getValue(),
                 phoneNumber.getValue(),
                 organizerLocation.getValue(),
-                null    // TODO Set Url of user profile picture if applicable - Ryan
+                profilePictureUrl.getValue()
         );
 
         firebaseHelper.updateThisUser(updatedUser);
@@ -165,5 +169,13 @@ public class ProfileViewModel extends ViewModel {
      */
     public void setPfpText(String text) {
         pfpText.setValue(text);
+    }
+
+    public LiveData<String> getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String url) {
+        profilePictureUrl.setValue(url);
     }
 }

@@ -1,7 +1,13 @@
 package com.example.mini_pekkas.ui.profile;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,15 +15,23 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.TextDrawable;
 import com.example.mini_pekkas.databinding.FragmentProfileBinding;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 /**
  * Fragment representing the user's profile screen, displaying and editing user information.
  */
@@ -25,6 +39,22 @@ public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
     private ProfileViewModel profileViewModel;
+    private ActivityResultLauncher<Intent> pickImageLauncher;
+    private StorageReference profileImageRef;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        profileImageRef = FirebaseStorage.getInstance().getReference("profile_pictures");
+
+        // Check and request notification permission if targeting Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 100);
+            }
+        }
+    }
 
     /**
      * Inflates the profile layout and initializes the ViewModel.
@@ -59,13 +89,29 @@ public class ProfileFragment extends Fragment {
         final TextView profileText = binding.profileText;
         final ImageView profileImage = binding.profileImage;
         final ImageButton editButton = binding.editButton;
-        //final Switch organizerToggle = binding.organizerToggle;
+        final ImageButton profileEdit = binding.pfpEdit;
 
         // Observe LiveData from the ViewModel
         profileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstNameValue -> {
             firstName.setText(firstNameValue);
             updateProfileImageWithInitial(firstNameValue); // Update image after setting first name
         });
+
+        profileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {
+            if (url != null && !url.isEmpty()) {
+                Glide.with(this).load(url).into(profileImage);
+            }
+        });
+
+        pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
+                Uri selectedImageUri = result.getData().getData();
+                if (selectedImageUri != null) {
+                    uploadImageToFirebase(selectedImageUri);
+                }
+            }
+        });
+
         profileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
         profileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         profileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
@@ -80,7 +126,7 @@ public class ProfileFragment extends Fragment {
         });
 
         //profileViewModel.getIsOrganizer().observe(getViewLifecycleOwner(), organizerToggle::setChecked);
-
+        profileEdit.setOnClickListener(v -> openGallery());
         // Set click listener for the edit button
         editButton.setOnClickListener(v -> showEditDialog());
 
@@ -94,6 +140,25 @@ public class ProfileFragment extends Fragment {
 //
 //            }
 //        });
+    }
+
+    private void uploadImageToFirebase(Uri imageUri) {
+        StorageReference imageRef = profileImageRef.child(System.currentTimeMillis() + ".jpg");
+
+        imageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String downloadUrl = uri.toString();
+                    profileViewModel.setProfilePictureUrl(downloadUrl);
+                    profileViewModel.updateProfileInFirebase();
+                    Glide.with(this).load(downloadUrl).into(binding.profileImage);
+                }).addOnFailureListener(e ->
+                        Toast.makeText(getActivity(), "Failed to upload image", Toast.LENGTH_SHORT).show()
+                ));
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickImageLauncher.launch(intent);
     }
     /**
      * Updates the profile image with an initial letter from the first name.
