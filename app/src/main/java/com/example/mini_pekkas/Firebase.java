@@ -10,6 +10,8 @@ import android.util.Log;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -25,6 +27,10 @@ public class Firebase {
     private final CollectionReference eventCollection;
     private final CollectionReference userEventsCollection;
     private final CollectionReference adminCollection;
+    private final StorageReference storageReference;
+    private final StorageReference profilePictureReference;
+    private final StorageReference bannerPictureReference;
+
 
     private DocumentSnapshot userDocument;
 
@@ -37,11 +43,16 @@ public class Firebase {
     public Firebase(Context context) {
         // Initialize the database
         this.db = FirebaseFirestore.getInstance();
-        // Initialize the collection references
+        // Initialize all collection references
         userCollection = db.collection("users");
         eventCollection = db.collection("events");
         userEventsCollection = db.collection("user-events");
         adminCollection = db.collection("admins");
+
+        //Initialize our storage references
+        storageReference = FirebaseStorage.getInstance().getReference();
+        profilePictureReference = storageReference.child("profile-pictures");
+        bannerPictureReference = storageReference.child("banner-pictures");
 
         // Get the device id
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -362,6 +373,13 @@ public class Firebase {
                     listener.onRetrievalCompleted(Objects.requireNonNull(document.get("status")).toString());
                 });
     }
+
+    // TODO add Image storage functions. Allows for the storing and retieving of varios media files
+
+    public void storeImage(String image){
+
+
+
 
     // TODO add admin functions. Allows for deletion of various types of data
     /**
