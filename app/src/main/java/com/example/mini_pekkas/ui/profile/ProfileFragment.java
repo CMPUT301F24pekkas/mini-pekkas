@@ -115,8 +115,8 @@ public class ProfileFragment extends Fragment {
         View dialogView = inflater.inflate(R.layout.dialog_edit_profile, null);
 
 
-        EditText firstNameInput = dialogView.findViewById(R.id.first_name_input);
-        EditText lastNameInput = dialogView.findViewById(R.id.last_name_input);
+        EditText firstNameInput = dialogView.findViewById(R.id.dialogue_first_name_input);
+        EditText lastNameInput = dialogView.findViewById(R.id.dialogue_last_name_input);
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
 
