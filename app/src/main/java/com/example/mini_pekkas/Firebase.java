@@ -421,7 +421,7 @@ public class Firebase {
     private void uploadProfilePicture(User user, Uri image, DataRetrievalListener listener) {
         profilePictureReference.putFile(image)
                 .addOnSuccessListener(taskSnapshot -> {
-                    String imagePath = taskSnapshot.getMetadata().getPath(); // Get the path of the uploaded image
+                    String imagePath = Objects.requireNonNull(taskSnapshot.getMetadata()).getPath(); // Get the path of the uploaded image
                     user.setProfilePhotoUrl(imagePath); // Set the profile photo field in the user object
                     listener.onRetrievalCompleted(imagePath);   // Pass the image reference to the listener
 
@@ -464,7 +464,7 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #setProfilePicture(User, Uri)} with no listener
+     * Overload of the {@link #setProfilePicture(User, Uri, DataRetrievalListener)} with no listener
      */
     public void setProfilePicture(User user, Uri image) {
         setProfilePicture(user, image, id -> {});
@@ -472,7 +472,7 @@ public class Firebase {
 
     /**
      * Gets the profile picture from the storage.
-     * @// TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
+     * @ TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
      * @param user the user object to get the profile picture from
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
@@ -491,7 +491,7 @@ public class Firebase {
     private void setPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
         posterPictureReference.putFile(image)
                 .addOnSuccessListener(taskSnapshot -> {
-                    String imagePath = taskSnapshot.getMetadata().getPath(); // Get the path of the uploaded image
+                    String imagePath = Objects.requireNonNull(taskSnapshot.getMetadata()).getPath(); // Get the path of the uploaded image
                     event.setPosterPhotoUrl(imagePath); // Set the profile photo field in the user object
                     listener.onRetrievalCompleted(imagePath);   // Pass the image reference to the listener
 
@@ -534,7 +534,7 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #uploadProfilePicture(Event, Uri)} with no listener
+     * Overload of the {@link #uploadProfilePicture(Event, Uri, DataRetrievalListener)} with no listener
      */
     public void uploadProfilePicture(Event event, Uri image) {
         uploadProfilePicture(event, image, id -> {});
@@ -542,7 +542,7 @@ public class Firebase {
 
     /**
      * Gets the poster picture from the storage.
-     * @// TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
+     * @ TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
      * @param event the event object to get the profile picture from
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
