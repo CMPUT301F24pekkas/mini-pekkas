@@ -12,7 +12,11 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * The MainActivity class is the entry point of the application. It checks if the user
+ * already exists in Firebase and navigates to the appropriate activity based on the user's information.
+ * If the user does not exist, it displays a form to create a new user.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
@@ -23,7 +27,12 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText facilityInput;
     private Button submitButton;
     private Firebase firebaseHelper;
-
+    /**
+     * Called when the activity is first created. Initializes Firebase, checks if the user
+     * exists in Firebase, and either navigates to the appropriate activity or displays a form for new users.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down, this Bundle contains the saved state data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +63,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
+    /**
+     * Initializes the views for the user form and sets the onClickListener for the submit button.
+     * This method is only called if the user does not already exist in Firebase.
+     */
     private void initializeViews() {
         firstNameInput = findViewById(R.id.firstNameInput);
         lastNameInput = findViewById(R.id.lastNameInput);
@@ -70,7 +82,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
+    /**
+     * Gathers the user input from the form fields, creates a temporary User object,
+     * and initializes the user in Firebase. Based on the facility information,
+     * this method navigates the user to either UserActivity or OrganizerActivity.
+     */
     private void navigateBasedOnFacility() {
         String firstname = firstNameInput.getText().toString().trim();
         String lastName = lastNameInput.getText().toString().trim();

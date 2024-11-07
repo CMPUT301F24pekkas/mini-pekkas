@@ -5,10 +5,19 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.common.BitMatrix;
-
+/**
+ * QRCodeGenerator creates a QR code and returns it as a bitmap
+ */
 public class QRCodeGenerator {
 
-    // generates a QR code and returns it as a Bitmap
+    /**
+     * Generates a QR code as a Bitmap image from the specified text input.
+     *
+     * @param text The text to encode within the QR code.
+     * @param width The width of the QR code image in pixels.
+     * @param height The height of the QR code image in pixels.
+     * @return A Bitmap image of the generated QR code, or null if an error occurs.
+     */
     public static Bitmap generateQRCode(String text, int width, int height) {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         try {
