@@ -54,7 +54,7 @@ public class Firebase {
         //Initialize our storage references
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         profilePictureReference = storageReference.child("profile-pictures");
-        posterPictureReference = storageReference.child("banner-pictures");
+        posterPictureReference = storageReference.child("poster-pictures");
 
         // Get the device id
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
