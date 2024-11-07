@@ -1,5 +1,7 @@
 package com.example.mini_pekkas.ui.profile;
 
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -77,7 +79,8 @@ public class ProfileViewModel extends ViewModel {
                 lastName.getValue(),
                 email.getValue(),
                 phoneNumber.getValue(),
-                organizerLocation.getValue()
+                organizerLocation.getValue(),
+                null    // TODO Set Url of user profile picture if applicable - Ryan
         );
 
         firebaseHelper.updateThisUser(updatedUser);

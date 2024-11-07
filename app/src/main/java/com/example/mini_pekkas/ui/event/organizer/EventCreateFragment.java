@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.QRCodeGenerator;
-import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentCreateEventBinding;
 import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
@@ -133,7 +132,7 @@ public class EventCreateFragment extends Fragment {
 
         // Create Event object with QR code placeholder
         Event event = new Event(event_id, eventTitle, host, eventDescription, startDate, endDate,
-                price, facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked);
+                price, facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked, null);
         return event;
     }
 

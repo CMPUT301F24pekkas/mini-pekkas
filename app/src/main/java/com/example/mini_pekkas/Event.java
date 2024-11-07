@@ -27,12 +27,12 @@ public class Event {
     private boolean isUserInWaitlist;
     private String QrCode;
     private boolean geo;
-
+    private String posterPhotoUrl;
 
     // Constructors
     public Event(String id, String name, User eventHost, String description, String startDate, String endDate, float price,
                  String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees,
-                 ArrayList<User> waitlist, String QrCode, boolean geo) {
+                 ArrayList<User> waitlist, String QrCode, boolean geo, String posterPhotoUrl) {
         this.id = id;
         this.name = name;
         this.eventHost = eventHost;
@@ -47,6 +47,7 @@ public class Event {
         this.waitlist = waitlist;
         this.QrCode = QrCode;
         this.geo = geo;
+        this.posterPhotoUrl = posterPhotoUrl;
     }
 
 
@@ -206,6 +207,14 @@ public class Event {
      * @param geo true to enable geographic location, false to disable
      */
     public void setGeo(boolean geo) { this.geo = geo; }
+
+    public String getPosterPhotoUrl() {
+        return posterPhotoUrl;
+    }
+
+    public void setPosterPhotoUrl(String posterPhotoUrl) {
+        this.posterPhotoUrl = posterPhotoUrl;
+    }
 
     public Bitmap getQRCodeFromID(int width, int height) {
         return null;
