@@ -550,7 +550,7 @@ public class Firebase {
      * @param image the image to be stored in Uri format
      * @param listener the listener that is called when the image is stored. Returns the image url as a string
      */
-    public void uploadProfilePicture(Event event, Uri image, DataRetrievalListener listener) {
+    public void uploadPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
         // Fetch the current profile picture path
         String currentImagePath = event.getPosterPhotoUrl();
 
@@ -571,10 +571,10 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #uploadProfilePicture(Event, Uri, DataRetrievalListener)} with no listener
+     * Overload of the {@link #uploadPosterPicture(Event, Uri, DataRetrievalListener)} with no listener
      */
-    public void uploadProfilePicture(Event event, Uri image) {
-        uploadProfilePicture(event, image, id -> {});
+    public void uploadPosterPicture(Event event, Uri image) {
+        uploadPosterPicture(event, image, id -> {});
     }
 
     /**
