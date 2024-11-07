@@ -58,6 +58,9 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
+    implementation("com.github.bumptech.glide:glide:4.15.1") // Check for latest version
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+
     // Implement android.jar for javadoc, replace with your own filepath
     // implementation(files("/home/ryan/Android/Sdk/platforms/android-34/android.jar"))
 

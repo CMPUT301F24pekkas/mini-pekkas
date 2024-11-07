@@ -140,10 +140,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/phone_input"
         app:layout_constraintVertical_bias="0.76" />
-    <ImageView
+
+    <ImageButton
         android:id="@+id/pfp_edit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:src="@drawable/edit_button"
         app:layout_constraintBottom_toBottomOf="@+id/profile_image"
         app:layout_constraintEnd_toEndOf="@+id/profile_image"
