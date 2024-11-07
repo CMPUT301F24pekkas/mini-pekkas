@@ -23,6 +23,7 @@ public class OrganizerProfileViewModel extends ViewModel {
     private final MutableLiveData<String> email;
     private final MutableLiveData<String> phoneNumber;
     private final MutableLiveData<String> organizerLocation;
+    private final MutableLiveData<String> profilePictureUrl;
     private final Firebase firebaseHelper;
     /**
      * Constructor that initializes the ViewModel, sets default profile values,
@@ -37,6 +38,7 @@ public class OrganizerProfileViewModel extends ViewModel {
         email = new MutableLiveData<>();
         phoneNumber = new MutableLiveData<>();
         organizerLocation = new MutableLiveData<>(); // Initialize organizer location
+        profilePictureUrl = new MutableLiveData<>();
         firebaseHelper = new Firebase(context);
 
         // Set default values for these fields
@@ -44,7 +46,8 @@ public class OrganizerProfileViewModel extends ViewModel {
         lastName.setValue("Organizer Last Name");
         email.setValue("organizer@example.com");
         phoneNumber.setValue("123-456-7890");
-        organizerLocation.setValue("Organizer Location"); // Default organizer location
+        organizerLocation.setValue("Organizer Location");
+        profilePictureUrl.setValue("");// Default organizer location
         loadUserProfile();
     }
     /**
@@ -62,6 +65,7 @@ public class OrganizerProfileViewModel extends ViewModel {
                     email.setValue(user.getEmail());
                     phoneNumber.setValue(user.getPhone());
                     organizerLocation.setValue((user.getFacility()));
+                    profilePictureUrl.setValue(user.getProfilePhotoUrl());
                 }
             }
         });
@@ -76,11 +80,13 @@ public class OrganizerProfileViewModel extends ViewModel {
                 email.getValue(),
                 phoneNumber.getValue(),
                 organizerLocation.getValue(),
-                null    // TODO Set Url of user profile picture if applicable - Ryan
+                profilePictureUrl.getValue()
+                //null    // TODO Set Url of user profile picture if applicable - Ryan
         );
 
         firebaseHelper.updateThisUser(updatedUser);
     }
+
 
     /**
      * Gets the LiveData for the organizer's first name.
@@ -172,5 +178,14 @@ public class OrganizerProfileViewModel extends ViewModel {
      */
     public void setOrganizerLocation(String location) {
         organizerLocation.setValue(location);
+    }
+
+
+    public LiveData<String> getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String url) {
+        profilePictureUrl.setValue(url);
     }
 }

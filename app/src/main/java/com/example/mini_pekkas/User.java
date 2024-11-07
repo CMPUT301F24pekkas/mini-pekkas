@@ -148,6 +148,7 @@ public class User {
         map.put("email", email);
         map.put("phone", phone);
         map.put("facility", facility);
+        map.put("profilePhoto", profilePhotoUrl);
         //map.put("isOrganizer", isOrganizer);
         // map.put("isAdmin", isAdmin);
         //map.put("profilePhoto", profilePhoto);

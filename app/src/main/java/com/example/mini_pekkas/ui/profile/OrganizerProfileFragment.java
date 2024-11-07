@@ -1,7 +1,10 @@
 package com.example.mini_pekkas.ui.profile;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,13 +12,19 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentOrganizerProfileBinding;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 /**
  * Fragment representing the organizer profile screen, displaying profile details and allowing editing.
@@ -24,15 +33,17 @@ public class OrganizerProfileFragment extends Fragment {
 
     private FragmentOrganizerProfileBinding binding;
     private OrganizerProfileViewModel organizerProfileViewModel;
-    /**
-     * Called to initialize the fragment's user interface view.
-     * Sets up view bindings, initializes the ViewModel, and observes LiveData for profile fields.
-     *
-     * @param inflater LayoutInflater for inflating the view.
-     * @param container Parent view that this fragment's UI should be attached to.
-     * @param savedInstanceState Bundle containing the saved state, if any.
-     * @return The root view of the fragment's layout.
-     */
+
+    // Define the ActivityResultLauncher as a private field
+    private ActivityResultLauncher<Intent> pickImageLauncher;
+    private StorageReference profileImageRef;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        profileImageRef = FirebaseStorage.getInstance().getReference("profile_pictures");
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -49,9 +60,26 @@ public class OrganizerProfileFragment extends Fragment {
         final TextView lastName = binding.lastName;
         final TextView emailInput = binding.emailInput;
         final TextView phoneInput = binding.phoneInput;
-        final TextView organizerLocationInput = binding.organizationInput; // New TextView for organizer location
+        final TextView organizerLocationInput = binding.organizationInput;
         final ImageView profileImage = binding.userProfileImage;
         final ImageButton editButton = binding.editButton;
+        final ImageButton profileEdit = binding.pfpEdit;
+
+        organizerProfileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {
+            if (url != null && !url.isEmpty()) {
+                Glide.with(this).load(url).into(profileImage);
+            }
+        });
+
+        // Initialize the ActivityResultLauncher to handle the image picking result
+        pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
+                Uri selectedImageUri = result.getData().getData();
+                if (selectedImageUri != null) {
+                    uploadImageToFirebase(selectedImageUri);
+                }
+            }
+        });
 
         // Observe LiveData from ViewModel and update the UI
         organizerProfileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
@@ -60,11 +88,42 @@ public class OrganizerProfileFragment extends Fragment {
         organizerProfileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
         organizerProfileViewModel.getOrganizerLocation().observe(getViewLifecycleOwner(), organizerLocationInput::setText);
 
+        // Set click listener for the profile edit button
+        profileEdit.setOnClickListener(v -> openGallery());
+
         // Set click listener for the edit button
         editButton.setOnClickListener(v -> showEditDialog());
 
         return root;
     }
+
+    // Method to open the gallery
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickImageLauncher.launch(intent);
+    }
+
+    private void uploadImageToFirebase(Uri imageUri) {
+        // Define a unique name for the image
+        StorageReference imageRef = profileImageRef.child(System.currentTimeMillis() + ".jpg");
+
+        // Upload the image to Firebase Storage
+        imageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String downloadUrl = uri.toString();
+
+                    // Update the profilePictureUrl in the ViewModel and Firebase
+                    organizerProfileViewModel.setProfilePictureUrl(downloadUrl);
+                    organizerProfileViewModel.updateProfileInFirebase();
+
+                    // Load the image from URL into the ImageView
+                    Glide.with(this).load(downloadUrl).into(binding.userProfileImage);
+
+                }).addOnFailureListener(e ->
+                        Toast.makeText(getActivity(), "Failed to upload image", Toast.LENGTH_SHORT).show()
+                ));
+    }
+
     /**
      * Shows a dialog to edit the organizer's profile information.
      * Pre-fills fields with existing values and updates the ViewModel upon saving.
@@ -107,9 +166,7 @@ public class OrganizerProfileFragment extends Fragment {
                 .create()
                 .show();
     }
-    /**
-     * Called when the fragment's view is destroyed. Clears the binding reference to prevent memory leaks.
-     */
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
