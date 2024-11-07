@@ -9,7 +9,7 @@ public class User {
     private String email;
     private String phone;
     private String facility;
-   // private String profilePhoto;    // Could be another value
+    private String profilePhotoUrl;
 
     public User(Map<String, Object> map) {
         this.name = (String) map.get("name");
@@ -17,16 +17,16 @@ public class User {
         this.email = (String) map.get("email");
         this.phone = (String) map.get("phone");
         this.facility = (String) map.get("facility");
-        //this.profilePhoto = (String) map.get("profilePhoto");
+        this.profilePhotoUrl = (String) map.get("profilePhoto");
     }
 
-    public User(String name, String lastname, String email, String phone, String facility) {
+    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl) {
         this.name = name;
         this.lastname = lastname;
         this.email = email;
         this.phone = phone;
         this.facility = facility;
-        //this.profilePhoto = profilePhoto;
+        this.profilePhotoUrl = profilePhotoUrl;
     }
 
     public User() {
@@ -72,13 +72,13 @@ public class User {
         this.facility = facility;
     }
 
-//    public String getProfilePhoto() {
-//        return profilePhoto;
-//    }
-//
-//    public void setProfilePhoto(String profilePhoto) {
-//        this.profilePhoto = profilePhoto;
-//    }
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
+    }
+
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
+    }
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<String, Object>();

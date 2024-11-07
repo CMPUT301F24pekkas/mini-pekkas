@@ -4,6 +4,7 @@ import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -27,9 +28,9 @@ public class Firebase {
     private final CollectionReference eventCollection;
     private final CollectionReference userEventsCollection;
     private final CollectionReference adminCollection;
-    private final StorageReference storageReference;
+    // private final StorageReference storageReference;
     private final StorageReference profilePictureReference;
-    private final StorageReference bannerPictureReference;
+    private final StorageReference posterPictureReference;
 
 
     private DocumentSnapshot userDocument;
@@ -50,9 +51,9 @@ public class Firebase {
         adminCollection = db.collection("admins");
 
         //Initialize our storage references
-        storageReference = FirebaseStorage.getInstance().getReference();
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         profilePictureReference = storageReference.child("profile-pictures");
-        bannerPictureReference = storageReference.child("banner-pictures");
+        posterPictureReference = storageReference.child("banner-pictures");
 
         // Get the device id
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -130,6 +131,10 @@ public class Firebase {
         }
     }
 
+    public interface ImageRetrievalListener {
+        void onImageRetrievalCompleted(Uri image);
+        default void onError(Exception e) {Log.e(TAG, "Error getting image: ", e);}
+    }
     /**
      * Private function to fetch the user document.
      * @param listener a void listener that runs on a successful fetch
@@ -374,12 +379,61 @@ public class Firebase {
                 });
     }
 
-    // TODO add Image storage functions. Allows for the storing and retieving of varios media files
+    // TODO add Image storage functions. Allows for the storing and retrieving of various media files
 
-    public void storeImage(String image){
+    /**
+     * Stores the profile picture in the storage.
+     * @param image the image to be stored in Uri format
+     */
+    public void storeProfilePicture(User user, Uri image, InitializationListener listener) {
+        profilePictureReference.putFile(image)
+                .addOnSuccessListener(taskSnapshot -> {
+                    String imagePath = taskSnapshot.getMetadata().getPath(); // Get the path of the uploaded image
+                    user.setProfilePhotoUrl(imagePath); // Set the profile photo field in the user object
+                    listener.onInitialized();   // Pass the image reference to the listener
 
+                })
+                .addOnFailureListener(listener::onError);
+    }
 
+    /**
+     * Gets the profile picture from the storage.
+     * @// TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
+     * @param user the user object to get the profile picture from
+     * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
+     */
+    public void getProfilePicture(User user, ImageRetrievalListener listener) {
+        profilePictureReference.child(user.getProfilePhotoUrl()).getDownloadUrl()
+                .addOnSuccessListener(listener::onImageRetrievalCompleted)
+                .addOnFailureListener(listener::onError);
+    }
 
+    /**
+     * Stores the profile picture in the storage.
+     * @param image the image to be stored in Uri format
+     */
+    public void storeBannerPicture(Event event, Uri image, InitializationListener listener) {
+        posterPictureReference.putFile(image)
+                .addOnSuccessListener(taskSnapshot -> {
+                    String imagePath = taskSnapshot.getMetadata().getPath(); // Get the path of the uploaded image
+                    event.setPosterPhotoUrl(imagePath); // Set the profile photo field in the user object
+                    listener.onInitialized();   // Pass the image reference to the listener
+
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Gets the poster picture from the storage.
+     * @// TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
+     * @param event the event object to get the profile picture from
+     * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
+     */
+    public void getProfilePicture(Event event, ImageRetrievalListener listener) {
+        profilePictureReference.child(event.getPosterPhotoUrl()).getDownloadUrl()
+                .addOnSuccessListener(listener::onImageRetrievalCompleted)
+                .addOnFailureListener(listener::onError);
+    }
 
     // TODO add admin functions. Allows for deletion of various types of data
     /**
