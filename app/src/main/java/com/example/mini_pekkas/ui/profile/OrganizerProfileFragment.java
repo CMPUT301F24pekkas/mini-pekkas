@@ -17,11 +17,22 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentOrganizerProfileBinding;
 
+/**
+ * Fragment representing the organizer profile screen, displaying profile details and allowing editing.
+ */
 public class OrganizerProfileFragment extends Fragment {
 
     private FragmentOrganizerProfileBinding binding;
     private OrganizerProfileViewModel organizerProfileViewModel;
-
+    /**
+     * Called to initialize the fragment's user interface view.
+     * Sets up view bindings, initializes the ViewModel, and observes LiveData for profile fields.
+     *
+     * @param inflater LayoutInflater for inflating the view.
+     * @param container Parent view that this fragment's UI should be attached to.
+     * @param savedInstanceState Bundle containing the saved state, if any.
+     * @return The root view of the fragment's layout.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -54,7 +65,10 @@ public class OrganizerProfileFragment extends Fragment {
 
         return root;
     }
-
+    /**
+     * Shows a dialog to edit the organizer's profile information.
+     * Pre-fills fields with existing values and updates the ViewModel upon saving.
+     */
     private void showEditDialog() {
         // Inflate the edit dialog layout
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -93,7 +107,9 @@ public class OrganizerProfileFragment extends Fragment {
                 .create()
                 .show();
     }
-
+    /**
+     * Called when the fragment's view is destroyed. Clears the binding reference to prevent memory leaks.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
