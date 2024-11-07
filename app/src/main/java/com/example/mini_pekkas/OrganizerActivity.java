@@ -13,9 +13,18 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.mini_pekkas.databinding.OrganizerMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+/**
+ * OrganizerActivity is the main activity for organizers, setting up the navigation controller
+ * and Navigation Bar for organizer-specific views.
+ */
 public class OrganizerActivity extends AppCompatActivity {
     private OrganizerMainBinding binding;
     @Override
+    /**
+     * Called when the activity is first created.
+     *
+     * @param savedInstanceState The state of the activity saved during a previous configuration change.
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = OrganizerMainBinding.inflate(getLayoutInflater());

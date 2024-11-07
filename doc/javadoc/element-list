@@ -1,0 +1,8 @@
+com.example.mini_pekkas
+com.example.mini_pekkas.ui.camera
+com.example.mini_pekkas.ui.event.admin
+com.example.mini_pekkas.ui.event.organizer
+com.example.mini_pekkas.ui.event.user
+com.example.mini_pekkas.ui.home
+com.example.mini_pekkas.ui.notifications
+com.example.mini_pekkas.ui.profile

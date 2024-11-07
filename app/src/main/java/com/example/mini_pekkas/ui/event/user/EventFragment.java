@@ -2,7 +2,6 @@ package com.example.mini_pekkas.ui.event.user;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,29 +13,22 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.example.mini_pekkas.User;
+
 import com.example.mini_pekkas.Event;
-import com.example.mini_pekkas.Firebase;
-
 import com.example.mini_pekkas.R;
+import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentEventBinding;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class EventFragment extends Fragment {
 
     private FragmentEventBinding binding;
     private User mockUser;
     private EventViewModel eventViewModel;
-    private Firebase firebaseHelper;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
         createMockUser(); // Mock user for testing
-        firebaseHelper = new Firebase(requireContext());
 
 
         binding = FragmentEventBinding.inflate(inflater, container, false);
@@ -96,7 +88,7 @@ public class EventFragment extends Fragment {
         String facility = "Community Center";
         //String profilePhoto = "profile_photo_url"; // A URL or path to the profile photo
 
-        mockUser = new User(name, lastname, email, phone, facility);
+        mockUser = new User(name, lastname, email, phone, facility, null);
     }
 
     // If user is not currently in waitlist, takes them to confirmation screen to join waitlist
@@ -117,7 +109,6 @@ public class EventFragment extends Fragment {
             Event event = eventViewModel.getEvent().getValue();
             if (!event.getWaitlist().contains(mockUser)) {
                 event.getWaitlist().add(mockUser);
-                firebaseHelper.waitlistEvent(event);
                 Toast.makeText(getContext(), "You have joined the waitlist!", Toast.LENGTH_SHORT).show();
                 updateButtonText(button);
             }
@@ -149,7 +140,6 @@ public class EventFragment extends Fragment {
             Event event = eventViewModel.getEvent().getValue();
             if (event != null && event.getWaitlist().contains(mockUser)) {
                 event.getWaitlist().remove(mockUser);
-                firebaseHelper.cancelEvent(event);
                 Toast.makeText(getContext(), "You have left the waitlist!", Toast.LENGTH_SHORT).show();
                 updateButtonText(button);
             }

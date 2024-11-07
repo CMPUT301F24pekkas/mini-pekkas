@@ -2,15 +2,16 @@ package com.example.mini_pekkas.ui.event.user;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import com.example.mini_pekkas.Firebase;
 
-
-import com.example.mini_pekkas.R;
 
 public class EventViewModel extends ViewModel {
 
@@ -103,7 +104,7 @@ public class EventViewModel extends ViewModel {
                 "2024-11-05", "2024-11-06", 50,
                 "Community Hall", 37.7749, -122.4194,
                 100, waitlist,
-                "CHK123", true);
+                "CHK123", true, null);
     }
 
 }
