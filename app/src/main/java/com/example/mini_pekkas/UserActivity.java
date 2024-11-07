@@ -23,11 +23,21 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * UserActivity is the main activity for Users, setting up the navigation controller
+ * and Navigation Bar for user-specific activities. This activity initializes and configures the navigation components and handles
+ * Firebase authentication for the current user. If the user does not exist, it creates
+ * a temporary user with default values.
+ */
 public class UserActivity extends AppCompatActivity {
 
     private UserMainBinding binding;
-
+    /**
+     * Initializes the UserActivity, sets up navigation, and checks if a user exists in Firebase.
+     * If the user does not exist, a temporary user with default values is created and initialized.
+     *
+     * @param savedInstanceState A Bundle object containing the activity's previously saved state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +97,11 @@ public class UserActivity extends AppCompatActivity {
             }
         });
     }
+    /**
+     * Handles the "up" navigation action in the action bar.
+     *
+     * @return true if the navigation action is handled, false otherwise.
+     */
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.user_main);
