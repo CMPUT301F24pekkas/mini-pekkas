@@ -536,6 +536,7 @@ public class Firebase {
      * @param qrCode The Base64 encoded QR code string to match.
      * @param listener An EventRetrievalListener that returns the Event object if found.
      */
+
      public void getEventByQRCode(String qrCode, EventRetrievalListener listener) {
          eventCollection.whereEqualTo("QrCode", qrCode).get()
                  .addOnSuccessListener(task -> {

@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +80,8 @@ public class EventCreateFragment extends Fragment {
             if (qrCodeBitmap != null) {
                 // Convert QR code bitmap to Base64 string and set it in the event object
                 String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
+                // TODO
+                Log.d("PUT IN", "base64qr = " + qrCodeBase64);
                 event.setQrCode(qrCodeBase64);
 
                 // Upload poster image if available, then save the event
@@ -174,7 +177,7 @@ public class EventCreateFragment extends Fragment {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] byteArray = baos.toByteArray();
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP);
     }
 
     /**
