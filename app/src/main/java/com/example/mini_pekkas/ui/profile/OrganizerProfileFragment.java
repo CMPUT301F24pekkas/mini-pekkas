@@ -100,6 +100,19 @@ public class OrganizerProfileFragment extends Fragment {
             }
         });
 
+        organizerProfileViewModel.getFirstName().observe(getViewLifecycleOwner(), name -> {
+            firstName.setText(name);
+            if (organizerProfileViewModel.getProfilePictureUrl().getValue() == null || organizerProfileViewModel.getProfilePictureUrl().getValue().isEmpty()) {
+                if (name != null && !name.isEmpty()) {
+                    profileText.setText(String.valueOf(name.charAt(0)).toUpperCase());
+                    profileText.setVisibility(View.VISIBLE);
+                } else {
+                    profileText.setVisibility(View.GONE);
+                }
+            }
+        });
+
+
         // Bind profile data to views
         organizerProfileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
         organizerProfileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
