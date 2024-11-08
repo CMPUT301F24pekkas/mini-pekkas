@@ -6,8 +6,11 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.google.firebase.firestore.FieldValue.delete;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.provider.Settings;
@@ -24,6 +27,7 @@ import androidx.test.uiautomator.UiSelector;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +46,7 @@ public class OrganizerTests {
             ActivityScenarioRule<OrganizerActivity>(OrganizerActivity.class);
     private FirebaseFirestore database;
     public String deviceId;
+    private String eventId;
     public void CreateTestProfile(Context context) {
         database = FirebaseFirestore.getInstance();
         deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -73,6 +78,8 @@ public class OrganizerTests {
         onView(withId(R.id.navigation_org_home)).perform(click());
     }
 
+
+
     /**
      * US 02.01.01 As an organizer I want to create a new event and generate a unique promotional QR code
      * that links to the event description and event poster in the app
@@ -82,8 +89,18 @@ public class OrganizerTests {
         Thread.sleep(3000);
         onView(withId(R.id.navigation_org_add)).perform(click());
         Thread.sleep(3000);
+        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
+        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
         onView(withId(R.id.addEventButton)).perform(click());
         onView(withId(R.id.qrDialogueImageView)).check(matches(isDisplayed()));
+        database.collection("events")
+                .whereEqualTo("name", "Oilers Event")
+                .limit(1)
+                .get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                    document.getReference().delete();
+                });
     }
     /**
      * US 02.01.02 As an organizer I want to store hash data of the generated QR code in my database
@@ -97,11 +114,14 @@ public class OrganizerTests {
         onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
         onView(withId(R.id.addEventButton)).perform(click());
         onView(withId(R.id.qrDialogueImageView)).check(matches(isDisplayed()));
-        onView(withId(R.id.confirmQrButton)).perform(click());
-        database.collection("events").document(deviceId).get()
+        database.collection("events")
+                .whereEqualTo("name", "Oilers Event")
+                .limit(1)
+                .get()
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot document = task.getResult();
+                    DocumentSnapshot document = task.getResult().getDocuments().get(0);
                     assertNotNull("QrCode should not be null", document.getString("QrCode"));
+                    document.getReference().delete();
                 });
     }
 //    /**
@@ -125,12 +145,18 @@ public class OrganizerTests {
         Thread.sleep(3000);
         onView(withId(R.id.navigation_org_add)).perform(click());
         Thread.sleep(3000);
+        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Test Event"));
+        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
         onView(withId(R.id.geoCheckBox)).perform(click());
         onView(withId(R.id.addEventButton)).perform(click());
-        database.collection("events").document(deviceId).get()
+        database.collection("events")
+                .whereEqualTo("name", "Test Event")
+                .limit(1)
+                .get()
                 .addOnCompleteListener(task -> {
-                    DocumentSnapshot document = task.getResult();
-                    assertNotNull("QrCode should not be null", document.getString("QrCode"));
+                    DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                    assertEquals("Geo field should be true", Boolean.TRUE, document.getBoolean("geo"));
+                    document.getReference().delete();
                 });
     }
     /**
