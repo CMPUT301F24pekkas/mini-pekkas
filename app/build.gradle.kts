@@ -75,9 +75,12 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:21.0.1")
 
     // for the qr code
-    implementation("com.google.zxing:core:3.4.1") // Core library
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0") {
+        exclude(group = "com.google.zxing", module = "android-integration")
+    }
+
+    implementation("com.google.zxing:core:3.5.1") // Core library
     implementation("com.google.zxing:javase:3.4.1")// Optional, for the MatrixToImageWriter
-    implementation("com.google.zxing:android-core:3.3.0") // Android-specific library
-    implementation("com.google.zxing:android-integration:3.3.0") // Optional, for integration with Android
+
 }
 
