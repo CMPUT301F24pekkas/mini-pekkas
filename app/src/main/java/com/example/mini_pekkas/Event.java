@@ -17,11 +17,11 @@ public class Event {
     private String description;
     private String startDate;
     private String endDate;
-    private float price;
+    private double price;
     private String facility;
     private double facilityGeoLat;
     private double facilityGeoLong;
-    private int maxAttendees;
+    private long maxAttendees;
     private ArrayList<User> attendees;
     private ArrayList<User> waitlist;
     private boolean isUserInWaitlist;
@@ -119,7 +119,7 @@ public class Event {
      * Gets the price of the event.
      * @return the price of the event
      */
-    public float getPrice() { return price; }
+    public double getPrice() { return price; }
     /**
      * Sets the price of the event.
      * @param price the price of the event to set
@@ -159,12 +159,12 @@ public class Event {
      * Gets the maximum number of attendees for the event.
      * @return the maximum number of attendees
      */
-    public int getMaxAttendees() { return maxAttendees; }
+    public long getMaxAttendees() { return maxAttendees; }
     /**
      * Sets the maximum number of attendees for the event.
      * @param maxAttendees the maximum number of attendees to set
      */
-    public void setMaxAttendees(int maxAttendees) { this.maxAttendees = maxAttendees; }
+    public void setMaxAttendees(long maxAttendees) { this.maxAttendees = maxAttendees; }
     /**
      * Gets the list of users attending the event.
      * @return an ArrayList of User objects representing the attendees
@@ -223,15 +223,15 @@ public class Event {
     public Event(Map<String, Object> map) {
         this.id = (String) map.get("id");
         this.name = (String) map.get("name");
-        this.eventHost = (User) map.get("eventHost");
+        this.eventHost = new User((Map<String, Object>) map.get("eventHost"));
         this.description = (String) map.get("description");
         this.startDate = (String) map.get("startDate");
         this.endDate = (String) map.get("endDate");
-        this.price = map.get("price") != null ? (int) map.get("price") : 0;
+        this.price = map.get("price") != null ? (double) map.get("price") : 0;
         this.facility = (String) map.get("facility");
         this.facilityGeoLat = map.get("facilityGeoLat") != null ? (double) map.get("facilityGeoLat") : 0.0;
         this.facilityGeoLong = map.get("facilityGeoLong") != null ? (double) map.get("facilityGeoLong") : 0.0;
-        this.maxAttendees = map.get("maxAttendees") != null ? (int) map.get("maxAttendees") : 0;
+        this.maxAttendees = map.get("maxAttendees") != null ? (long) map.get("maxAttendees") : 0;
         this.attendees = (ArrayList<User>) map.get("attendees");
         this.waitlist = (ArrayList<User>) map.get("waitlist");
         this.QrCode = (String) map.get("QrCode");
