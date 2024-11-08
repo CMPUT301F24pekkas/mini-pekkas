@@ -15,6 +15,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,6 +94,26 @@ public class Firebase {
         void onCheckComplete(boolean exist);
         default void onError(Exception e) {
             Log.e(TAG, "Error checking conditional: ", e);
+        }
+    }
+
+    /**
+     * Interface for getUser. Fetches and returns an user object
+     */
+    public interface UserRetrievalListener {
+        void onUserRetrievalCompleted(Event event);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting data: ", e);
+        }
+    }
+
+    /**
+     * Interface for functions that retrieve an array of users
+     */
+    public interface UserListRetrievalListener {
+        void onUserListRetrievalCompleted(ArrayList<Event> events);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting events: ", e);
         }
     }
 
@@ -515,43 +536,25 @@ public class Firebase {
      * @param qrCode The Base64 encoded QR code string to match.
      * @param listener An EventRetrievalListener that returns the Event object if found.
      */
-    public void getEventByQRCode(String qrCode, EventRetrievalListener listener) {
-        eventCollection.whereEqualTo("qrcode", qrCode).get()
-                .addOnSuccessListener(task -> {
-                    int totalDocuments = task.getDocuments().size();
-
-                    if (totalDocuments == 0) {
-                        // No event found, trigger callback with null
-                        listener.onEventRetrievalCompleted(null);
-                        return;
-                    }
-
-                    AtomicInteger retrievedCount = new AtomicInteger();
-
-                    for (DocumentSnapshot document : task.getDocuments()) {
-                        // Fetch the event details from the document
-                        eventCollection.document(document.getId()).get()
-                                .addOnSuccessListener(documentSnapshot -> {
-                                    if (documentSnapshot.exists()) {
-                                        // Convert the document into an Event object
-                                        Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
-                                        listener.onEventRetrievalCompleted(event);
-                                    } else {
-                                        listener.onEventRetrievalCompleted(null);
-                                    }
-                                })
-                                .addOnFailureListener(listener::onError)
-                                .addOnCompleteListener(taskCompleted -> {
-                                    // Increment the counter
-                                    if (retrievedCount.incrementAndGet() == totalDocuments) {
-                                        listener.onEventRetrievalCompleted(null);
-                                    }
-                                });
-                    }
-                })
-                .addOnFailureListener(listener::onError);
-    }
-
+     public void getEventByQRCode(String qrCode, EventRetrievalListener listener) {
+         eventCollection.whereEqualTo("QrCode", qrCode).get()
+                 .addOnSuccessListener(task -> {
+                     // Check if any documents were found
+                     if (task.getDocuments().isEmpty()) {
+                         // No event found, trigger callback with null
+                         Log.d("Camera Yay", "Event NOTHING");
+                         listener.onEventRetrievalCompleted(null);
+                         return;
+                     } else {
+                         // Fetch the event details from the document
+                         DocumentSnapshot document = task.getDocuments().get(0);
+                         Event event = new Event(Objects.requireNonNull(document.getData()));
+                         Log.d("Camera Yay", "Event succesfully Retrieved");
+                         listener.onEventRetrievalCompleted(event);
+                     }
+                 })
+                 .addOnFailureListener(listener::onError);
+     }
 
     /**
      * Get all events the user is waitlisted in
@@ -778,7 +781,13 @@ public class Firebase {
                 });
     }
 
-    // Get all users...
-    // Get all events...
+    /**
+     * Searches for users by checking if they have a parameter that matches the query
+     * @param query the query to search for
+     * @param listener
+     */
+    public void serachForUsers(String query, UserListRetrievalListener listener) {
+        // TODO
+    }
 }
 

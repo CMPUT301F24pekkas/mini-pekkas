@@ -32,8 +32,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 /**
- * Fragment that handles the user's profile display and management.
- * It allows the user to view and edit their profile information and profile picture.
+ * Fragment responsible for displaying and managing user profile details.
+ * Allows users to view and edit their profile information, including
+ * updating or deleting profile pictures.
  */
 public class ProfileFragment extends Fragment {
 
@@ -43,7 +44,7 @@ public class ProfileFragment extends Fragment {
     private StorageReference profileImageRef;
 
     /**
-     * Initializes the fragment, including setting up Firebase storage reference
+     * Initializes the fragment, setting up Firebase Storage reference
      * and checking for notification permission on devices with SDK TIRAMISU or higher.
      */
     @Override
@@ -51,7 +52,6 @@ public class ProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         profileImageRef = FirebaseStorage.getInstance().getReference("profile_pictures");
 
-        // Check if notification permission is granted (for devices with SDK TIRAMISU or higher)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -61,11 +61,11 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Inflates the view for the profile fragment and sets up observers to update UI elements
-     * based on LiveData values from the ViewModel.
+     * Inflates the view for the profile fragment, sets up data observers,
+     * and initializes UI components with data from the ViewModel.
      *
-     * @param inflater The LayoutInflater used to inflate the view.
-     * @param container The container that holds the fragment's UI.
+     * @param inflater           The LayoutInflater used to inflate the view.
+     * @param container          The container that holds the fragment's UI.
      * @param savedInstanceState The saved instance state for restoring UI state.
      * @return The root view for this fragment.
      */
@@ -87,7 +87,7 @@ public class ProfileFragment extends Fragment {
         final ImageButton editButton = binding.editButton;
         final ImageButton profileEdit = binding.pfpEdit;
 
-        // Observe the profile picture URL from the ViewModel
+        // Observe the profile picture URL
         profileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {
             if (url != null && !url.isEmpty()) {
                 Glide.with(this).load(url).into(profileImage);
@@ -101,7 +101,25 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // Set up image picker launcher
+        // Observe the first name to update profile initial if there's no profile picture
+        profileViewModel.getFirstName().observe(getViewLifecycleOwner(), name -> {
+            firstName.setText(name);
+            if (profileViewModel.getProfilePictureUrl().getValue() == null || profileViewModel.getProfilePictureUrl().getValue().isEmpty()) {
+                if (name != null && !name.isEmpty()) {
+                    profileText.setText(String.valueOf(name.charAt(0)).toUpperCase());
+                    profileText.setVisibility(View.VISIBLE);
+                } else {
+                    profileText.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        // Observe other profile details
+        profileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
+        profileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
+        profileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
+
+        // Set up image picker
         pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
                 Uri selectedImageUri = result.getData().getData();
@@ -111,13 +129,6 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // Set up observers for other profile details
-        profileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
-        profileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
-        profileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
-        profileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
-
-        // Set up listeners for profile edit and profile picture options
         profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
         editButton.setOnClickListener(v -> showEditDialog());
 
@@ -125,7 +136,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Shows a dialog with options to either choose a new profile picture or delete the current one.
+     * Shows a dialog allowing the user to either choose a new profile picture
+     * or delete the current one.
      */
     private void showProfilePictureOptionsDialog() {
         View popupView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_pfp_edit_delete, null);
@@ -159,7 +171,9 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Deletes the current profile picture and resets the profile picture to a default image.
+     * Deletes the current profile picture and resets it to a default image.
+     * If there’s a first name, it sets the profile initial using the first
+     * letter of the first name.
      */
     private void deleteProfilePicture() {
         profileViewModel.setProfilePictureUrl("");
@@ -174,7 +188,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Uploads a new profile picture to Firebase Storage and updates the profile with the image URL.
+     * Uploads a new profile picture to Firebase Storage and updates
+     * the profile with the new image URL.
      *
      * @param imageUri The URI of the image to be uploaded.
      */
@@ -193,7 +208,7 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Displays a dialog allowing the user to edit their profile information.
+     * Displays a dialog that allows the user to edit their profile information.
      */
     private void showEditDialog() {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
