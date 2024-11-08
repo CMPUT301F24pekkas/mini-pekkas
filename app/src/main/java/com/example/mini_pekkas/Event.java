@@ -256,6 +256,7 @@ public class Event {
         map.put("waitlist", waitlist);
         map.put("geo", geo);
         map.put("QrCode", QrCode);
+        map.put("posterUrl", posterPhotoUrl);
 
         return map;
     }

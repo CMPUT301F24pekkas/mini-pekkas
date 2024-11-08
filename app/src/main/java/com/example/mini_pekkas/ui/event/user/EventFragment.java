@@ -110,7 +110,7 @@ public class EventFragment extends Fragment {
 
         joinButton.setOnClickListener(view -> {
             Event event = eventViewModel.getEvent().getValue();
-            if (!event.getWaitlist().contains(mockUser)) {
+            if (!event.getWaitlist().contains(mockUser) && event.getWaitlist().size() < event.getMaxAttendees()) {
                 event.getWaitlist().add(mockUser);
                 firebaseHelper.waitlistEvent(event);
                 Toast.makeText(getContext(), "You have joined the waitlist!", Toast.LENGTH_SHORT).show();

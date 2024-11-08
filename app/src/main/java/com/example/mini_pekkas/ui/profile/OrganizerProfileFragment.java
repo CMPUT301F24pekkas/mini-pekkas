@@ -32,6 +32,10 @@ import com.example.mini_pekkas.databinding.FragmentOrganizerProfileBinding;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+/**
+ * Fragment representing the organizer's profile view, allowing users to view and edit
+ * their personal details, profile picture, and other information.
+ */
 public class OrganizerProfileFragment extends Fragment {
 
     private FragmentOrganizerProfileBinding binding;
@@ -61,6 +65,7 @@ public class OrganizerProfileFragment extends Fragment {
         binding = FragmentOrganizerProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Initialize profile elements
         final TextView firstName = binding.firstName;
         final TextView lastName = binding.lastName;
         final TextView emailInput = binding.emailInput;
@@ -71,13 +76,12 @@ public class OrganizerProfileFragment extends Fragment {
         final ImageButton editButton = binding.editButton;
         final ImageButton profileEdit = binding.pfpEdit;
 
+        // Load profile picture or show initial text
         organizerProfileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {
             if (url != null && !url.isEmpty()) {
                 Glide.with(this).load(url).into(profileImage);
                 profileText.setVisibility(View.GONE);
-                //profileImage.setVisibility(View.VISIBLE);
             } else {
-                // Set profileText to the initial if no profile picture
                 String name = organizerProfileViewModel.getFirstName().getValue();
                 if (name != null && !name.isEmpty()) {
                     profileText.setText(String.valueOf(name.charAt(0)).toUpperCase());
@@ -86,6 +90,7 @@ public class OrganizerProfileFragment extends Fragment {
             }
         });
 
+        // Initialize the image picker
         pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
                 Uri selectedImageUri = result.getData().getData();
@@ -95,23 +100,26 @@ public class OrganizerProfileFragment extends Fragment {
             }
         });
 
+        // Bind profile data to views
         organizerProfileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
         organizerProfileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
         organizerProfileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         organizerProfileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
         organizerProfileViewModel.getOrganizerLocation().observe(getViewLifecycleOwner(), organizerLocationInput::setText);
 
+        // Set click listeners
         profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
         editButton.setOnClickListener(v -> showEditDialog());
 
         return root;
     }
 
+    /**
+     * Shows a dialog allowing the user to choose between uploading a new profile picture or deleting the current one.
+     */
     private void showProfilePictureOptionsDialog() {
-        // Inflate the popup layout
         View popupView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_pfp_edit_delete, null);
 
-        // Set up the popup dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(popupView);
         AlertDialog dialog = builder.create();
@@ -132,11 +140,17 @@ public class OrganizerProfileFragment extends Fragment {
         dialog.show();
     }
 
+    /**
+     * Opens the device's gallery for selecting a new profile picture.
+     */
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         pickImageLauncher.launch(intent);
     }
 
+    /**
+     * Deletes the current profile picture, resets the profile image to a placeholder, and updates Firebase.
+     */
     private void deleteProfilePicture() {
         organizerProfileViewModel.setProfilePictureUrl("");
         organizerProfileViewModel.updateProfileInFirebase();
@@ -149,6 +163,11 @@ public class OrganizerProfileFragment extends Fragment {
         Toast.makeText(getActivity(), "Profile picture deleted", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Uploads a new profile image to Firebase Storage and updates the ViewModel with the image's URL.
+     *
+     * @param imageUri URI of the selected image to upload.
+     */
     private void uploadImageToFirebase(Uri imageUri) {
         StorageReference imageRef = profileImageRef.child(System.currentTimeMillis() + ".jpg");
 
@@ -163,6 +182,9 @@ public class OrganizerProfileFragment extends Fragment {
                 ));
     }
 
+    /**
+     * Displays a dialog to edit organizer profile details including name, email, phone number, and location.
+     */
     private void showEditDialog() {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_edit_organizer_profile, null);
