@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.13 11/12/20224 Fixed alot of logical bugs
+ * @version 1.13.1 11/12/20224 Fixed Infinite poster upload bug
  */
 public class Firebase {
     private final String deviceID;
@@ -685,7 +685,7 @@ public class Firebase {
      * @param image the image to be stored in Uri format
      * @param listener Optional listener that is called when the image is stored. Returns the image url as a string
      */
-    private void setPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
+    private void uploadPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
         posterPictureReference.putFile(image)
                 .addOnSuccessListener(taskSnapshot -> {
                     String imagePath = Objects.requireNonNull(taskSnapshot.getMetadata()).getPath(); // Get the path of the uploaded image
@@ -697,10 +697,10 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #setPosterPicture(Event, Uri, DataRetrievalListener)} with no listener
+     * Overload of the {@link #uploadPosterPicture(Event, Uri, DataRetrievalListener)} with no listener
      */
-    private void setPosterPicture(Event event, Uri image) {
-        setPosterPicture(event, image, id -> {});
+    private void uploadPosterPicture(Event event, Uri image) {
+        uploadPosterPicture(event, image, id -> {});
     }
 
     /**
@@ -710,7 +710,7 @@ public class Firebase {
      * @param image the image to be stored in Uri format
      * @param listener the listener that is called when the image is stored. Returns the image url as a string
      */
-    public void uploadPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
+    public void setPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
         // Fetch the current profile picture path
         String currentImagePath = event.getPosterPhotoUrl();
 
@@ -727,8 +727,8 @@ public class Firebase {
     /**
      * Overload of the {@link #uploadPosterPicture(Event, Uri, DataRetrievalListener)} with no listener
      */
-    public void uploadPosterPicture(Event event, Uri image) {
-        uploadPosterPicture(event, image, id -> {});
+    public void setPosterPicture(Event event, Uri image) {
+        setPosterPicture(event, image, id -> {});
     }
 
     /**
