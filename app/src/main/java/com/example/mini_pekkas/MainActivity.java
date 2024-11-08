@@ -40,28 +40,42 @@ public class MainActivity extends AppCompatActivity {
         // Initialize Firebase helper
         firebaseHelper = new Firebase(this);
 
-        // Check if the device ID already exists in Firebase
-        firebaseHelper.checkThisUserExist(exist -> {
-            if (!exist) {
-                setContentView(R.layout.home_page);
-                initializeViews();
-            } else {
-                // User already exists
-                User epicUser = firebaseHelper.getThisUser();
-                String fac = epicUser.getFacility();
-
-                if (fac == null || fac.isEmpty()) {
-                    // Facility is null, navigate to UserActivity
-                    Intent userIntent = new Intent(MainActivity.this, UserActivity.class);
-                    startActivity(userIntent);
-                } else {
-                    // Facility is not null, navigate to OrganizerActivity
-                    Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
-                    startActivity(organizerIntent);
-                }
+        // First check if this user is an admin
+        firebaseHelper.isThisUserAdmin(isAdmin -> {
+            if(isAdmin){
+                // User is an admin
+                // TODO MAKE ADMIN activity
+                // Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
+                // startActivity(adminIntent);
                 finish(); // Close MainActivity
+            } else {
+                // User is not an admin
+                // Check if the device ID already exists in Firebase
+                firebaseHelper.checkThisUserExist(exist -> {
+                    if (!exist) {
+                        setContentView(R.layout.home_page);
+                        initializeViews();
+                    } else {
+                        // User already exists
+                        User epicUser = firebaseHelper.getThisUser();
+                        String fac = epicUser.getFacility();
+
+                        if (fac == null || fac.isEmpty()) {
+                            // Facility is null, navigate to UserActivity
+                            Intent userIntent = new Intent(MainActivity.this, UserActivity.class);
+                            startActivity(userIntent);
+                        } else {
+                            // Facility is not null, navigate to OrganizerActivity
+                            Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
+                            startActivity(organizerIntent);
+                        }
+                        finish(); // Close MainActivity
+                    }
+                });
             }
         });
+
+
     }
     /**
      * Initializes the views for the user form and sets the onClickListener for the submit button.
