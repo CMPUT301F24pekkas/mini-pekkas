@@ -75,7 +75,7 @@ public class EventCreateFragment extends Fragment {
 
             // Generate a unique QR code using the event ID + a new UUID
             String uniqueQrData = event.getId();
-            Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(uniqueQrData, 300, 300);
+            Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(event, uniqueQrData, 300, 300);
 
             if (qrCodeBitmap != null) {
                 // Convert QR code bitmap to Base64 string and set it in the event object

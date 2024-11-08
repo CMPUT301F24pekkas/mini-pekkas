@@ -21,9 +21,9 @@ public class QRCodeGenerator {
      * @param height The height of the QR code image in pixels.
      * @return A Bitmap image of the generated QR code, or null if an error occurs.
      */
-    public static Bitmap generateQRCode(String text, int width, int height) {
+    public static Bitmap generateQRCode(Event event, String text, int width, int height) {
         // Append a new UUID to ensure uniqueness
-        String uniqueText = text + "_" + UUID.randomUUID().toString();
+        String uniqueText = event.getId();
 
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         try {
