@@ -1,8 +1,10 @@
 package com.example.mini_pekkas;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.intent.matcher.IntentMatchers.hasData;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
@@ -13,16 +15,17 @@ import android.provider.Settings;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.intent.Intents;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiSelector;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+
+import androidx.test.espresso.intent.rule.IntentsTestRule;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,8 +46,7 @@ import java.util.Map;
 @RunWith(AndroidJUnit4.class)
 public class UserTests {
     @Rule
-    public ActivityScenarioRule<UserActivity> scenario = new
-            ActivityScenarioRule<UserActivity>(UserActivity.class);
+    public IntentsTestRule<UserActivity> intentsRule = new IntentsTestRule<>(UserActivity.class);
     private FirebaseFirestore database;
     public String deviceId;
     public void CreateTestProfile(Context context) {
@@ -128,22 +130,25 @@ public class UserTests {
     /**
      * US 01.03.01 As an entrant I want to upload a profile picture for a more personalized experience
      */
-//    @Test
-//    public void testUploadProfilePicture() throws InterruptedException {
-//        Thread.sleep(3000);
-//        onView(withId(R.id.navigation_profile)).perform(click());
-//        Thread.sleep(3000);
-//        onView(withId(R.id.pfp_edit)).perform(click());
-//        Thread.sleep(3000);
-//        onView(withText("Pictures")).perform(click());
-//    }
-//    /**
-//     * US 01.03.02 As an entrant I want remove profile picture if need be
-//     */
-//    @Test
-//    public void testRemoveProfilePicture(){
-//
-//    }
+    @Test
+    public void testUploadProfilePicture() throws InterruptedException {
+        onView(withId(R.id.navigation_profile)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.pfp_edit)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.choose_new_picture_button)).check(matches(isDisplayed()));
+    }
+    /**
+     * US 01.03.02 As an entrant I want remove profile picture if need be
+     */
+    @Test
+    public void testRemoveProfilePicture() throws InterruptedException {
+        onView(withId(R.id.navigation_profile)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.pfp_edit)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.delete_picture_button)).check(matches(isDisplayed()));
+    }
     /**
      * US 01.03.03 As an entrant I want my profile picture to be deterministically generated from my profile name if I haven't uploaded a profile image yet.
      */
@@ -154,10 +159,10 @@ public class UserTests {
         Thread.sleep(3000);
         onView(withId(R.id.edit_button)).perform(click());
         Thread.sleep(3000);
-        onView(withId(R.id.dialogue_first_name_input)).perform(ViewActions.clearText(),ViewActions.typeText("Connor"));        onView(withText("Save")).perform(click());
+        onView(withId(R.id.dialogue_first_name_input)).perform(ViewActions.clearText(),ViewActions.typeText("Connor"));
         onView(withText("Save")).perform(click());
         Thread.sleep(3000);
-        onView(withId(R.id.profile_image)).check(matches(withTagValue(is("C"))));
+        onView(withId(R.id.profileText)).check(matches(withText("C")));
     }
 //    /**
 //     * US 01.04.01 As an entrant I want to receive notification when chosen from the waiting list (when I "win" the lottery)
@@ -221,7 +226,7 @@ public class UserTests {
      */
     @Test
     public void deviceIdentify(){
-        onView(withText("Home")).check(matches(isDisplayed()));
+        onView(withId(R.id.user_view)).check(matches(isDisplayed()));
     }
 //    /**
 //     * US 01.08.01 As an entrant, I want to be warned before joining a waiting list that requires geolocation.
