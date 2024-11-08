@@ -5,6 +5,7 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import android.content.Context;
@@ -12,14 +13,22 @@ import android.provider.Settings;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiSelector;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -56,6 +65,17 @@ public class UserTests {
     public void setUp() {
         Context context = ApplicationProvider.getApplicationContext();
         CreateTestProfile(context);
+        onView(withId(R.id.navigation_profile)).perform(click());
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        try {
+            UiObject allowButton = device.findObject(new UiSelector().text("Allow"));
+            if (allowButton.exists()) {
+                allowButton.click();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        onView(withId(R.id.navigation_home)).perform(click());
     }
 
 //    /**
@@ -83,7 +103,6 @@ public class UserTests {
         Thread.sleep(3000);
         onView(withId(R.id.navigation_profile)).perform(click());
         Thread.sleep(3000);
-        onView(withId(R.id.edit_button)).check(matches(isDisplayed()));
         onView(withId(R.id.edit_button)).perform(click());
         Thread.sleep(3000);
         onView(withId(R.id.dialogue_first_name_input)).perform(ViewActions.clearText(),ViewActions.typeText("Connor"));
@@ -106,12 +125,17 @@ public class UserTests {
                     assertEquals("7809876543", document.getString("phone"));
                 });
     }
-//    /**
-//     * US 01.03.01 As an entrant I want to upload a profile picture for a more personalized experience
-//     */
+    /**
+     * US 01.03.01 As an entrant I want to upload a profile picture for a more personalized experience
+     */
 //    @Test
-//    public void testUploadProfilePicture(){
-//
+//    public void testUploadProfilePicture() throws InterruptedException {
+//        Thread.sleep(3000);
+//        onView(withId(R.id.navigation_profile)).perform(click());
+//        Thread.sleep(3000);
+//        onView(withId(R.id.pfp_edit)).perform(click());
+//        Thread.sleep(3000);
+//        onView(withText("Pictures")).perform(click());
 //    }
 //    /**
 //     * US 01.03.02 As an entrant I want remove profile picture if need be
@@ -120,13 +144,21 @@ public class UserTests {
 //    public void testRemoveProfilePicture(){
 //
 //    }
-//    /**
-//     * US 01.03.03 As an entrant I want my profile picture to be deterministically generated from my profile name if I haven't uploaded a profile image yet.
-//     */
-//    @Test
-//    public void testNoProfilePicture(){
-//
-//    }
+    /**
+     * US 01.03.03 As an entrant I want my profile picture to be deterministically generated from my profile name if I haven't uploaded a profile image yet.
+     */
+    @Test
+    public void testNoProfilePicture() throws InterruptedException {
+        Thread.sleep(3000);
+        onView(withId(R.id.navigation_profile)).perform(click());
+        Thread.sleep(3000);
+        onView(withId(R.id.edit_button)).perform(click());
+        Thread.sleep(3000);
+        onView(withId(R.id.dialogue_first_name_input)).perform(ViewActions.clearText(),ViewActions.typeText("Connor"));        onView(withText("Save")).perform(click());
+        onView(withText("Save")).perform(click());
+        Thread.sleep(3000);
+        onView(withId(R.id.profile_image)).check(matches(withTagValue(is("C"))));
+    }
 //    /**
 //     * US 01.04.01 As an entrant I want to receive notification when chosen from the waiting list (when I "win" the lottery)
 //     */
@@ -184,13 +216,13 @@ public class UserTests {
 //    public void signUpEvent(){
 //
 //    }
-//    /**
-//     * US 01.07.01 As an entrant, I want to be identified by my device, so that I don't have to use a username and password
-//     */
-//    @Test
-//    public void deviceIdentify(){
-//
-//    }
+    /**
+     * US 01.07.01 As an entrant, I want to be identified by my device, so that I don't have to use a username and password
+     */
+    @Test
+    public void deviceIdentify(){
+        onView(withText("Home")).check(matches(isDisplayed()));
+    }
 //    /**
 //     * US 01.08.01 As an entrant, I want to be warned before joining a waiting list that requires geolocation.
 //     */

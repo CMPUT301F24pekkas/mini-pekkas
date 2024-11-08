@@ -7,6 +7,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
 import android.provider.Settings;
@@ -15,6 +16,10 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiSelector;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,181 +29,206 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Test cases for Organizers according to user stories
  */
 @RunWith(AndroidJUnit4.class)
 public class OrganizerTests {
     @Rule
-    public ActivityScenarioRule<MainActivity> scenario = new
-            ActivityScenarioRule<MainActivity>(MainActivity.class);
+    public ActivityScenarioRule<OrganizerActivity> scenario = new
+            ActivityScenarioRule<OrganizerActivity>(OrganizerActivity.class);
     private FirebaseFirestore database;
     public String deviceId;
-    public void deleteDeviceId(Context context) {
+    public void CreateTestProfile(Context context) {
         database = FirebaseFirestore.getInstance();
         deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-
+        database = FirebaseFirestore.getInstance();
+        Map<String, Object> userProfile = new HashMap<>();
+        userProfile.put("name", "John");
+        userProfile.put("lastname", "Doe");
+        userProfile.put("email", "test@gmail.com");
+        userProfile.put("phone", "7801234567");
+        userProfile.put("facility", "Facility");
         database.collection("users")
                 .document(deviceId)
-                .delete();
+                .set(userProfile);
     }
     @Before
     public void setUp() {
         Context context = ApplicationProvider.getApplicationContext();
-        deleteDeviceId(context);
+        CreateTestProfile(context);
+        onView(withId(R.id.navigation_org_profile)).perform(click());
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        try {
+            UiObject allowButton = device.findObject(new UiSelector().text("Allow"));
+            if (allowButton.exists()) {
+                allowButton.click();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        onView(withId(R.id.navigation_org_home)).perform(click());
     }
 
+    /**
+     * US 02.01.01 As an organizer I want to create a new event and generate a unique promotional QR code
+     * that links to the event description and event poster in the app
+     */
+    @Test
+    public void testCreateQR() throws InterruptedException {
+        Thread.sleep(3000);
+        onView(withId(R.id.navigation_org_add)).perform(click());
+        Thread.sleep(3000);
+        onView(withId(R.id.addEventButton)).perform(click());
+        onView(withId(R.id.qrDialogueImageView)).check(matches(isDisplayed()));
+    }
+    /**
+     * US 02.01.02 As an organizer I want to store hash data of the generated QR code in my database
+     */
+    @Test
+    public void testStoreHash() throws InterruptedException {
+        Thread.sleep(3000);
+        onView(withId(R.id.navigation_org_add)).perform(click());
+        Thread.sleep(3000);
+        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
+        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
+        onView(withId(R.id.addEventButton)).perform(click());
+        onView(withId(R.id.qrDialogueImageView)).check(matches(isDisplayed()));
+        onView(withId(R.id.confirmQrButton)).perform(click());
+        database.collection("events").document(deviceId).get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot document = task.getResult();
+                    assertNotNull("QrCode should not be null", document.getString("QrCode"));
+                });
+    }
 //    /**
-//     * US 01.01.01 As an entrant, I want to join the waiting list for a specific event
+//     * US 02.02.01 As an organizer I want to view the list of entrants who joined my event waiting list
 //     */
 //    @Test
-//    public void testJoinWait(){
-////        // click on the event profile
-////        onView(withId(R.id.navigation_event)).perform(click());
-////        onView(withId(R.id.joinWaitButton)).perform(click());
-//
+//    public void testViewEntrants() throws InterruptedException {
 //    }
 //    /**
-//     * US 01.01.02 As an entrant, I want to leave the waiting list for a specific event
+//     * US 02.02.02 As an organizer I want to see on a map where entrants joined my event waiting list from.
 //     */
 //    @Test
-//    public void testLeaveWait(){
+//    public void testEntrantMap(){
 //
 //    }
     /**
-     * US 01.02.01 As an entrant, I want to provide my personal information such as name, email and optional phone number in the app
+     * US 02.02.03 As an organizer I want to enable or disable the geolocation requirement for my event.
      */
     @Test
-    public void testAddProfileDetails() throws InterruptedException {
+    public void testEnableGeolocation() throws InterruptedException {
         Thread.sleep(3000);
-        onView(withId(R.id.firstNameInput)).perform(ViewActions.typeText("John"));
-        onView(withId(R.id.lastNameInput)).perform(ViewActions.typeText("Doe"));
-        onView(withId(R.id.emailInput)).perform(ViewActions.typeText("test@gmail.com"));
-        onView(withId(R.id.phoneInput)).perform(ViewActions.typeText("7801234567"));
-        onView(withId(R.id.submitButton)).perform(click());
+        onView(withId(R.id.navigation_org_add)).perform(click());
         Thread.sleep(3000);
-        database.collection("users").document(deviceId).get()
+        onView(withId(R.id.geoCheckBox)).perform(click());
+        onView(withId(R.id.addEventButton)).perform(click());
+        database.collection("events").document(deviceId).get()
                 .addOnCompleteListener(task -> {
                     DocumentSnapshot document = task.getResult();
-                    assertEquals("John", document.getString("name"));
-                    assertEquals("Doe", document.getString("lastname"));
-                    assertEquals("test@gmail.com", document.getString("email"));
-                    assertEquals("7801234567", document.getString("phone"));
+                    assertNotNull("QrCode should not be null", document.getString("QrCode"));
                 });
     }
     /**
-     * US 01.02.02 As an entrant I want to update information such as name, email and contact information on my profile
+     * US 02.03.01 As an organizer I want to OPTIONALLY limit the number of entrants who can join my waiting list
      */
     @Test
-    public void testUpdateProfileDetails() throws InterruptedException {
+    public void testLimitEntrants() throws InterruptedException {
         Thread.sleep(3000);
-        onView(withId(R.id.submitButton)).perform(click());
+        onView(withId(R.id.navigation_org_add)).perform(click());
         Thread.sleep(3000);
-        onView(withId(R.id.navigation_profile)).perform(click());
-        Thread.sleep(3000);
-        onView(withId(R.id.edit_button)).perform(click());
-        Thread.sleep(3000);
-        onView(withId(R.id.dialogue_first_name_input)).perform(ViewActions.typeText("John"));
-        onView(withId(R.id.dialogue_last_name_input)).perform(ViewActions.typeText("Doe"));
-        onView(withId(R.id.dialog_email_input)).perform(ViewActions.typeText("test@gmail.com"));
-        onView(withId(R.id.dialog_phone_input)).perform(ViewActions.typeText("7801234567"));
-        onView(withText("Save")).perform(click());
-        Thread.sleep(3000);
-        onView(withText("John")).check(matches(isDisplayed()));
-        onView(withText("Doe")).check(matches(isDisplayed()));
-        onView(withText("test@gmail.com")).check(matches(isDisplayed()));
-        onView(withText("7801234567")).check(matches(isDisplayed()));
+        onView(withId(R.id.maxPartCheckBox)).perform(click());
+        onView(withId(R.id.editMaxPart)).perform(ViewActions.typeText("300"));
+
     }
 //    /**
-//     * US 01.03.01 As an entrant I want to upload a profile picture for a more personalized experience
+//     * US 02.04.01 As an organizer I want to upload an event poster to provide visual information to entrants
 //     */
 //    @Test
-//    public void testUploadProfilePicture(){
-//
-//    }
-//    /**
-//     * US 01.03.02 As an entrant I want remove profile picture if need be
-//     */
-//    @Test
-//    public void testRemoveProfilePicture(){
-//
-//    }
-//    /**
-//     * US 01.03.03 As an entrant I want my profile picture to be deterministically generated from my profile name if I haven't uploaded a profile image yet.
-//     */
-//    @Test
-//    public void testNoProfilePicture(){
-//
-//    }
-//    /**
-//     * US 01.04.01 As an entrant I want to receive notification when chosen from the waiting list (when I "win" the lottery)
-//     */
-//    @Test
-//    public void testChosenNotifications(){
+//    public void testEventPoster(){
 //
 //    }
 //
 //    /**
-//     * US 01.04.02 As an entrant I want to receive notification of not chosen on the app (when I "lose" the lottery)
+//     * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
 //     */
 //    @Test
-//    public void testLoseNotifications(){
+//    public void testUpdateEventPoster(){
 //
 //    }
 //    /**
-//     * US 01.04.03 As an entrant I want to opt out of receiving notifications from organizers and admin
+//     * US 02.05.01 As an organizer I want to send a notification to chosen entrants to sign up for events.
 //     */
 //    @Test
-//    public void testOptOutNotifications(){
+//    public void testNotifyEntrants(){
 //
 //    }
 //    /**
-//     * US 01.05.01 As an entrant I want another chance to be chosen from the waiting list if a selected user declines an invitation to sign up
+//     * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event
 //     */
 //    @Test
-//    public void testChanceChosenAgain(){
+//    public void testSampleEntrants(){
 //
 //    }
 //    /**
-//     * US 01.05.02 As an entrant I want to be able to accept the invitation to register/sign up when chosen to participate in an event
+//     * US 02.05.03 As an organizer I want to be able to draw a replacement applicant from the pooling system
+//     * when a previously selected applicant cancels or rejects the invitation
 //     */
 //    @Test
-//    public void acceptEvent(){
+//    public void testDrawReplacement(){
 //
 //    }
 //    /**
-//     * US 01.05.03 As an entrant I want to be able to decline an invitation when chosen to participate in an event
+//     * US 02.06.01 As an organizer I want to view a list of all chosen entrants who are invited to apply
 //     */
 //    @Test
-//    public void delineEvent(){
+//    public void testViewChosen(){
 //
 //    }
 //    /**
-//     * US 01.06.01 As an entrant I want to view event details within the app by scanning the promotional QR code
+//     * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
 //     */
 //    @Test
-//    public void viewEvent(){
+//    public void testViewCancelled(){
 //
 //    }
 //    /**
-//     * US 01.06.02 As an entrant I want to be able to be sign up for an event by scanning the QR code
+//     * US 02.06.03 As an organizer I want to see a final list of entrants who enrolled for the event
 //     */
 //    @Test
-//    public void signUpEvent(){
+//    public void testViewEnrolled(){
 //
 //    }
 //    /**
-//     * US 01.07.01 As an entrant, I want to be identified by my device, so that I don't have to use a username and password
+//     * US 02.06.04 As an organizer I want to cancel entrants that did not sign up for the event
 //     */
 //    @Test
-//    public void deviceIdentify(){
+//    public void testCancelEntrants(){
 //
 //    }
 //    /**
-//     * US 01.08.01 As an entrant, I want to be warned before joining a waiting list that requires geolocation.
+//     * US 02.07.01 As an organizer I want to send notifications to all entrants on the waiting list
 //     */
 //    @Test
-//    public void geolocationWarning(){
+//    public void testNotifyWait(){
+//
+//    }
+//    /**
+//     * US 02.07.02 As an organizer I want to send notifications to all selected entrants
+//     */
+//    @Test
+//    public void testNotifySelected(){
+//
+//    }
+//    /**
+//     * US 02.07.03 As an organizer I want to send a notification to all cancelled entrants
+//     */
+//    @Test
+//    public void testNotifyCancelled(){
 //
 //    }
 }
