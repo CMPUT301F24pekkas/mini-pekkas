@@ -74,7 +74,7 @@ public class EventCreateFragment extends Fragment {
             Event event = CreateEvent();
 
             // Generate a unique QR code using the event ID + a new UUID
-            String uniqueQrData = event.getId() + "_" + UUID.randomUUID().toString();
+            String uniqueQrData = event.getId();
             Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(uniqueQrData, 300, 300);
 
             if (qrCodeBitmap != null) {
@@ -130,7 +130,7 @@ public class EventCreateFragment extends Fragment {
      */
     private void uploadPosterImageToFirebase(Event event, Bitmap qrCodeBitmap) {
         if (imageUri != null) {
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference("poster-pictures/" + UUID.randomUUID().toString());
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference("poster-pictures/" + event.getId());
 
             storageRef.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
@@ -186,7 +186,7 @@ public class EventCreateFragment extends Fragment {
      * @return A populated Event object
      */
     public Event CreateEvent() {
-        String event_id = UUID.randomUUID().toString();
+        String event_id = null;
         double latitude = 40.730610; // Example latitude
         double longitude = -73.935242; // Example longitude
         float price = 90.45f;
