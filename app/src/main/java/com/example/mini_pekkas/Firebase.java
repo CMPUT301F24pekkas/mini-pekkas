@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.12 11/06/20224 added image upload and download functions. Unified listener implementation for consistency. Added Error handling. Updated all JavaDocs
+ * @version 1.13 11/12/20224 Fixed alot of logical bugs
  */
 public class Firebase {
     private final String deviceID;
@@ -209,22 +209,29 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the user is deleted
      */
     public void deleteThisUser(InitializationListener listener) {
-        userCollection.document(this.deviceID)
-                .delete()
+        // Delete the profile picture from user (assuming the deletion works)
+        deleteProfilePicture(new User(Objects.requireNonNull(userDocument.getData())));
+
+        userCollection.document(this.deviceID).delete()
                 .addOnSuccessListener(aVoid -> {
                     userDocument = null;        // Set user document to null
-                    listener.onInitialized();
                 })
                 .addOnFailureListener(listener::onError);
-
 
         // Delete all user document from the user-events collection
         userEventsCollection.whereEqualTo("userID", this.deviceID).get()
                 .addOnSuccessListener(task -> {
+                    int total_user = task.size();
+                    AtomicInteger deleted_user = new AtomicInteger();
                     // Delete all documents that match the query
                     for (DocumentSnapshot document : task.getDocuments()) {
                         document.getReference().delete()
                                 .addOnFailureListener(listener::onError);
+
+                        // Wait for all documents to be deleted first
+                        if (deleted_user.incrementAndGet() == total_user) {
+                            listener.onInitialized();
+                        }
                     }
                 })
                 .addOnFailureListener(listener::onError);
@@ -278,18 +285,29 @@ public class Firebase {
      */
     public void deleteEvent(Event event, InitializationListener listener) {
         String eventID = event.getId();
+
+        // Delete the banner image
+        deletePosterPicture(event);
+
         // Delete the event document
         eventCollection.document(eventID).delete();
 
         // Delete all event document from the user-events collection
         userEventsCollection.whereEqualTo("eventID", eventID).get()
                 .addOnSuccessListener(task -> {
+                    // Counter for the number of documents deleted
+                    int total_events = task.size();
+                    AtomicInteger deleted_events = new AtomicInteger();
+
                     for (DocumentSnapshot document : task.getDocuments()) {
                         document.getReference().delete()
                                 .addOnFailureListener(listener::onError);
+
+                        // Wait for all events to be deleted first
+                        if (deleted_events.incrementAndGet() == total_events) {
+                            listener.onInitialized();
+                        }
                     }
-                    // Call the success listener on completion
-                    listener.onInitialized();
                 })
                 .addOnFailureListener(listener::onError);
     }
@@ -522,9 +540,7 @@ public class Firebase {
                                         listener.onEventRetrievalCompleted(null);
                                     }
                                 })
-                                .addOnFailureListener(e -> {
-                                    listener.onError(e);
-                                })
+                                .addOnFailureListener(listener::onError)
                                 .addOnCompleteListener(taskCompleted -> {
                                     // Increment the counter
                                     if (retrievedCount.incrementAndGet() == totalDocuments) {
@@ -608,17 +624,12 @@ public class Firebase {
 
         // Delete the old profile picture (if it exists)
         if (currentImagePath != null && !currentImagePath.isEmpty()) {
-            StorageReference oldPfpRef = profilePictureReference.child(currentImagePath);
-            // Handle error deleting old profile picture
-            oldPfpRef.delete()
-                    .addOnSuccessListener(aVoid -> {
-                        // Old profile picture deleted successfully, upload the new profile picture
-                        setProfilePicture(user, image, listener);
-                    })
-                    .addOnFailureListener(listener::onError);
+            // First delete the old pfp deleting old profile picture
+            // Then upload new profile pic on success
+            deleteProfilePicture(user, () -> uploadProfilePicture(user, image, listener));
         } else {
             // No old profile picture to delete, upload the new one directly
-            setProfilePicture(user, image, listener);
+            uploadProfilePicture(user, image, listener);
         }
     }
 
@@ -631,7 +642,6 @@ public class Firebase {
 
     /**
      * Gets the profile picture from the storage.
-     * @ TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
      * @param user the user object to get the profile picture from
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
@@ -639,6 +649,31 @@ public class Firebase {
         profilePictureReference.child(user.getProfilePhotoUrl()).getDownloadUrl()
                 .addOnSuccessListener(listener::onImageRetrievalCompleted)
                 .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Deletes the profile picture from the storage.
+     * Throws an error if the profile picture does not exist
+     * @param user the user object to delete the profile picture from
+     * @param listener Optional InitializationListener listener that is called when the image is deleted
+     */
+    public void deleteProfilePicture(User user, InitializationListener listener) {
+        String profilePhotoUrl = user.getProfilePhotoUrl();
+        if (profilePhotoUrl != null && !profilePhotoUrl.isEmpty()) {
+            profilePictureReference.child(user.getProfilePhotoUrl()).delete()
+                    .addOnSuccessListener(aVoid -> listener.onInitialized())
+                    .addOnFailureListener(listener::onError);
+        } else {
+            // Throw an exception if the profile picture does not exist
+            listener.onError(new Exception("No profile picture to delete"));
+        }
+    }
+
+    /**
+     * Overload of the {@link #deleteProfilePicture(User, InitializationListener)} with no listener
+     */
+    public void deleteProfilePicture(User user) {
+        deleteProfilePicture(user, () -> {});
     }
 
     /**
@@ -678,17 +713,11 @@ public class Firebase {
 
         // Delete the old profile picture (if it exists)
         if (currentImagePath != null && !currentImagePath.isEmpty()) {
-            StorageReference oldPstRef = posterPictureReference.child(currentImagePath);
-            // Handle error deleting old profile picture
-            oldPstRef.delete()
-                    .addOnSuccessListener(aVoid -> {
-                        // Old poster picture deleted successfully, upload the new poster picture
-                        setPosterPicture(event, image, listener);
-                    })
-                    .addOnFailureListener(listener::onError);
+            // Upload the new image in it's place
+            deletePosterPicture(event, () -> uploadPosterPicture(event, image, listener));
         } else {
             // No old poster picture to delete, upload the new one directly
-            setPosterPicture(event, image, listener);
+            uploadPosterPicture(event, image, listener);
         }
     }
 
@@ -701,7 +730,6 @@ public class Firebase {
 
     /**
      * Gets the poster picture from the storage.
-     * @ TODO: 11/6/24 Consider if we should use firebaseUI instead according to https://firebase.google.com/docs/storage/android/download-files#downloading_images_with_firebaseui
      * @param event the event object to get the profile picture from
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
@@ -711,7 +739,31 @@ public class Firebase {
                 .addOnFailureListener(listener::onError);
     }
 
+    /**
+     * Deletes the poster picture from the storage.
+     * Throws an exception if there is no poster picture
+     * @param event the event object to delete the poster picture from
+     * @param listener Optional InitializationListener listener that is called when the image is deleted
+     */
+    public void deletePosterPicture(Event event, InitializationListener listener) {
+        // Get the photo Url and delete it
+        String photoUrl = event.getPosterPhotoUrl();
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            posterPictureReference.child(photoUrl).delete()
+                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                .addOnFailureListener(listener::onError);
+        } else {
+            // Throw an exception
+            listener.onError(new Exception("No poster picture to delete"));
+        }
+    }
 
+    /**
+     * Overload of the {@link #deletePosterPicture(Event, InitializationListener)} with no listener
+     */
+    public void deletePosterPicture(Event event) {
+        deletePosterPicture(event, () -> {});
+    }
     // TODO add admin functions. Allows for deletion of various types of data
     /**
      * Checks if this user is an admin
