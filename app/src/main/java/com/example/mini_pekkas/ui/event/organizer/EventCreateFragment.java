@@ -72,21 +72,21 @@ public class EventCreateFragment extends Fragment {
         addButton.setOnClickListener(v -> {
             // Create the event with user input data
             Event event = CreateEvent();
+            firebaseHelper.addEvent(event, result -> {
+                // Generate a unique QR code using the event ID + a new UUID
+                Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(event.getId(), 300, 300);
 
-            // Generate a unique QR code using the event ID + a new UUID
-            String uniqueQrData = event.getId();
-            Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(event, uniqueQrData, 300, 300);
+                if (qrCodeBitmap != null) {
+                    // Convert QR code bitmap to Base64 string and set it in the event object
+                    String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
+                    // TODO
+                    Log.d("PUT IN", "base64qr = " + qrCodeBase64);
+                    event.setQrCode(qrCodeBase64);
 
-            if (qrCodeBitmap != null) {
-                // Convert QR code bitmap to Base64 string and set it in the event object
-                String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
-                // TODO
-                Log.d("PUT IN", "base64qr = " + qrCodeBase64);
-                event.setQrCode(qrCodeBase64);
-
-                // Upload poster image if available, then save the event
-                uploadPosterImageToFirebase(event, qrCodeBitmap);
-            }
+                    // Upload poster image if available, then save the event
+                    uploadPosterImageToFirebase(event, qrCodeBitmap);
+                }
+            });
         });
 
         // Button to cancel event creation and clear inputs

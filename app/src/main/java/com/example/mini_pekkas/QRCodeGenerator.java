@@ -16,15 +16,12 @@ public class QRCodeGenerator {
     /**
      * Generates a unique QR code as a Bitmap image.
      *
-     * @param text The base text to encode within the QR code.
+     * @param uniqueText The base text to encode within the QR code.
      * @param width The width of the QR code image in pixels.
      * @param height The height of the QR code image in pixels.
      * @return A Bitmap image of the generated QR code, or null if an error occurs.
      */
-    public static Bitmap generateQRCode(Event event, String text, int width, int height) {
-        // Append a new UUID to ensure uniqueness
-        String uniqueText = event.getId();
-
+    public static Bitmap generateQRCode(String uniqueText, int width, int height) {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         try {
             BitMatrix bitMatrix = qrCodeWriter.encode(uniqueText, BarcodeFormat.QR_CODE, width, height);
