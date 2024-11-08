@@ -516,12 +516,14 @@ public class Firebase {
      * @param listener An EventRetrievalListener that returns the Event object if found.
      */
     public void getEventByQRCode(String qrCode, EventRetrievalListener listener) {
-        eventCollection.whereEqualTo("qrcode", qrCode).get()
+        Log.d("Fire12345", "qrCode = " + qrCode);
+        eventCollection.whereEqualTo("QrCode", qrCode).get()
                 .addOnSuccessListener(task -> {
                     int totalDocuments = task.getDocuments().size();
 
                     if (totalDocuments == 0) {
                         // No event found, trigger callback with null
+                        Log.d("TROLLED", "No event found");
                         listener.onEventRetrievalCompleted(null);
                         return;
                     }
