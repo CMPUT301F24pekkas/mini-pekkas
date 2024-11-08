@@ -23,6 +23,7 @@ import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class EventCreateFragment extends Fragment {
 
@@ -42,13 +43,15 @@ public class EventCreateFragment extends Fragment {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Create the event with user input data
                 Event event = CreateEvent();
 
-                // Generate the QR code
-                Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode("https://example.com", 300, 300); // Replace with your desired URL
+                // Generate a unique QR code using the event ID + a new UUID
+                String uniqueQrData = event.getId() + "_" + UUID.randomUUID().toString();
+                Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(uniqueQrData, 300, 300);
 
                 if (qrCodeBitmap != null) {
-                    // Convert QR code bitmap to Base64 string and set it as QrCode
+                    // Convert QR code bitmap to Base64 string and set it in the event object
                     String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
                     event.setQrCode(qrCodeBase64);
 
@@ -91,11 +94,10 @@ public class EventCreateFragment extends Fragment {
 
     // Creates a new Event object from user inputs
     public Event CreateEvent() {
-        // Get all input data (hardcoded values for demo, change as needed)
-        double latitude = 40.730610;
-        double longitude = -73.935242;
+        String event_id = UUID.randomUUID().toString();
+        double latitude = 40.730610; // Example latitude
+        double longitude = -73.935242; // Example longitude
         float price = 90.45f;
-        String event_id = "eventIdPlaceholder";
         ArrayList<User> waitlist = new ArrayList<>();
 
         EditText editEventTitle = binding.createEventEditText;
@@ -130,7 +132,7 @@ public class EventCreateFragment extends Fragment {
         User host = firebaseHelper.getThisUser();
         String facility = host.getFacility();
 
-        // Create Event object with QR code placeholder
+        // Create the Event object
         Event event = new Event(event_id, eventTitle, host, eventDescription, startDate, endDate,
                 price, facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked, null);
         return event;
