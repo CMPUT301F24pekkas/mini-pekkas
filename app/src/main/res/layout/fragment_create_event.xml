@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/imageView"
         android:layout_width="358dp"
         android:layout_height="93dp"
