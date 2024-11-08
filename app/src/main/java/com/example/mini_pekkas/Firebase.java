@@ -493,6 +493,51 @@ public class Firebase {
     }
 
     /**
+     * Retrieves an event using its QR code.
+     * @param qrCode The Base64 encoded QR code string to match.
+     * @param listener An EventRetrievalListener that returns the Event object if found.
+     */
+    public void getEventByQRCode(String qrCode, EventRetrievalListener listener) {
+        eventCollection.whereEqualTo("qrcode", qrCode).get()
+                .addOnSuccessListener(task -> {
+                    int totalDocuments = task.getDocuments().size();
+
+                    if (totalDocuments == 0) {
+                        // No event found, trigger callback with null
+                        listener.onEventRetrievalCompleted(null);
+                        return;
+                    }
+
+                    AtomicInteger retrievedCount = new AtomicInteger();
+
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        // Fetch the event details from the document
+                        eventCollection.document(document.getId()).get()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    if (documentSnapshot.exists()) {
+                                        // Convert the document into an Event object
+                                        Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
+                                        listener.onEventRetrievalCompleted(event);
+                                    } else {
+                                        listener.onEventRetrievalCompleted(null);
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    listener.onError(e);
+                                })
+                                .addOnCompleteListener(taskCompleted -> {
+                                    // Increment the counter
+                                    if (retrievedCount.incrementAndGet() == totalDocuments) {
+                                        listener.onEventRetrievalCompleted(null);
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+
+    /**
      * Get all events the user is waitlisted in
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
