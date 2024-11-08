@@ -51,7 +51,7 @@ public class LoginTests {
      * US 01.02.01 As an entrant, I want to provide my personal information such as name, email and optional phone number in the app
      */
     @Test
-    public void testAddProfileDetails() throws InterruptedException {
+    public void testCreateUser() throws InterruptedException {
         Thread.sleep(3000);
         onView(withId(R.id.firstNameInput)).perform(ViewActions.typeText("John"));
         onView(withId(R.id.lastNameInput)).perform(ViewActions.typeText("Doe"));
@@ -66,6 +66,29 @@ public class LoginTests {
                     assertEquals("Doe", document.getString("lastname"));
                     assertEquals("test@gmail.com", document.getString("email"));
                     assertEquals("7801234567", document.getString("phone"));
+                });
+    }
+    /**
+     * US 02.01.03 As an organizer, I want to create and manage my facility profile.
+     */
+    @Test
+    public void testCreateOrganizer() throws InterruptedException {
+        Thread.sleep(3000);
+        onView(withId(R.id.firstNameInput)).perform(ViewActions.typeText("John"));
+        onView(withId(R.id.lastNameInput)).perform(ViewActions.typeText("Doe"));
+        onView(withId(R.id.emailInput)).perform(ViewActions.typeText("test@gmail.com"));
+        onView(withId(R.id.phoneInput)).perform(ViewActions.typeText("7801234567"));
+        onView(withId(R.id.facilityInput)).perform(ViewActions.typeText("Facility"));
+        onView(withId(R.id.submitButton)).perform(click());
+        Thread.sleep(3000);
+        database.collection("users").document(deviceId).get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot document = task.getResult();
+                    assertEquals("John", document.getString("name"));
+                    assertEquals("Doe", document.getString("lastname"));
+                    assertEquals("test@gmail.com", document.getString("email"));
+                    assertEquals("7801234567", document.getString("phone"));
+                    assertEquals("Facility", document.getString("facility"));
                 });
     }
 
