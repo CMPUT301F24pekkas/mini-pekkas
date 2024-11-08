@@ -21,6 +21,7 @@ public class AdminEventDetails extends Fragment {
         return binding.getRoot(); // Return the root view from binding
     }
 
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
