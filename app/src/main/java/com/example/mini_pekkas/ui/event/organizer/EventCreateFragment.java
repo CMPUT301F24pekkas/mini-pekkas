@@ -64,7 +64,7 @@ public class EventCreateFragment extends Fragment {
         firebaseHelper = new Firebase(requireContext());
 
         // Set up poster image selection
-        ImageButton posterButton = binding.imageView;
+        ImageButton posterButton = binding.addEventPicture;
         posterButton.setOnClickListener(v -> openImageChooser());
 
         // Button to create event and show QR code confirmation dialog
@@ -117,7 +117,7 @@ public class EventCreateFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
             imageUri = data.getData();
-            binding.imageView.setImageURI(imageUri);  // Show selected image in ImageView
+            binding.addEventPicture.setImageURI(imageUri);  // Show selected image in ImageView
         }
     }
 
