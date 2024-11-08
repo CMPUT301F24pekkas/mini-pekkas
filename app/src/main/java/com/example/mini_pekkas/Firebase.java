@@ -14,8 +14,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is used to interface with Firebase and should be used for all Firebase operations.
@@ -101,6 +103,16 @@ public class Firebase {
         void onEventRetrievalCompleted(Event event);
         default void onError(Exception e) {
             Log.e(TAG, "Error getting data: ", e);
+        }
+    }
+
+    /**
+     * Interface for functions that retrieve an array of events
+     */
+    public interface EventListRetrievalListener {
+        void onEventListRetrievalCompleted(ArrayList<Event> events);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting events: ", e);
         }
     }
 
@@ -446,6 +458,71 @@ public class Firebase {
                 .addOnFailureListener(listener::onError);
     }
 
+    /**
+     * Gets an ArrayList of events this user is in, specified by the status
+     * This function is called by getXEvents() where X is the status
+     * @param status the status of the events to retrieve. [waitlisted, enrolled, cancelled, organized]
+     * @param listener a EventListRetrievalListener that returns an ArrayList of events
+     */
+    private void getEventByStatus(String status, EventListRetrievalListener listener) {
+        userEventsCollection.whereEqualTo("userID", this.deviceID).whereEqualTo("status", status).get()
+                .addOnSuccessListener(task -> {
+                    ArrayList<Event> events = new ArrayList<>(); // Get the array of events the user is waitlisted in
+                    int totalEvents = task.getDocuments().size(); // Total events to retrieve
+                    AtomicInteger retrievedEvents = new AtomicInteger(); // Counter for retrieved events
+
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        // Get the event ID to pull from the event collection
+                        String eventID = Objects.requireNonNull(document.get("eventID")).toString();
+                        // Get the event from the event collection
+                        eventCollection.document(eventID).get()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    // Create the new event object and store it in the array
+                                    Event event = new Event(Objects.requireNonNull(document.getData()));
+                                    events.add(event);
+
+                                    // Increment and check if we have retrieved all events
+                                    if (retrievedEvents.getAndIncrement() == totalEvents){
+                                        listener.onEventListRetrievalCompleted(events);
+                                    }
+                                })
+                                .addOnFailureListener(listener::onError);
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Get all events the user is waitlisted in
+     * @param listener a EventListRetrievalListener that returns an ArrayList of events
+     */
+    public void getOrganizedEvents(EventListRetrievalListener listener) {
+        getEventByStatus("organized", listener);
+    }
+
+    /**
+     * Get all events the user is waitlisted in
+     * @param listener a EventListRetrievalListener that returns an ArrayList of events
+     */
+    public void getWaitlistedEvents(EventListRetrievalListener listener) {
+        getEventByStatus("waitlisted", listener);
+    }
+
+    /**
+     * Get all events the user is enrolled in
+     * @param listener a EventListRetrievalListener that returns an ArrayList of events
+     */
+    public void getEnrolledEvents(EventListRetrievalListener listener) {
+        getEventByStatus("enrolled", listener);
+    }
+
+    /**
+     * Get all events the user has cancelled
+     * @param listener a EventListRetrievalListener that returns an ArrayList of events
+     */
+    public void getCancelledEvents(EventListRetrievalListener listener) {
+        getEventByStatus("cancelled", listener);
+    }
     // TODO add Image storage functions. Allows for the storing and retrieving of various media files
 
     /**
