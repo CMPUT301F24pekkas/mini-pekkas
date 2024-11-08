@@ -25,11 +25,22 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Fragment for creating an event and generating a QR code for it.
+ */
 public class EventCreateFragment extends Fragment {
 
     private FragmentCreateEventBinding binding;
     private Firebase firebaseHelper;
 
+    /**
+     * Initializes the fragment's view and sets up listeners for event creation.
+     *
+     * @param inflater           LayoutInflater to inflate the layout.
+     * @param container          Parent container to attach the fragment's view.
+     * @param savedInstanceState Saved instance state for restoring UI.
+     * @return The root view of the fragment.
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCreateEventBinding.inflate(inflater, container, false);
@@ -84,7 +95,12 @@ public class EventCreateFragment extends Fragment {
         return root;
     }
 
-    // Converts Bitmap to Base64 string for storage
+    /**
+     * Converts a Bitmap image to a Base64 encoded string.
+     *
+     * @param bitmap The bitmap to convert.
+     * @return A Base64 encoded string representing the bitmap.
+     */
     private String bitmapToBase64(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
@@ -92,7 +108,11 @@ public class EventCreateFragment extends Fragment {
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 
-    // Creates a new Event object from user inputs
+    /**
+     * Creates an Event object from the user input in the form fields.
+     *
+     * @return The newly created Event object.
+     */
     public Event CreateEvent() {
         String event_id = UUID.randomUUID().toString();
         double latitude = 40.730610; // Example latitude
@@ -138,7 +158,9 @@ public class EventCreateFragment extends Fragment {
         return event;
     }
 
-    // Clears input fields in the UI
+    /**
+     * Clears all the input fields in the event creation form.
+     */
     private void ClearInput() {
         binding.createEventEditText.getText().clear();
         binding.createEventLocationEditText.getText().clear();
