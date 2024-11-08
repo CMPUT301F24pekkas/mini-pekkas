@@ -30,6 +30,10 @@ import com.example.mini_pekkas.databinding.FragmentOrganizerProfileBinding;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+/**
+ * Fragment that handles the organizer's profile display and editing functionality.
+ * Allows users to view and update their profile information, including uploading a profile picture.
+ */
 public class OrganizerProfileFragment extends Fragment {
 
     private FragmentOrganizerProfileBinding binding;
@@ -37,6 +41,11 @@ public class OrganizerProfileFragment extends Fragment {
     private ActivityResultLauncher<Intent> pickImageLauncher;
     private StorageReference profileImageRef;
 
+    /**
+     * Initializes the fragment and sets up Firebase storage reference for profile images.
+     *
+     * @param savedInstanceState The saved instance state bundle.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +60,14 @@ public class OrganizerProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Inflates the layout and sets up view bindings, view model, and event listeners.
+     *
+     * @param inflater The LayoutInflater object to inflate views.
+     * @param container The parent view that this fragment's UI will be attached to.
+     * @param savedInstanceState The saved instance state bundle.
+     * @return The root view of the fragment.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -60,6 +77,7 @@ public class OrganizerProfileFragment extends Fragment {
         binding = FragmentOrganizerProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Bind UI elements to variables
         final TextView firstName = binding.firstName;
         final TextView lastName = binding.lastName;
         final TextView emailInput = binding.emailInput;
@@ -69,12 +87,14 @@ public class OrganizerProfileFragment extends Fragment {
         final ImageButton editButton = binding.editButton;
         final ImageButton profileEdit = binding.pfpEdit;
 
+        // Load profile picture from the URL
         organizerProfileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {
             if (url != null && !url.isEmpty()) {
                 Glide.with(this).load(url).into(profileImage);
             }
         });
 
+        // Set up launcher for selecting images
         pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
                 Uri selectedImageUri = result.getData().getData();
@@ -84,6 +104,7 @@ public class OrganizerProfileFragment extends Fragment {
             }
         });
 
+        // Observe profile data from ViewModel and set text views
         organizerProfileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
         organizerProfileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
         organizerProfileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
@@ -96,11 +117,19 @@ public class OrganizerProfileFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Opens the device gallery to select an image.
+     */
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         pickImageLauncher.launch(intent);
     }
 
+    /**
+     * Uploads the selected image to Firebase Storage and updates the profile picture URL in the ViewModel.
+     *
+     * @param imageUri The URI of the selected image.
+     */
     private void uploadImageToFirebase(Uri imageUri) {
         StorageReference imageRef = profileImageRef.child(System.currentTimeMillis() + ".jpg");
 
@@ -115,22 +144,28 @@ public class OrganizerProfileFragment extends Fragment {
                 ));
     }
 
+    /**
+     * Displays a dialog for editing the organizer's profile details.
+     */
     private void showEditDialog() {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_edit_organizer_profile, null);
 
+        // Bind dialog inputs to variables
         EditText firstNameInput = dialogView.findViewById(R.id.first_name_input);
         EditText lastNameInput = dialogView.findViewById(R.id.last_name_input);
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
         EditText organizerLocationInput = dialogView.findViewById(R.id.dialog_organizer_input);
 
+        // Pre-fill dialog with current profile data
         firstNameInput.setText(organizerProfileViewModel.getFirstName().getValue());
         lastNameInput.setText(organizerProfileViewModel.getLastName().getValue());
         emailInput.setText(organizerProfileViewModel.getEmail().getValue());
         phoneInput.setText(organizerProfileViewModel.getPhoneNumber().getValue());
         organizerLocationInput.setText(organizerProfileViewModel.getOrganizerLocation().getValue());
 
+        // Show the dialog for editing profile details
         new AlertDialog.Builder(getActivity())
                 .setTitle("Edit Profile")
                 .setView(dialogView)
@@ -147,6 +182,9 @@ public class OrganizerProfileFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Cleans up the binding to prevent memory leaks.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
