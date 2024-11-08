@@ -8,15 +8,19 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -111,7 +115,7 @@ public class Firebase {
      * Interface for functions that retrieve an array of users
      */
     public interface UserListRetrievalListener {
-        void onUserListRetrievalCompleted(ArrayList<Event> events);
+        void onUserListRetrievalCompleted(ArrayList<User> users);
         default void onError(Exception e) {
             Log.e(TAG, "Error getting events: ", e);
         }
@@ -768,6 +772,14 @@ public class Firebase {
         deletePosterPicture(event, () -> {});
     }
     // TODO add admin functions. Allows for deletion of various types of data
+    private interface QueryDocumentsListener{
+        void onQueryDocumentCompleted(List<DocumentSnapshot> results);
+        default void onError(Exception e){
+            Log.e(TAG, "Error getting documents: ", e);
+        }
+    }
+
+
     /**
      * Checks if this user is an admin
      * @param listener the listener that is called when the check is complete. Returns true if the user is an admin
@@ -782,12 +794,59 @@ public class Firebase {
     }
 
     /**
+     * Gerenic Query Retrieval Function
+     * @param tasks the tasks to run
+     */
+    private void searchByQuery(List<Task<QuerySnapshot>> tasks, QueryDocumentsListener listener) {
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener(querySnapshots -> {
+                    List<DocumentSnapshot> matchingDocuments = new ArrayList<>();
+
+                    // Iterate through the query results
+                    for (Object obj : querySnapshots) {
+                        if (obj instanceof QuerySnapshot) { // Check if the object is a QuerySnapshot
+                            QuerySnapshot querySnapshot = (QuerySnapshot) obj; // Cast to QuerySnapshot
+                            for (DocumentSnapshot documentSnapshot : querySnapshot.getDocuments()) {
+                                // Add the document to the list of matching documents
+                                if (!matchingDocuments.contains(documentSnapshot)) { // Avoid duplicates
+                                    matchingDocuments.add(documentSnapshot);
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle the matching documents
+                    listener.onQueryDocumentCompleted(matchingDocuments);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
      * Searches for users by checking if they have a parameter that matches the query
      * @param query the query to search for
-     * @param listener
+     * @param listener A UserListRetrievalListener that returns an ArrayList of users
      */
     public void serachForUsers(String query, UserListRetrievalListener listener) {
-        // TODO
+        // Initialize the tasks
+        List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+
+        // Query for all reverent field values
+        tasks.add(userCollection.whereEqualTo("field1", query).get());
+        tasks.add(userCollection.whereEqualTo("field2", query).get());
+        tasks.add(userCollection.whereEqualTo("field3", query).get());
+
+        searchByQuery(tasks, new QueryDocumentsListener() {
+            @Override
+            public void onQueryDocumentCompleted(List<DocumentSnapshot> results) {
+                ArrayList<User> users = new ArrayList<>();
+                // Fetch DocumentSnapshot objects from the result
+                for (DocumentSnapshot document : results) {
+                    User user = new User(Objects.requireNonNull(document.getData()));
+                    users.add(user);
+                }
+                listener.onUserListRetrievalCompleted(users);
+            }
+        });
     }
 }
 
