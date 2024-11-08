@@ -196,7 +196,10 @@ public class OrganizerTests {
      * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
      */
     @Test
-    public void testUpdateEventPoster(){
+    public void testUpdateEventPoster() throws InterruptedException {
+        Thread.sleep(3000);
+        onView(withId(R.id.homeOrgEditEvent)).perform(click());
+        onView(withId(R.id.editEventPictureButton)).perform(click());
 
     }
     /**

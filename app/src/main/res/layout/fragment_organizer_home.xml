@@ -79,7 +79,7 @@
                         android:textSize="16sp" />
 
                     <Button
-                        android:id="@+id/homeUserVIewEvent"
+                        android:id="@+id/homeOrgEditEvent"
                         android:layout_width="2sp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
