@@ -62,7 +62,10 @@ public class UserTests {
                 .document(deviceId)
                 .set(userProfile);
     }
-
+    /**
+     * set up tests by adding a test user and also turning off notifications which satisfies
+     * US 01.04.03 As an entrant I want to opt out of receiving notifications from organizers and admin
+     */
     @Before
     public void setUp() {
         Context context = ApplicationProvider.getApplicationContext();
@@ -70,7 +73,7 @@ public class UserTests {
         onView(withId(R.id.navigation_profile)).perform(click());
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         try {
-            UiObject allowButton = device.findObject(new UiSelector().text("Allow"));
+            UiObject allowButton = device.findObject(new UiSelector().text("Don't Allow"));
             if (allowButton.exists()) {
                 allowButton.click();
             }

@@ -59,6 +59,7 @@ public class LoginTests {
         onView(withId(R.id.phoneInput)).perform(ViewActions.typeText("7801234567"));
         onView(withId(R.id.submitButton)).perform(click());
         Thread.sleep(3000);
+        onView(withId(R.id.user_view)).check(matches(isDisplayed()));
         database.collection("users").document(deviceId).get()
                 .addOnCompleteListener(task -> {
                     DocumentSnapshot document = task.getResult();
@@ -66,7 +67,9 @@ public class LoginTests {
                     assertEquals("Doe", document.getString("lastname"));
                     assertEquals("test@gmail.com", document.getString("email"));
                     assertEquals("7801234567", document.getString("phone"));
+                    document.getReference().delete();
                 });
+
     }
     /**
      * US 02.01.03 As an organizer, I want to create and manage my facility profile.
@@ -81,6 +84,7 @@ public class LoginTests {
         onView(withId(R.id.facilityInput)).perform(ViewActions.typeText("Facility"));
         onView(withId(R.id.submitButton)).perform(click());
         Thread.sleep(3000);
+        onView(withId(R.id.organizer_view)).check(matches(isDisplayed()));
         database.collection("users").document(deviceId).get()
                 .addOnCompleteListener(task -> {
                     DocumentSnapshot document = task.getResult();
@@ -89,6 +93,7 @@ public class LoginTests {
                     assertEquals("test@gmail.com", document.getString("email"));
                     assertEquals("7801234567", document.getString("phone"));
                     assertEquals("Facility", document.getString("facility"));
+                    document.getReference().delete();
                 });
     }
 
