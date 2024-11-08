@@ -31,6 +31,10 @@ import com.example.mini_pekkas.databinding.FragmentProfileBinding;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+/**
+ * Fragment that handles the user's profile display and management.
+ * It allows the user to view and edit their profile information and profile picture.
+ */
 public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
@@ -38,11 +42,16 @@ public class ProfileFragment extends Fragment {
     private ActivityResultLauncher<Intent> pickImageLauncher;
     private StorageReference profileImageRef;
 
+    /**
+     * Initializes the fragment, including setting up Firebase storage reference
+     * and checking for notification permission on devices with SDK TIRAMISU or higher.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         profileImageRef = FirebaseStorage.getInstance().getReference("profile_pictures");
 
+        // Check if notification permission is granted (for devices with SDK TIRAMISU or higher)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -51,6 +60,15 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Inflates the view for the profile fragment and sets up observers to update UI elements
+     * based on LiveData values from the ViewModel.
+     *
+     * @param inflater The LayoutInflater used to inflate the view.
+     * @param container The container that holds the fragment's UI.
+     * @param savedInstanceState The saved instance state for restoring UI state.
+     * @return The root view for this fragment.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         profileViewModel = new ViewModelProvider(this, new ProfileViewModelFactory(getActivity()))
@@ -59,6 +77,7 @@ public class ProfileFragment extends Fragment {
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // UI elements
         final TextView firstName = binding.firstName;
         final TextView lastName = binding.lastName;
         final TextView emailInput = binding.emailInput;
@@ -68,6 +87,7 @@ public class ProfileFragment extends Fragment {
         final ImageButton editButton = binding.editButton;
         final ImageButton profileEdit = binding.pfpEdit;
 
+        // Observe the profile picture URL from the ViewModel
         profileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {
             if (url != null && !url.isEmpty()) {
                 Glide.with(this).load(url).into(profileImage);
@@ -81,6 +101,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        // Set up image picker launcher
         pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
                 Uri selectedImageUri = result.getData().getData();
@@ -90,17 +111,22 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        // Set up observers for other profile details
         profileViewModel.getFirstName().observe(getViewLifecycleOwner(), firstName::setText);
         profileViewModel.getLastName().observe(getViewLifecycleOwner(), lastName::setText);
         profileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         profileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
 
+        // Set up listeners for profile edit and profile picture options
         profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
         editButton.setOnClickListener(v -> showEditDialog());
 
         return root;
     }
 
+    /**
+     * Shows a dialog with options to either choose a new profile picture or delete the current one.
+     */
     private void showProfilePictureOptionsDialog() {
         View popupView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_pfp_edit_delete, null);
 
@@ -124,11 +150,17 @@ public class ProfileFragment extends Fragment {
         dialog.show();
     }
 
+    /**
+     * Opens the device's gallery to allow the user to choose a new profile picture.
+     */
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         pickImageLauncher.launch(intent);
     }
 
+    /**
+     * Deletes the current profile picture and resets the profile picture to a default image.
+     */
     private void deleteProfilePicture() {
         profileViewModel.setProfilePictureUrl("");
         profileViewModel.updateProfileInFirebase();
@@ -141,6 +173,11 @@ public class ProfileFragment extends Fragment {
         Toast.makeText(getActivity(), "Profile picture deleted", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Uploads a new profile picture to Firebase Storage and updates the profile with the image URL.
+     *
+     * @param imageUri The URI of the image to be uploaded.
+     */
     private void uploadImageToFirebase(Uri imageUri) {
         StorageReference imageRef = profileImageRef.child(System.currentTimeMillis() + ".jpg");
 
@@ -155,6 +192,9 @@ public class ProfileFragment extends Fragment {
                 ));
     }
 
+    /**
+     * Displays a dialog allowing the user to edit their profile information.
+     */
     private void showEditDialog() {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_edit_profile, null);
@@ -184,6 +224,9 @@ public class ProfileFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Cleans up resources when the view is destroyed.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
