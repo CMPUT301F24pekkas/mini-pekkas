@@ -70,25 +70,27 @@ public class EventCreateFragment extends Fragment {
         // Button to create event and show QR code confirmation dialog
         Button addButton = binding.addEventButton;
         addButton.setOnClickListener(v -> {
-            // Create the event with user input data
-            Event event = CreateEvent();
-            firebaseHelper.addEvent(event, result -> {
-                // Generate a unique QR code using the event ID + a new UUID
-                Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(event.getId(), 300, 300);
+                    // Create the event with user input data
+                    Event event = CreateEvent();
+                    firebaseHelper.addEvent(event, result -> {
+                        // Generate a unique QR code using the event ID + a new UUID
+                        Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(event.getId(), 300, 300);
 
-                if (qrCodeBitmap != null) {
-                    // Convert QR code bitmap to Base64 string and set it in the event object
-                    String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
-                    // TODO
-                    Log.d("PUT IN", "base64qr = " + qrCodeBase64);
-                    event.setQrCode(qrCodeBase64);
+                        if (qrCodeBitmap != null) {
+                            // Convert QR code bitmap to Base64 string and set it in the event object
+                            String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
+                            // TODO
+                            Log.d("PUT IN", "base64qr = " + qrCodeBase64);
+                            event.setQrCode(qrCodeBase64);
 
-                    // Upload poster image if available, then save the event
-                    uploadPosterImageToFirebase(event, qrCodeBitmap);
-                }
+                            // Upload poster image if available, then save the event
+                            // uploadPosterImageToFirebase(event, qrCodeBitmap);
+                            // TODO Skip poster picture, just show qr code
+                            showQrCodeDialog(qrCodeBitmap);
+                            ClearInput();
+                        }
+                    });
             });
-        });
-
         // Button to cancel event creation and clear inputs
         Button cancelButton = binding.cancelEventButton;
         cancelButton.setOnClickListener(v -> ClearInput());
@@ -135,7 +137,7 @@ public class EventCreateFragment extends Fragment {
             storageRef.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         event.setPosterPhotoUrl(uri.toString());  // Set the poster URL in the event
-                        firebaseHelper.addEvent(event);           // Save the event with poster URL in Firebase
+                        firebaseHelper.updateEvent(event);           // Save the event with poster URL in Firebase
 
                         // Show the QR code in a dialog after saving
                         showQrCodeDialog(qrCodeBitmap);
@@ -146,7 +148,7 @@ public class EventCreateFragment extends Fragment {
                     });
         } else {
             // Save event without a poster URL if no image is selected
-            firebaseHelper.addEvent(event);
+            firebaseHelper.updateEvent(event);
             showQrCodeDialog(qrCodeBitmap);
             ClearInput();
         }
