@@ -43,8 +43,7 @@ public class MainActivity extends AppCompatActivity {
         // First check if this user is an admin
         firebaseHelper.isThisUserAdmin(isAdmin -> {
             if(isAdmin){
-                // User is an admin
-                // TODO MAKE ADMIN activity
+                // User is an admin, show admin activity
                  Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
                  startActivity(adminIntent);
                 finish(); // Close MainActivity

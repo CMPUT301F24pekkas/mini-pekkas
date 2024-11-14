@@ -841,6 +841,7 @@ public class Firebase {
             //  Check if we found anything
             if (results.isEmpty()) {
                 listener.onUserListRetrievalCompleted(null);
+                return;
             }
 
             ArrayList<User> users = new ArrayList<>();
@@ -876,6 +877,7 @@ public class Firebase {
             //  Check if we found anything
             if (results.isEmpty()) {
                 listener.onEventListRetrievalCompleted(null);
+                return;
             }
 
             ArrayList<Event> events = new ArrayList<>();
@@ -895,20 +897,26 @@ public class Firebase {
      * @param listener A EventListRetrievalListener that returns an ArrayList of events or null if there's no results
      */
     public void searchForFacility(String query, EventListRetrievalListener listener) {
-        eventCollection.whereGreaterThanOrEqualTo("facility", query)
-                .whereLessThanOrEqualTo("facility", query + "\uf8ff").get()
-                .addOnSuccessListener(result -> {
-                    // Add document data to events list and call into the listener
-                    ArrayList<Event> events = new ArrayList<>();
-                    if (!result.isEmpty()) {
-                        for (DocumentSnapshot document : result.getDocuments()) {
-                            Event event = new Event(Objects.requireNonNull(document.getData()));
-                            events.add(event);
-                        }
-                        listener.onEventListRetrievalCompleted(events);
-                    }
-                })
-                .addOnFailureListener(listener::onError);
+        List<Task<QuerySnapshot>> tasks = new ArrayList<>();    // List of all tasks to run
+
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("facility", query)
+                .whereLessThanOrEqualTo("facility", query + "\uf8ff").get());
+
+        searchByQuery(tasks, results -> {
+            //  Check if we found anything
+            if (results.isEmpty()) {
+                listener.onEventListRetrievalCompleted(null);
+                return;
+            }
+
+            ArrayList<Event> events = new ArrayList<>();
+            // Fetch DocumentSnapshot objects from the result
+            for (DocumentSnapshot document : results) {
+                Event event = new Event(Objects.requireNonNull(document.getData()));
+                events.add(event);
+            }
+            listener.onEventListRetrievalCompleted(events);
+        });
     }
 }
 
