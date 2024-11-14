@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
             if(isAdmin){
                 // User is an admin
                 // TODO MAKE ADMIN activity
-                // Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
-                // startActivity(adminIntent);
+                 Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
+                 startActivity(adminIntent);
                 finish(); // Close MainActivity
             } else {
                 // User is not an admin
