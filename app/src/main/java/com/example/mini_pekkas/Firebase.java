@@ -18,7 +18,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -794,8 +793,10 @@ public class Firebase {
     }
 
     /**
-     * Gerenic Query Retrieval Function
+     * A generic functions that takes in an array of tasks and a listener, and ensure that all tasks run correctly
+     * Returns the list of matching documents in the listener, else call the failure listener
      * @param tasks the tasks to run
+     * @param listener the QueryDocumentsListener that is called when all tasks are complete
      */
     private void searchByQuery(List<Task<QuerySnapshot>> tasks, QueryDocumentsListener listener) {
         Tasks.whenAllSuccess(tasks)
@@ -804,18 +805,11 @@ public class Firebase {
 
                     // Iterate through the query results
                     for (Object obj : querySnapshots) {
-                        if (obj instanceof QuerySnapshot) { // Check if the object is a QuerySnapshot
-                            QuerySnapshot querySnapshot = (QuerySnapshot) obj; // Cast to QuerySnapshot
-                            for (DocumentSnapshot documentSnapshot : querySnapshot.getDocuments()) {
-                                // Add the document to the list of matching documents
-                                if (!matchingDocuments.contains(documentSnapshot)) { // Avoid duplicates
-                                    matchingDocuments.add(documentSnapshot);
-                                }
-                            }
-                        }
+                        QuerySnapshot querySnapshot = (QuerySnapshot) obj;          // Cast object to QuerySnapshot
+                        matchingDocuments.addAll(querySnapshot.getDocuments());     // Add all documents to the list
                     }
 
-                    // Handle the matching documents
+                    // Handle the matching documents in the calling function
                     listener.onQueryDocumentCompleted(matchingDocuments);
                 })
                 .addOnFailureListener(listener::onError);
@@ -823,30 +817,98 @@ public class Firebase {
 
     /**
      * Searches for users by checking if they have a parameter that matches the query
+     * Returns null if no matching documents found, otherwise return an array of User Objects
      * @param query the query to search for
-     * @param listener A UserListRetrievalListener that returns an ArrayList of users
+     * @param listener A UserListRetrievalListener that returns an ArrayList of users or null if there's no results
      */
     public void serachForUsers(String query, UserListRetrievalListener listener) {
-        // Initialize the tasks
-        List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+        List<Task<QuerySnapshot>> tasks = new ArrayList<>();    // List of all tasks to run
 
-        // Query for all reverent field values
-        tasks.add(userCollection.whereEqualTo("field1", query).get());
-        tasks.add(userCollection.whereEqualTo("field2", query).get());
-        tasks.add(userCollection.whereEqualTo("field3", query).get());
+        // Query for first name, last name, email, and phone number
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("name", query)
+                .whereLessThanOrEqualTo("name", query + "\uf8ff").get());
 
-        searchByQuery(tasks, new QueryDocumentsListener() {
-            @Override
-            public void onQueryDocumentCompleted(List<DocumentSnapshot> results) {
-                ArrayList<User> users = new ArrayList<>();
-                // Fetch DocumentSnapshot objects from the result
-                for (DocumentSnapshot document : results) {
-                    User user = new User(Objects.requireNonNull(document.getData()));
-                    users.add(user);
-                }
-                listener.onUserListRetrievalCompleted(users);
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("lastname", query)
+                .whereLessThanOrEqualTo("lastname", query + "\uf8ff").get());
+
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("email", query)
+                .whereLessThanOrEqualTo("email", query + "\uf8ff").get());
+
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("phone", query)
+                .whereLessThanOrEqualTo("phone", query + "\uf8ff").get());
+
+        searchByQuery(tasks, results -> {
+            //  Check if we found anything
+            if (results.isEmpty()) {
+                listener.onUserListRetrievalCompleted(null);
             }
+
+            ArrayList<User> users = new ArrayList<>();
+            // Fetch DocumentSnapshot objects from the result
+            for (DocumentSnapshot document : results) {
+                User user = new User(Objects.requireNonNull(document.getData()));
+                users.add(user);
+            }
+            listener.onUserListRetrievalCompleted(users);
         });
+    }
+
+    /**
+     * Searches for events by checking if they have a parameter that matches the query
+     * Returns null if no matching documents found, otherwise return an array of Event Objects
+     * @param query the query to search for
+     * @param listener A EventListRetrievalListener that returns an ArrayList of events or null if there's no results
+     */
+    public void serachForEvents(String query, EventListRetrievalListener listener) {
+        List<Task<QuerySnapshot>> tasks = new ArrayList<>();    // List of all tasks to run
+
+        // Query for name, id (need exact value), facility
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("name", query)
+                .whereLessThanOrEqualTo("name", query + "\uf8ff").get());
+
+        tasks.add(eventCollection.whereEqualTo("id", query).get());
+
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("facility", query)
+                .whereLessThanOrEqualTo("facility", query + "\uf8ff").get());
+
+
+        searchByQuery(tasks, results -> {
+            //  Check if we found anything
+            if (results.isEmpty()) {
+                listener.onEventListRetrievalCompleted(null);
+            }
+
+            ArrayList<Event> events = new ArrayList<>();
+            // Fetch DocumentSnapshot objects from the result
+            for (DocumentSnapshot document : results) {
+                Event event = new Event(Objects.requireNonNull(document.getData()));
+                events.add(event);
+            }
+            listener.onEventListRetrievalCompleted(events);
+        });
+    }
+
+    /**
+     * Searches for facilities by checking if they have a parameter that matches the query
+     * Retunrs null if no facility exist, else return an array of events corresponding to the facility
+     * @param query the query to search for
+     * @param listener A EventListRetrievalListener that returns an ArrayList of events or null if there's no results
+     */
+    public void searchForFacility(String query, EventListRetrievalListener listener) {
+        eventCollection.whereGreaterThanOrEqualTo("facility", query)
+                .whereLessThanOrEqualTo("facility", query + "\uf8ff").get()
+                .addOnSuccessListener(result -> {
+                    // Add document data to events list and call into the listener
+                    ArrayList<Event> events = new ArrayList<>();
+                    if (!result.isEmpty()) {
+                        for (DocumentSnapshot document : result.getDocuments()) {
+                            Event event = new Event(Objects.requireNonNull(document.getData()));
+                            events.add(event);
+                        }
+                        listener.onEventListRetrievalCompleted(events);
+                    }
+                })
+                .addOnFailureListener(listener::onError);
     }
 }
 
