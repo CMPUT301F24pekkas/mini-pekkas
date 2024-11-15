@@ -43,8 +43,8 @@ public class Firebase {
 
     /**
      * Firebase constructor. Initializes the database and all collection references
-     * @param context
-     * the context of the activity the function is called from
+     *
+     * @param context the context of the activity the function is called from
      */
     @SuppressLint("HardwareIds") // We just need the device id as a string
     public Firebase(Context context) {
@@ -69,7 +69,7 @@ public class Firebase {
         fetchUserDocument(() -> userDocument.getReference().addSnapshotListener((value, error) -> {
             // Update the user document whenever data gets updated
             this.userDocument = value;
-            }));
+        }));
     }
 
     /**
@@ -77,7 +77,10 @@ public class Firebase {
      */
     public interface InitializationListener {
         void onInitialized();
-        default void onError(Exception e) {Log.e(TAG, "Error initializing data: ", e);}
+
+        default void onError(Exception e) {
+            Log.e(TAG, "Error initializing data: ", e);
+        }
     }
 
     /**
@@ -85,6 +88,7 @@ public class Firebase {
      */
     public interface DataRetrievalListener {
         void onRetrievalCompleted(String result);
+
         default void onError(Exception e) {
             Log.e(TAG, "Error retrieving data: ", e);
         }
@@ -95,6 +99,7 @@ public class Firebase {
      */
     public interface CheckListener {
         void onCheckComplete(boolean exist);
+
         default void onError(Exception e) {
             Log.e(TAG, "Error checking conditional: ", e);
         }
@@ -105,6 +110,7 @@ public class Firebase {
      */
     public interface UserRetrievalListener {
         void onUserRetrievalCompleted(Event event);
+
         default void onError(Exception e) {
             Log.e(TAG, "Error getting data: ", e);
         }
@@ -115,6 +121,7 @@ public class Firebase {
      */
     public interface UserListRetrievalListener {
         void onUserListRetrievalCompleted(ArrayList<User> users);
+
         default void onError(Exception e) {
             Log.e(TAG, "Error getting events: ", e);
         }
@@ -125,6 +132,7 @@ public class Firebase {
      */
     public interface EventRetrievalListener {
         void onEventRetrievalCompleted(Event event);
+
         default void onError(Exception e) {
             Log.e(TAG, "Error getting data: ", e);
         }
@@ -135,6 +143,7 @@ public class Firebase {
      */
     public interface EventListRetrievalListener {
         void onEventListRetrievalCompleted(ArrayList<Event> events);
+
         default void onError(Exception e) {
             Log.e(TAG, "Error getting events: ", e);
         }
@@ -145,13 +154,17 @@ public class Firebase {
      */
     public interface ImageRetrievalListener {
         void onImageRetrievalCompleted(Uri image);
-        default void onError(Exception e) {Log.e(TAG, "Error getting image: ", e);}
+
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting image: ", e);
+        }
     }
 
     /**
      * This function fetches the user document and stores it in UserDocument
      * This function shouldn't need to be called as the constructor will initialize the user document
      * Call checkThisUserExist first if the existence of the user document is not known
+     *
      * @param listener An InitializationListener listener that runs on a successful fetch
      */
     public void fetchUserDocument(InitializationListener listener) {
@@ -166,6 +179,7 @@ public class Firebase {
 
     /**
      * Checks if the user document exists in the firestore.
+     *
      * @param listener A CheckListener listener that is called when the check is complete. Returns true if the document exists
      */
     public void checkThisUserExist(CheckListener listener) {
@@ -175,11 +189,11 @@ public class Firebase {
             userCollection.document(deviceID)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
-                            // Check if the document exists
-                            boolean exist = documentSnapshot.exists();
+                        // Check if the document exists
+                        boolean exist = documentSnapshot.exists();
 
-                            // Call the listener, return true if the document exists
-                            listener.onCheckComplete(exist);
+                        // Call the listener, return true if the document exists
+                        listener.onCheckComplete(exist);
                     })
                     .addOnFailureListener(listener::onError);
         }
@@ -187,7 +201,8 @@ public class Firebase {
 
     /**
      * Initializes this user into firebase
-     * @param user A user object to be initialized
+     *
+     * @param user     A user object to be initialized
      * @param listener An InitializationListener listener that is called after the user is initialized
      */
     public void InitializeThisUser(User user, InitializationListener listener) {
@@ -202,6 +217,7 @@ public class Firebase {
 
     /**
      * Gets and returns a User object stored in UserDocument
+     *
      * @return the user document as a User object. Throws an error if the user does not exist
      */
     public User getThisUser() {
@@ -210,7 +226,8 @@ public class Firebase {
 
     /**
      * Updates the user document with the new user object
-     * @param user a user object with new data to be updated
+     *
+     * @param user     a user object with new data to be updated
      * @param listener Optional InitializationListener listener that is called after the user is updated
      */
     public void updateThisUser(User user, InitializationListener listener) {
@@ -224,12 +241,14 @@ public class Firebase {
      * Overload of the {@link #updateThisUser(User, InitializationListener)} with no listener
      */
     public void updateThisUser(User user) {
-        updateThisUser(user, () -> {});
+        updateThisUser(user, () -> {
+        });
     }
 
     /**
      * Deletes this user, essentially starting with a clean slate
      * also deletes related documents in user-events collection
+     *
      * @param listener Optional InitializationListener listener that is called after the user is deleted
      */
     public void deleteThisUser(InitializationListener listener) {
@@ -265,7 +284,8 @@ public class Firebase {
      * Overload of the {@link #deleteThisUser(InitializationListener)} with no listener
      */
     public void deleteThisUser() {
-        deleteThisUser(() -> {});
+        deleteThisUser(() -> {
+        });
     }
 
 
@@ -273,7 +293,8 @@ public class Firebase {
 
     /**
      * Add an event to the events collection
-     * @param event an event object to be added
+     *
+     * @param event    an event object to be added
      * @param listener Optional DataRetrievalListener listener that is called after the event is added
      */
     public void addEvent(Event event, DataRetrievalListener listener) {
@@ -299,22 +320,25 @@ public class Firebase {
      * Overload of the {@link #addEvent(Event, DataRetrievalListener)} with no listener
      */
     public void addEvent(Event event) {
-        addEvent(event, id -> {});
+        addEvent(event, id -> {
+        });
     }
 
     /**
      * Delete an event from the events and user-events collection
-     * @param event an event object to be deleted
+     *
+     * @param event    an event object to be deleted
      * @param listener Optional InitializationListener listener that is called after the event is deleted
      */
     public void deleteEvent(Event event, InitializationListener listener) {
         String eventID = event.getId();
 
-        // Delete the banner image
+        // Delete the poster image
         deletePosterPicture(event);
 
         // Delete the event document
-        eventCollection.document(eventID).delete();
+        eventCollection.document(eventID).delete()
+                .addOnFailureListener(listener::onError);
 
         // Delete all event document from the user-events collection
         userEventsCollection.whereEqualTo("eventID", eventID).get()
@@ -340,12 +364,14 @@ public class Firebase {
      * Overload of the {@link #deleteEvent(Event, InitializationListener)} with no listener
      */
     public void deleteEvent(Event event) {
-        deleteEvent(event, () -> {});
+        deleteEvent(event, () -> {
+        });
     }
 
     /**
      * Update an event in the events collection
-     * @param event an event object to be updated
+     *
+     * @param event    an event object to be updated
      * @param listener Optional InitializationListener listener that is called after the event is updated
      */
     public void updateEvent(Event event, InitializationListener listener) {
@@ -359,12 +385,14 @@ public class Firebase {
      * Overload of the {@link #updateEvent(Event, InitializationListener)} with no listener
      */
     public void updateEvent(Event event) {
-        updateEvent(event, () -> {});
+        updateEvent(event, () -> {
+        });
     }
 
     /**
      * Get an event from the events collection
-     * @param eventID the ID of the event to be retrieved
+     *
+     * @param eventID  the ID of the event to be retrieved
      * @param listener an EventRetrievalListener listener that returns the newly received event object
      */
     public void getEvent(String eventID, EventRetrievalListener listener) {
@@ -386,7 +414,8 @@ public class Firebase {
 
     /**
      * This function is called whenever an event is created. Sets this user as the organizer
-     * @param event an event object that's being organized
+     *
+     * @param event    an event object that's being organized
      * @param listener Optional InitializationListener listener that is called after the event is organized
      */
     private void organizeEvent(Event event, InitializationListener listener) {
@@ -405,12 +434,14 @@ public class Firebase {
      * Overload of the {@link #organizeEvent(Event, InitializationListener)} with no listener
      */
     private void organizeEvent(Event event) {
-        organizeEvent(event, () -> {});
+        organizeEvent(event, () -> {
+        });
     }
 
     /**
      * Waitlist this user into the event. Creates a new entry in the user-events collection
-     * @param event an event object to be waitlisted into
+     *
+     * @param event    an event object to be waitlisted into
      * @param listener Optional InitializationListener listener that is called after the event is waitlisted
      */
     public void waitlistEvent(Event event, InitializationListener listener) {
@@ -429,12 +460,14 @@ public class Firebase {
      * Overload of the {@link #waitlistEvent(Event, InitializationListener)} with no listener
      */
     public void waitlistEvent(Event event) {
-        waitlistEvent(event, () -> {});
+        waitlistEvent(event, () -> {
+        });
     }
 
     /**
      * Enroll this user into the event
-     * @param event an event object to be enrolled into
+     *
+     * @param event    an event object to be enrolled into
      * @param listener Optional InitializationListener listener that is called after the event is enrolled
      */
     public void enrollEvent(Event event, InitializationListener listener) {
@@ -455,12 +488,14 @@ public class Firebase {
      * Overload of the {@link #enrollEvent(Event, InitializationListener)} with no listener
      */
     public void enrollEvent(Event event) {
-        enrollEvent(event, () -> {});
+        enrollEvent(event, () -> {
+        });
     }
 
     /**
      * Cancel the event, removing oneself from the waitlist or enrolling
-     * @param event an event object to be waitlisted into
+     *
+     * @param event    an event object to be waitlisted into
      * @param listener Optional InitializationListener listener that is called after the event is waitlisted
      */
     public void cancelEvent(Event event, InitializationListener listener) {
@@ -481,12 +516,14 @@ public class Firebase {
      * Overload of the {@link #cancelEvent(Event, InitializationListener)} with no listener
      */
     public void cancelEvent(Event event) {
-        cancelEvent(event, () -> {});
+        cancelEvent(event, () -> {
+        });
     }
 
     /**
      * Get the current status of the user in the event
-     * @param event an event object to get the status of
+     *
+     * @param event    an event object to get the status of
      * @param listener A DataRetrievalListener listener that returns the status of the user in the event
      */
     public void getStatusInEvent(Event event, DataRetrievalListener listener) {
@@ -503,7 +540,8 @@ public class Firebase {
     /**
      * Gets an ArrayList of events this user is in, specified by the status
      * This function is called by getXEvents() where X is the status
-     * @param status the status of the events to retrieve. [waitlisted, enrolled, cancelled, organized]
+     *
+     * @param status   the status of the events to retrieve. [waitlisted, enrolled, cancelled, organized]
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     private void getEventByStatus(String status, EventListRetrievalListener listener) {
@@ -524,7 +562,7 @@ public class Firebase {
                                     events.add(event);
 
                                     // Increment and check if we have retrieved all events
-                                    if (retrievedEvents.getAndIncrement() == totalEvents){
+                                    if (retrievedEvents.getAndIncrement() == totalEvents) {
                                         listener.onEventListRetrievalCompleted(events);
                                     }
                                 })
@@ -536,31 +574,33 @@ public class Firebase {
 
     /**
      * Retrieves an event using its QR code.
-     * @param qrCode The Base64 encoded QR code string to match.
+     *
+     * @param qrCode   The Base64 encoded QR code string to match.
      * @param listener An EventRetrievalListener that returns the Event object if found.
      */
-     public void getEventByQRCode(String qrCode, EventRetrievalListener listener) {
-         eventCollection.whereEqualTo("QrCode", qrCode).get()
-                 .addOnSuccessListener(task -> {
-                     // Check if any documents were found
-                     if (task.getDocuments().isEmpty()) {
-                         // No event found, trigger callback with null
-                         Log.d("Camera Yay", "Event NOTHING");
-                         listener.onEventRetrievalCompleted(null);
-                         return;
-                     } else {
-                         // Fetch the event details from the document
-                         DocumentSnapshot document = task.getDocuments().get(0);
-                         Event event = new Event(Objects.requireNonNull(document.getData()));
-                         Log.d("Camera Yay", "Event succesfully Retrieved");
-                         listener.onEventRetrievalCompleted(event);
-                     }
-                 })
-                 .addOnFailureListener(listener::onError);
-     }
+    public void getEventByQRCode(String qrCode, EventRetrievalListener listener) {
+        eventCollection.whereEqualTo("QrCode", qrCode).get()
+                .addOnSuccessListener(task -> {
+                    // Check if any documents were found
+                    if (task.getDocuments().isEmpty()) {
+                        // No event found, trigger callback with null
+                        Log.d("Camera Yay", "Event NOTHING");
+                        listener.onEventRetrievalCompleted(null);
+                        return;
+                    } else {
+                        // Fetch the event details from the document
+                        DocumentSnapshot document = task.getDocuments().get(0);
+                        Event event = new Event(Objects.requireNonNull(document.getData()));
+                        Log.d("Camera Yay", "Event succesfully Retrieved");
+                        listener.onEventRetrievalCompleted(event);
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
 
     /**
      * Get all events the user is waitlisted in
+     *
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     public void getOrganizedEvents(EventListRetrievalListener listener) {
@@ -569,6 +609,7 @@ public class Firebase {
 
     /**
      * Get all events the user is waitlisted in
+     *
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     public void getWaitlistedEvents(EventListRetrievalListener listener) {
@@ -577,6 +618,7 @@ public class Firebase {
 
     /**
      * Get all events the user is enrolled in
+     *
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     public void getEnrolledEvents(EventListRetrievalListener listener) {
@@ -585,6 +627,7 @@ public class Firebase {
 
     /**
      * Get all events the user has cancelled
+     *
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     public void getCancelledEvents(EventListRetrievalListener listener) {
@@ -595,8 +638,9 @@ public class Firebase {
     /**
      * A private function that stores the profile picture in the storage.
      * This function is called from uploadProfilePicture and should not be invoked directly
-     * @param user the user object to store the profile picture in
-     * @param image the image to be stored in Uri format
+     *
+     * @param user     the user object to store the profile picture in
+     * @param image    the image to be stored in Uri format
      * @param listener Optional listener that is called when the image is stored. Returns the image url as a string
      */
     private void uploadProfilePicture(User user, Uri image, DataRetrievalListener listener) {
@@ -614,14 +658,16 @@ public class Firebase {
      * Overload of the {@link #uploadProfilePicture(User, Uri, DataRetrievalListener)} with no listener
      */
     private void uploadProfilePicture(User user, Uri image) {
-        uploadProfilePicture(user, image, id -> {});
+        uploadProfilePicture(user, image, id -> {
+        });
     }
 
     /**
      * Stores the profile picture in the storage. Listener is required
      * This function automatically handles the updating of the profile picture in the user object
-     * @param user the user object to store the profile picture in
-     * @param image the image to be stored in Uri format
+     *
+     * @param user     the user object to store the profile picture in
+     * @param image    the image to be stored in Uri format
      * @param listener Optional DataRetrievalListener listener that is called when the image is stored. Returns the image url as a string
      */
     public void setProfilePicture(User user, Uri image, DataRetrievalListener listener) {
@@ -643,12 +689,14 @@ public class Firebase {
      * Overload of the {@link #setProfilePicture(User, Uri, DataRetrievalListener)} with no listener
      */
     public void setProfilePicture(User user, Uri image) {
-        setProfilePicture(user, image, id -> {});
+        setProfilePicture(user, image, id -> {
+        });
     }
 
     /**
      * Gets the profile picture from the storage.
-     * @param user the user object to get the profile picture from
+     *
+     * @param user     the user object to get the profile picture from
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
     public void getProfilePicture(User user, ImageRetrievalListener listener) {
@@ -660,7 +708,8 @@ public class Firebase {
     /**
      * Deletes the profile picture from the storage.
      * Throws an error if the profile picture does not exist
-     * @param user the user object to delete the profile picture from
+     *
+     * @param user     the user object to delete the profile picture from
      * @param listener Optional InitializationListener listener that is called when the image is deleted
      */
     public void deleteProfilePicture(User user, InitializationListener listener) {
@@ -679,13 +728,15 @@ public class Firebase {
      * Overload of the {@link #deleteProfilePicture(User, InitializationListener)} with no listener
      */
     public void deleteProfilePicture(User user) {
-        deleteProfilePicture(user, () -> {});
+        deleteProfilePicture(user, () -> {
+        });
     }
 
     /**
      * A private function that stores the banner picture in the storage.
-     * @param event the event object to store the banner picture in
-     * @param image the image to be stored in Uri format
+     *
+     * @param event    the event object to store the banner picture in
+     * @param image    the image to be stored in Uri format
      * @param listener Optional listener that is called when the image is stored. Returns the image url as a string
      */
     private void uploadPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
@@ -703,14 +754,16 @@ public class Firebase {
      * Overload of the {@link #uploadPosterPicture(Event, Uri, DataRetrievalListener)} with no listener
      */
     private void uploadPosterPicture(Event event, Uri image) {
-        uploadPosterPicture(event, image, id -> {});
+        uploadPosterPicture(event, image, id -> {
+        });
     }
 
     /**
      * Stores the poster picture in the storage. Listener is required
      * This function automatically handles the updating of the poster picture in the event object
-     * @param event the event object to store the poster picture in
-     * @param image the image to be stored in Uri format
+     *
+     * @param event    the event object to store the poster picture in
+     * @param image    the image to be stored in Uri format
      * @param listener the listener that is called when the image is stored. Returns the image url as a string
      */
     public void setPosterPicture(Event event, Uri image, DataRetrievalListener listener) {
@@ -731,12 +784,14 @@ public class Firebase {
      * Overload of the {@link #uploadPosterPicture(Event, Uri, DataRetrievalListener)} with no listener
      */
     public void setPosterPicture(Event event, Uri image) {
-        setPosterPicture(event, image, id -> {});
+        setPosterPicture(event, image, id -> {
+        });
     }
 
     /**
      * Gets the poster picture from the storage.
-     * @param event the event object to get the profile picture from
+     *
+     * @param event    the event object to get the profile picture from
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
     public void getPosterPicture(Event event, ImageRetrievalListener listener) {
@@ -748,7 +803,8 @@ public class Firebase {
     /**
      * Deletes the poster picture from the storage.
      * Throws an exception if there is no poster picture
-     * @param event the event object to delete the poster picture from
+     *
+     * @param event    the event object to delete the poster picture from
      * @param listener Optional InitializationListener listener that is called when the image is deleted
      */
     public void deletePosterPicture(Event event, InitializationListener listener) {
@@ -756,8 +812,8 @@ public class Firebase {
         String photoUrl = event.getPosterPhotoUrl();
         if (photoUrl != null && !photoUrl.isEmpty()) {
             posterPictureReference.child(photoUrl).delete()
-                .addOnSuccessListener(aVoid -> listener.onInitialized())
-                .addOnFailureListener(listener::onError);
+                    .addOnSuccessListener(aVoid -> listener.onInitialized())
+                    .addOnFailureListener(listener::onError);
         } else {
             // Throw an exception
             listener.onError(new Exception("No poster picture to delete"));
@@ -768,12 +824,15 @@ public class Firebase {
      * Overload of the {@link #deletePosterPicture(Event, InitializationListener)} with no listener
      */
     public void deletePosterPicture(Event event) {
-        deletePosterPicture(event, () -> {});
+        deletePosterPicture(event, () -> {
+        });
     }
+
     // TODO add admin functions. Allows for deletion of various types of data
-    private interface QueryDocumentsListener{
+    private interface QueryDocumentsListener {
         void onQueryDocumentCompleted(List<DocumentSnapshot> results);
-        default void onError(Exception e){
+
+        default void onError(Exception e) {
             Log.e(TAG, "Error getting documents: ", e);
         }
     }
@@ -781,9 +840,10 @@ public class Firebase {
 
     /**
      * Checks if this user is an admin
+     *
      * @param listener the listener that is called when the check is complete. Returns true if the user is an admin
      */
-    public void isThisUserAdmin(CheckListener listener){
+    public void isThisUserAdmin(CheckListener listener) {
         adminCollection.whereEqualTo("deviceID", this.deviceID).get()
                 .addOnSuccessListener(result -> {
                     // If the result is not empty, the user is an admin
@@ -795,7 +855,8 @@ public class Firebase {
     /**
      * A generic functions that takes in an array of tasks and a listener, and ensure that all tasks run correctly
      * Returns the list of matching documents in the listener, else call the failure listener
-     * @param tasks the tasks to run
+     *
+     * @param tasks    the tasks to run
      * @param listener the QueryDocumentsListener that is called when all tasks are complete
      */
     private void searchByQuery(List<Task<QuerySnapshot>> tasks, QueryDocumentsListener listener) {
@@ -818,10 +879,11 @@ public class Firebase {
     /**
      * Searches for users by checking if they have a parameter that matches the query
      * Returns null if no matching documents found, otherwise return an array of User Objects
-     * @param query the query to search for
+     *
+     * @param query    the query to search for
      * @param listener A UserListRetrievalListener that returns an ArrayList of users or null if there's no results
      */
-    public void serachForUsers(String query, UserListRetrievalListener listener) {
+    public void searchForUsers(String query, UserListRetrievalListener listener) {
         List<Task<QuerySnapshot>> tasks = new ArrayList<>();    // List of all tasks to run
 
         // Query for first name, last name, email, and phone number
@@ -857,7 +919,8 @@ public class Firebase {
     /**
      * Searches for events by checking if they have a parameter that matches the query
      * Returns null if no matching documents found, otherwise return an array of Event Objects
-     * @param query the query to search for
+     *
+     * @param query    the query to search for
      * @param listener A EventListRetrievalListener that returns an ArrayList of events or null if there's no results
      */
     public void serachForEvents(String query, EventListRetrievalListener listener) {
@@ -893,7 +956,8 @@ public class Firebase {
     /**
      * Searches for facilities by checking if they have a parameter that matches the query
      * Retunrs null if no facility exist, else return an array of events corresponding to the facility
-     * @param query the query to search for
+     *
+     * @param query    the query to search for
      * @param listener A EventListRetrievalListener that returns an ArrayList of events or null if there's no results
      */
     public void searchForFacility(String query, EventListRetrievalListener listener) {
@@ -918,5 +982,46 @@ public class Firebase {
             listener.onEventListRetrievalCompleted(events);
         });
     }
-}
 
+    /**
+     * Deletes any given user from the database
+     * For admins: The user object would be retrieved from {@link #searchForUsers(String, UserListRetrievalListener)}
+     *
+     * @param user     the user to be deleted
+     * @param listener Optional InitializationListener listener that is called after the user is deleted
+     */
+    public void deleteUser(User user, InitializationListener listener) {
+        // Delete the profile picture
+        deleteProfilePicture(user);
+
+        // Delete the user document itself
+        userCollection.document(user.getId()).delete()
+                .addOnFailureListener(listener::onError);
+
+        // Delete all references document from the user-events collection
+        userEventsCollection.whereEqualTo("userID", user.getId()).get()
+                .addOnSuccessListener(task -> {
+                    int total_user = task.size();
+                    AtomicInteger deleted_user = new AtomicInteger();
+                    // Delete all documents that match the query
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        document.getReference().delete()
+                                .addOnFailureListener(listener::onError);
+
+                        // Wait for all documents to be deleted first
+                        if (deleted_user.incrementAndGet() == total_user) {
+                            listener.onInitialized();
+                        }
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #deleteUser(User, InitializationListener)} with no listener
+     */
+    public void deleteUser(User user) {
+        deleteUser(user, () -> {
+        });
+    }
+}
