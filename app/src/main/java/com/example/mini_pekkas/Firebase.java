@@ -15,7 +15,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.13.1 11/12/20224 Fixed Infinite poster upload bug
+ * @version 1.13.2 11/15/20224 Minor bug fixes, deprecated getEventByQRCode
  */
 public class Firebase {
     private final String deviceID;
@@ -265,7 +264,6 @@ public class Firebase {
         deleteThisUser(() -> {});
     }
 
-
     // TODO add event functions
 
     /**
@@ -311,7 +309,8 @@ public class Firebase {
         deletePosterPicture(event);
 
         // Delete the event document
-        eventCollection.document(eventID).delete();
+        eventCollection.document(eventID).delete()
+                .addOnFailureListener(listener::onError);
 
         // Delete all event document from the user-events collection
         userEventsCollection.whereEqualTo("eventID", eventID).get()
@@ -376,7 +375,16 @@ public class Firebase {
                         listener.onEventRetrievalCompleted(event);
                     }
                 })
-                .addOnFailureListener(e -> Log.w(TAG, "Error getting event", e));
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #getEvent(String eventID, EventRetrievalListener listener)} using the event object itself
+     * @param event an event object to be retrieved
+     * @param listener an EventRetrievalListener listener that returns the newly received event object
+     */
+    public void getEvent(Event event, EventRetrievalListener listener) {
+        getEvent(event.getId(), listener);
     }
 
     // TODO enrollment functionality
@@ -533,6 +541,7 @@ public class Firebase {
 
     /**
      * Retrieves an event using its QR code.
+     * @deprecated The QR code should be decoded into the event id and retrieved using {@link #getEvent(String eventID, EventRetrievalListener listener)}
      * @param qrCode The Base64 encoded QR code string to match.
      * @param listener An EventRetrievalListener that returns the Event object if found.
      */
