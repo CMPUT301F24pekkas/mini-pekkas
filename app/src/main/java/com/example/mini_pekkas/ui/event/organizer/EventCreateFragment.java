@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +19,12 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.QRCodeGenerator;
+import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentCreateEventBinding;
 import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
@@ -32,13 +35,15 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import com.example.mini_pekkas.OrganizerEventsListViewModel;
+import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
 /**
  * Fragment for creating events within the organizer's UI.
  * Handles input collection for event details, poster image selection, and
  * generating QR codes for the event.
  */
 public class EventCreateFragment extends Fragment {
-
+    private OrganizerEventsListViewModel organizerEventsListViewModel;
     private FragmentCreateEventBinding binding;
     private Firebase firebaseHelper;
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -59,6 +64,8 @@ public class EventCreateFragment extends Fragment {
         binding = FragmentCreateEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
+                .get(OrganizerEventsListViewModel.class);;
         // Initialize Firebase helper
         firebaseHelper = new Firebase(requireContext());
 
@@ -84,6 +91,8 @@ public class EventCreateFragment extends Fragment {
                 // Upload poster image if available, then save the event
                 uploadPosterImageToFirebase(event, qrCodeBitmap);
             }
+            //update live data
+            organizerEventsListViewModel.addEvent(event);
         });
 
         // Button to cancel event creation and clear inputs
@@ -161,6 +170,14 @@ public class EventCreateFragment extends Fragment {
         builder.setView(qrBinding.getRoot());
         AlertDialog dialog = builder.create();
         dialog.show();
+        //
+        Button closeButton = qrBinding.getRoot().findViewById(R.id.confirmQrButton);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 
     /**
@@ -206,7 +223,7 @@ public class EventCreateFragment extends Fragment {
 
         User host = firebaseHelper.getThisUser();
         String facility = host.getFacility();
-
+        Log.d("EventCreateFragment:", " Event function finished");
         return new Event(event_id, eventTitle, host, eventDescription, startDate, endDate, price,
                 facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked, "");
     }

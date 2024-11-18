@@ -5,20 +5,18 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.mini_pekkas.OrganizerEventsViewModel;
-
-public class OrganizerEventsViewModelFactory implements ViewModelProvider.Factory {
+public class OrganizerEventsListViewModelFactory implements ViewModelProvider.Factory {
     private final Context context;
 
-    public OrganizerEventsViewModelFactory(Context context) {
+    public OrganizerEventsListViewModelFactory(Context context) {
         this.context = context;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(OrganizerEventsViewModel.class)) {
-            T classCast = modelClass.cast(new OrganizerEventsViewModel(context));
+        if (modelClass.isAssignableFrom(OrganizerEventsListViewModel.class)) {
+            T classCast = modelClass.cast(new OrganizerEventsListViewModel(context));
             assert classCast != null;
             return classCast;
         }
