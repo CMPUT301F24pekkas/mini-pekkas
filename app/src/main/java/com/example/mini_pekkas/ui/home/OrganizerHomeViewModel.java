@@ -10,6 +10,8 @@ import com.example.mini_pekkas.Event;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 /**
  * ViewModel for the Organizer Home Fragment.
  * Handles retrieving and updating events from Firebase for organizers.
@@ -77,4 +79,8 @@ public class OrganizerHomeViewModel extends ViewModel {
     public LiveData<Event> getSelectedEvent() {
         return selectedEvent;
     }
+
+//    public ArrayList<Event> getEventList(String organizerId){
+//
+//    }
 }
