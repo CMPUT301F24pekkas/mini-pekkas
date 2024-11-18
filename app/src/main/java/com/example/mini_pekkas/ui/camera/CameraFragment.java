@@ -22,12 +22,26 @@ import com.example.mini_pekkas.databinding.FragmentCameraBinding;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+/**
+ * Fragment to handle the QR code scanning functionality.
+ * The user can scan a QR code using the device camera, and based on the scanned code,
+ * the event details are fetched from Firebase.
+ */
 public class CameraFragment extends Fragment {
 
     private FragmentCameraBinding binding;
     private static final int CAMERA_REQUEST_CODE = 100;
     private Firebase firebaseHelper;
 
+    /**
+     * Called when the fragment's view is created. Initializes the Firebase helper and sets up
+     * the button click listener to open the camera for scanning QR codes.
+     *
+     * @param inflater           The LayoutInflater object to inflate views.
+     * @param container          The container for the fragment's UI.
+     * @param savedInstanceState The saved instance state bundle.
+     * @return The root view of the fragment.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -36,12 +50,16 @@ public class CameraFragment extends Fragment {
 
         firebaseHelper = new Firebase(requireContext());
 
+        // Button listener to open the camera when clicked
         binding.cameraButton.setOnClickListener(v -> openCamera());
 
         return root;
     }
 
-    // Open the QR code scanner
+    /**
+     * Opens the camera to scan a QR code. If the app doesn't have permission to use the camera,
+     * it will request permission from the user.
+     */
     private void openCamera() {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -52,7 +70,9 @@ public class CameraFragment extends Fragment {
         }
     }
 
-    // start QR code scanning
+    /**
+     * Starts the QR code scanner using the ZXing library.
+     */
     private void startQRCodeScanner() {
         IntentIntegrator integrator = IntentIntegrator.forSupportFragment(this);
         integrator.setPrompt("Scan a QR Code");
@@ -60,6 +80,14 @@ public class CameraFragment extends Fragment {
         integrator.initiateScan();
     }
 
+    /**
+     * Handles the result from the QR code scanner. If a valid QR code is scanned,
+     * it converts the scanned data to Base64 and fetches the event details from Firebase.
+     *
+     * @param requestCode The request code passed to {@link android.app.Activity#onActivityResult(int, int, Intent)}.
+     * @param resultCode  The result code returned by the child activity.
+     * @param data        An Intent containing the result data.
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -70,11 +98,11 @@ public class CameraFragment extends Fragment {
                 String scannedData = result.getContents();
                 Log.d("CameraFragment", "QR Code Scanned: " + scannedData);
 
-                // Convert scanned data to Base64
+                // Convert scanned data to Base64 for storage/verification
                 String base64QRCode = Base64.encodeToString(scannedData.getBytes(), Base64.NO_WRAP);
                 Log.d("CameraFragment", "Base64 Encoded QR Code: " + base64QRCode);
 
-                // fetch event details from Firebase using the Base64 string
+                // Fetch event details from Firebase using the Base64 QR code
                 fetchEventFromFirebase(base64QRCode);
             } else {
                 Toast.makeText(getContext(), "No QR Code detected", Toast.LENGTH_SHORT).show();
@@ -82,7 +110,13 @@ public class CameraFragment extends Fragment {
         }
     }
 
+    /**
+     * Fetches the event associated with the provided Base64-encoded QR code from Firebase.
+     *
+     * @param base64QRCode The Base64-encoded QR code string.
+     */
     private void fetchEventFromFirebase(String base64QRCode) {
+        Log.d("CameraFrag", "sent into query = " + base64QRCode);
         firebaseHelper.getEventByQRCode(base64QRCode, new Firebase.EventRetrievalListener() {
             @Override
             public void onEventRetrievalCompleted(Event event) {
@@ -103,6 +137,14 @@ public class CameraFragment extends Fragment {
         });
     }
 
+    /**
+     * Handles the result of the camera permission request. If granted, it opens the camera,
+     * otherwise it shows a message to the user explaining that the permission is required.
+     *
+     * @param requestCode  The request code passed to {@link android.app.Activity#onRequestPermissionsResult(int, String[], int[])}.
+     * @param permissions  The permissions that were requested.
+     * @param grantResults The results for the permissions requested.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -115,6 +157,9 @@ public class CameraFragment extends Fragment {
         }
     }
 
+    /**
+     * Cleans up resources when the fragment's view is destroyed.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

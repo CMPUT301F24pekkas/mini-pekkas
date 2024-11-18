@@ -70,7 +70,7 @@ public class EventCreateFragment extends Fragment {
         firebaseHelper = new Firebase(requireContext());
 
         // Set up poster image selection
-        ImageButton posterButton = binding.imageView;
+        ImageButton posterButton = binding.addEventPicture;
         posterButton.setOnClickListener(v -> openImageChooser());
 
         // Button to create event and show QR code confirmation dialog
@@ -86,6 +86,8 @@ public class EventCreateFragment extends Fragment {
             if (qrCodeBitmap != null) {
                 // Convert QR code bitmap to Base64 string and set it in the event object
                 String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
+                // TODO
+                Log.d("PUT IN", "base64qr = " + qrCodeBase64);
                 event.setQrCode(qrCodeBase64);
 
                 // Upload poster image if available, then save the event
@@ -123,7 +125,7 @@ public class EventCreateFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
             imageUri = data.getData();
-            binding.imageView.setImageURI(imageUri);  // Show selected image in ImageView
+            binding.addEventPicture.setImageURI(imageUri);  // Show selected image in ImageView
         }
     }
 
@@ -191,7 +193,7 @@ public class EventCreateFragment extends Fragment {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] byteArray = baos.toByteArray();
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP);
     }
 
     /**
