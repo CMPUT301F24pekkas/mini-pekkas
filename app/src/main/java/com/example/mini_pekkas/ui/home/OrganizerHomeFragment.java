@@ -71,7 +71,7 @@ public class OrganizerHomeFragment extends Fragment {
             }
         });
         //add the current events that are stored in the db
-        organizerEventsListViewModel.getEventsFromDb();
+        //organizerEventsListViewModel.getEventsFromDb();
         //Observe the selected event LiveData from the ViewModel
 //        organizerHomeViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), new Observer<Event>() {
 //            /**
