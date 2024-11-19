@@ -95,34 +95,31 @@ public class CameraFragment extends Fragment {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() != null) {
+                // Get the raw scanned data from the QR code
                 String scannedData = result.getContents();
-                Log.d("CameraFragment", "QR Code Scanned: " + scannedData);
+                Log.d("CameraFragment", "Raw QR Code Data: " + scannedData);
 
-                // Convert scanned data to Base64 for storage/verification
-                String base64QRCode = Base64.encodeToString(scannedData.getBytes(), Base64.NO_WRAP);
-                Log.d("CameraFragment", "Base64 Encoded QR Code: " + base64QRCode);
-
-                // Fetch event details from Firebase using the Base64 QR code
-                fetchEventFromFirebase(base64QRCode);
+                // Fetch the event using the raw data (no Base64 encoding needed)
+                fetchEventFromFirebase(scannedData);
             } else {
                 Toast.makeText(getContext(), "No QR Code detected", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+
     /**
      * Fetches the event associated with the provided Base64-encoded QR code from Firebase.
      *
      * @param base64QRCode The Base64-encoded QR code string.
      */
-    private void fetchEventFromFirebase(String base64QRCode) {
-        Log.d("CameraFrag", "sent into query = " + base64QRCode);
-        firebaseHelper.getEventByQRCode(base64QRCode, new Firebase.EventRetrievalListener() {
+    private void fetchEventFromFirebase(String qrCodeData) {
+        Log.d("CameraFragment", "Fetching event with raw QR data: " + qrCodeData);
+        firebaseHelper.getEventByQRCode(qrCodeData, new Firebase.EventRetrievalListener() {
             @Override
             public void onEventRetrievalCompleted(Event event) {
                 if (event != null) {
                     Log.d("CameraFragment", "Event found: " + event.getName());
-                    // Display event details or navigate to event details page
                     Toast.makeText(getContext(), "Event Found: " + event.getName(), Toast.LENGTH_SHORT).show();
                 } else {
                     Log.d("CameraFragment", "No event found for this QR code");
@@ -136,6 +133,7 @@ public class CameraFragment extends Fragment {
             }
         });
     }
+
 
     /**
      * Handles the result of the camera permission request. If granted, it opens the camera,
