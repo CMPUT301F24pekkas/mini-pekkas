@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.13.2 11/15/20224 Minor bug fixes, deprecated getEventByQRCode
+ * @version 1.13.3 11/18/20224 Fixed bug in getEventByStatus, fixed minor documentation error
  */
 public class Firebase {
     private final String deviceID;
@@ -143,6 +143,10 @@ public class Firebase {
         void onImageRetrievalCompleted(Uri image);
         default void onError(Exception e) {Log.e(TAG, "Error getting image: ", e);}
     }
+
+    /*
+     *  Functionality for managing this user (the user of this device)
+     */
 
     /**
      * This function fetches the user document and stores it in UserDocument
@@ -264,7 +268,9 @@ public class Firebase {
         deleteThisUser(() -> {});
     }
 
-    // TODO add event functions
+    /*
+     *  Functionality for managing events
+     */
 
     /**
      * Add an event to the events collection
@@ -387,7 +393,9 @@ public class Firebase {
         getEvent(event.getId(), listener);
     }
 
-    // TODO enrollment functionality
+    /*
+     *  Functionality for managing users within events
+     */
 
     /**
      * This function is called whenever an event is created. Sets this user as the organizer
@@ -525,7 +533,7 @@ public class Firebase {
                         eventCollection.document(eventID).get()
                                 .addOnSuccessListener(documentSnapshot -> {
                                     // Create the new event object and store it in the array
-                                    Event event = new Event(Objects.requireNonNull(document.getData()));
+                                    Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
                                     events.add(event);
 
                                     // Increment and check if we have retrieved all events
@@ -558,7 +566,7 @@ public class Firebase {
                          // Fetch the event details from the document
                          DocumentSnapshot document = task.getDocuments().get(0);
                          Event event = new Event(Objects.requireNonNull(document.getData()));
-                         Log.d("Camera Yay", "Event succesfully Retrieved");
+                         Log.d("Camera Yay", "Event successfully Retrieved");
                          listener.onEventRetrievalCompleted(event);
                      }
                  })
@@ -566,7 +574,7 @@ public class Firebase {
      }
 
     /**
-     * Get all events the user is waitlisted in
+     * Get all events the user has organized
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     public void getOrganizedEvents(EventListRetrievalListener listener) {
@@ -596,7 +604,10 @@ public class Firebase {
     public void getCancelledEvents(EventListRetrievalListener listener) {
         getEventByStatus("cancelled", listener);
     }
-    // TODO add Image storage functions. Allows for the storing and retrieving of various media files
+
+    /*
+     *  Functionality for managing profile and poster images
+     */
 
     /**
      * A private function that stores the profile picture in the storage.
@@ -789,14 +800,6 @@ public class Firebase {
                     listener.onCheckComplete(exist);
                 });
     }
-
-    /**
-     * Searches for users by checking if they have a parameter that matches the query
-     * @param query the query to search for
-     * @param listener
-     */
-    public void serachForUsers(String query, UserListRetrievalListener listener) {
-        // TODO
-    }
+    // TODO merge in admin functions later
 }
 
