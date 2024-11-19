@@ -70,8 +70,8 @@ public class OrganizerHomeFragment extends Fragment {
                 }
             }
         });
-        //add the current events that are stored in the db
-        //organizerEventsListViewModel.getEventsFromDb();
+        //add the current events in db ONCE
+        organizerEventsListViewModel.initializeDataIfNeeded();
         //Observe the selected event LiveData from the ViewModel
 //        organizerHomeViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), new Observer<Event>() {
 //            /**
@@ -106,7 +106,7 @@ public class OrganizerHomeFragment extends Fragment {
 
         // Add views for each event
         for (Event event : events) {
-            View eventView = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_organizer_event, null, false);
+            View eventView = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_organizer_event, EventsContainer, false);
             CardView NewMockEventCardView = eventView.findViewById(R.id.EventCardView);
             TextView EventTitleView = NewMockEventCardView.findViewById(R.id.EventName);
             TextView EventSubtitleView = NewMockEventCardView.findViewById(R.id.EventSubtitle);

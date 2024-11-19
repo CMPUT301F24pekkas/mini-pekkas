@@ -23,6 +23,8 @@ public class OrganizerEventsListViewModel extends ViewModel {
     private final String DeviceId;
     private final Firebase firebaseHelper;
     private final MutableLiveData<ArrayList<Event>> EventList;
+    private LiveData SelectedEvent;
+    private boolean isDataInitialized = false;
 
     public OrganizerEventsListViewModel(Context context){
         firebaseHelper = new Firebase(context);
@@ -65,6 +67,16 @@ public class OrganizerEventsListViewModel extends ViewModel {
 //    }
 
     /**
+     * this function ensures that the only
+     *
+     */
+    public void initializeDataIfNeeded() {
+        if (!isDataInitialized) {
+            getEventsFromDb();
+            isDataInitialized = true;
+        }
+    }
+    /**
      * Retrieves events created by the user from db and adds them to the EventList.
      *
      */
@@ -80,7 +92,7 @@ public class OrganizerEventsListViewModel extends ViewModel {
 
             @Override
             public void onError(Exception e) {
-                System.err.println("Error occurred: " + e.getMessage());
+                Log.d("OrganizerEventsListViewModel", "Error occurred: " + e.getMessage());
             }
 
         };
