@@ -1,6 +1,7 @@
 package com.example.mini_pekkas;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -221,6 +222,14 @@ public class Event {
     }
 
     public Event(Map<String, Object> map) {
+        for (String key : map.keySet()) {
+            Log.d("Event Debug", "Key: " + key);
+        }
+        if (map == null) {
+            Log.e("Error", "Document data is null");
+            return;
+        }
+
         this.id = (String) map.get("id");
         this.name = (String) map.get("name");
         this.eventHost = new User((Map<String, Object>) map.get("eventHost"));
