@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.13.3 11/18/20224 Fixed bug in getEventByStatus, fixed minor documentation error
+ * @version 1.13.4 11/18/20224 Fixed getEventByStatus, properly increment counter and check if all events have been retrieved
  */
 public class Firebase {
     private final String deviceID;
@@ -520,28 +520,39 @@ public class Firebase {
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     private void getEventByStatus(String status, EventListRetrievalListener listener) {
-        userEventsCollection.whereEqualTo("userID", this.deviceID).whereEqualTo("status", status).get()
+        userEventsCollection.whereEqualTo("userID", deviceID).whereEqualTo("status", status).get()
                 .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onEventListRetrievalCompleted(new ArrayList<>());
+                        return;
+                    }
+
                     ArrayList<Event> events = new ArrayList<>(); // Get the array of events the user is waitlisted in
-                    int totalEvents = task.getDocuments().size(); // Total events to retrieve
+                    int totalEvents = task.size(); // Total events to retrieve
                     AtomicInteger retrievedEvents = new AtomicInteger(); // Counter for retrieved events
 
                     for (DocumentSnapshot document : task.getDocuments()) {
+
                         // Get the event ID to pull from the event collection
                         String eventID = Objects.requireNonNull(document.get("eventID")).toString();
+
                         // Get the event from the event collection
                         eventCollection.document(eventID).get()
                                 .addOnSuccessListener(documentSnapshot -> {
+
                                     // Create the new event object and store it in the array
                                     Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
                                     events.add(event);
 
                                     // Increment and check if we have retrieved all events
-                                    if (retrievedEvents.getAndIncrement() == totalEvents){
+                                    if (retrievedEvents.incrementAndGet() == totalEvents){
                                         listener.onEventListRetrievalCompleted(events);
                                     }
                                 })
                                 .addOnFailureListener(listener::onError);
+                    }
+                    if (retrievedEvents.get() != totalEvents){
+                        listener.onError(new Exception("Not all events were retrieved"));
                     }
                 })
                 .addOnFailureListener(listener::onError);
