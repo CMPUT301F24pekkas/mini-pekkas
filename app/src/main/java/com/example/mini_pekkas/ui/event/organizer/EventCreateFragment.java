@@ -80,7 +80,6 @@ public class EventCreateFragment extends Fragment {
 
             // Set the raw QR code data in the event
             event.setQrCode(uniqueQrData);
-            Log.d("PUT IN", "raw QR data = " + uniqueQrData);
 
             // Generate the QR code bitmap for display purposes
             Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(uniqueQrData, 300, 300);
@@ -218,7 +217,6 @@ public class EventCreateFragment extends Fragment {
 
         User host = firebaseHelper.getThisUser();
         String facility = host.getFacility();
-        Log.d("EventCreateFragment:", " Event function finished");
         return new Event(event_id, eventTitle, host, eventDescription, startDate, endDate, price,
                 facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked, "");
     }
