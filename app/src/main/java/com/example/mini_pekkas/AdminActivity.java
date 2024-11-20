@@ -30,8 +30,8 @@ public class AdminActivity extends AppCompatActivity {
 
         BottomNavigationView navView = findViewById(R.id.admin_view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.adminHome, R.id.navigation_camera, R.id.adminSearch,
-                R.id.adminNavigation_profile)
+                R.id.admin_search_events, R.id.admin_search_facilities, R.id.admin_search_images,
+                R.id.admin_search_profiles)
                 .build();
 
         // Get the NavController
