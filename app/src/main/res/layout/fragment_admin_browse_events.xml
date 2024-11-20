@@ -11,7 +11,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Facilites"
+        android:text="Event"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_margin="16dp"
@@ -30,7 +30,7 @@
         tools:layout_editor_absoluteX="0dp" />
 
     <ListView
-        android:id="@+id/adminFacilityListView"
+        android:id="@+id/adminEventListView"
         android:layout_width="wrap_content"
         android:layout_height="585dp"
         android:layout_marginStart="16dp"

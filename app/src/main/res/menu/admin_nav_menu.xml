@@ -2,24 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/adminHome"
-        android:icon="@drawable/remote"
-        android:title="@string/to_user"
-        android:visible="true" />
-
-    <item
-        android:id="@+id/navigation_camera"
-        android:icon="@drawable/camera"
-        android:title="@string/title_camera" />
-
-    <item
-        android:id="@+id/adminSearch"
-        android:icon="@drawable/search"
-        android:title="@string/search" />
-
-    <item
-        android:id="@+id/adminNavigation_profile"
+        android:id="@+id/admin_search_events"
         android:icon="@drawable/user"
-        android:title="@string/title_profile" />
+        android:title="@string/search_event" />
+    <item
+        android:id="@+id/admin_search_facilities"
+        android:icon="@drawable/camera"
+        android:title="@string/search_facilities" />
 
+    <item
+        android:id="@+id/admin_search_images"
+        android:icon="@drawable/remote"
+        android:title="@string/search_images" />
+
+    <item
+        android:id="@+id/admin_search_profiles"
+        android:icon="@drawable/camera"
+        android:title="@string/search_profiles" />
 </menu>
