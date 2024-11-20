@@ -8,7 +8,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+
 import com.example.mini_pekkas.databinding.FragmentAdminModerationSearchBinding; // Import binding
+import com.example.mini_pekkas.Firebase;
 
 public class AdminModerationSearchFragment extends Fragment {
 

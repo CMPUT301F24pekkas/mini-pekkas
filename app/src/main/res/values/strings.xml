@@ -4,10 +4,12 @@
     <string name="to_user">To User</string>
     <string name="title_event">Event</string>
     <string name="title_notifications">Notifications</string>
+    <string name="title_profile">Profile</string>
     <string name="title_camera">Camera</string>
     <string name="title_event_org">Event Organizer</string>
     <string name="search_event">Browse Events</string>
     <string name="search_facilities">Browse Facilities</string>
     <string name="search_images">Browse Images</string>
     <string name="search_profiles">Browse Profiles</string>
+    <string name="add_event">Add Event</string>
 </resources>
