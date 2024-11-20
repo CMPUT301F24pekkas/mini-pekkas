@@ -30,7 +30,7 @@ public class AdminActivity extends AppCompatActivity {
 
         BottomNavigationView navView = findViewById(R.id.admin_view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.adminToUser, R.id.navigation_camera, R.id.adminSearch,
+                R.id.adminHome, R.id.navigation_camera, R.id.adminSearch,
                 R.id.adminNavigation_profile)
                 .build();
 
