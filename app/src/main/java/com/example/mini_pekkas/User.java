@@ -12,7 +12,6 @@ public class User {
     private String phone;
     private String facility;
     private String profilePhotoUrl;
-    private final String id;
 
     /**
      * Constructs a User object from a map of attributes.
@@ -26,7 +25,6 @@ public class User {
         this.phone = (String) map.get("phone");
         this.facility = (String) map.get("facility");
         this.profilePhotoUrl = (String) map.get("profilePhoto");
-        this.id = (String) map.get("id");
     }
 
     /**
@@ -38,14 +36,13 @@ public class User {
      * @param phone     The user's phone number.
      * @param facility  The user's associated facility.
      */
-    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl, String id) {
+    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl) {
         this.name = name;
         this.lastname = lastname;
         this.email = email;
         this.phone = phone;
         this.facility = facility;
         this.profilePhotoUrl = profilePhotoUrl;
-        this.id = id;
     }
 
     /**
@@ -138,13 +135,6 @@ public class User {
     }
 
     /**
-     * Gets the user's ID.
-     *
-     * @return The ID of the user.
-     */
-    public String getId() {return id;}
-
-    /**
      * Converts the User object into a Map of attributes.
      *
      * @return A Map containing the user's details, with keys "name", "lastname", "email", "phone", and "facility".
@@ -157,7 +147,6 @@ public class User {
         map.put("phone", phone);
         map.put("facility", facility);
         map.put("profilePhoto", profilePhotoUrl);
-        map.put("id", id);
         return map;
     }
 }
