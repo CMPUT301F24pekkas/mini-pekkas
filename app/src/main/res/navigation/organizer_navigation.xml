@@ -16,10 +16,10 @@
         android:label="@string/title_camera"
         tools:layout="@layout/fragment_camera" />
     <fragment
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_org_notifications"
         android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
         android:label="Organizer Notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_create_notification" />
     <fragment
         android:id="@+id/navigation_org_home"
         android:name="com.example.mini_pekkas.ui.home.OrganizerHomeFragment"

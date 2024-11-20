@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +19,12 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.QRCodeGenerator;
+import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentCreateEventBinding;
 import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
@@ -32,13 +35,15 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import com.example.mini_pekkas.OrganizerEventsListViewModel;
+import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
 /**
  * Fragment for creating events within the organizer's UI.
  * Handles input collection for event details, poster image selection, and
  * generating QR codes for the event.
  */
 public class EventCreateFragment extends Fragment {
-
+    private OrganizerEventsListViewModel organizerEventsListViewModel;
     private FragmentCreateEventBinding binding;
     private Firebase firebaseHelper;
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -59,34 +64,36 @@ public class EventCreateFragment extends Fragment {
         binding = FragmentCreateEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // Initialize Firebase helper
+        organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
+                .get(OrganizerEventsListViewModel.class);
         firebaseHelper = new Firebase(requireContext());
 
-        // Set up poster image selection
         ImageButton posterButton = binding.addEventPicture;
         posterButton.setOnClickListener(v -> openImageChooser());
 
-        // Button to create event and show QR code confirmation dialog
         Button addButton = binding.addEventButton;
         addButton.setOnClickListener(v -> {
-            // Create the event with user input data
             Event event = CreateEvent();
 
-            // Generate a unique QR code using the event ID + a new UUID
+            // Generate a unique QR code raw string (event ID + UUID)
             String uniqueQrData = event.getId() + "_" + UUID.randomUUID().toString();
+
+            // Set the raw QR code data in the event
+            event.setQrCode(uniqueQrData);
+            Log.d("PUT IN", "raw QR data = " + uniqueQrData);
+
+            // Generate the QR code bitmap for display purposes
             Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(uniqueQrData, 300, 300);
 
             if (qrCodeBitmap != null) {
-                // Convert QR code bitmap to Base64 string and set it in the event object
-                String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
-                event.setQrCode(qrCodeBase64);
-
-                // Upload poster image if available, then save the event
+                // Upload poster image (if any) and save the event
                 uploadPosterImageToFirebase(event, qrCodeBitmap);
             }
+
+            // Update live data
+            organizerEventsListViewModel.addEvent(event);
         });
 
-        // Button to cancel event creation and clear inputs
         Button cancelButton = binding.cancelEventButton;
         cancelButton.setOnClickListener(v -> ClearInput());
 
@@ -131,18 +138,15 @@ public class EventCreateFragment extends Fragment {
 
             storageRef.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        event.setPosterPhotoUrl(uri.toString());  // Set the poster URL in the event
-                        firebaseHelper.addEvent(event);           // Save the event with poster URL in Firebase
-
-                        // Show the QR code in a dialog after saving
+                        event.setPosterPhotoUrl(uri.toString());
+                        firebaseHelper.addEvent(event);  // Save the event in Firebase
                         showQrCodeDialog(qrCodeBitmap);
                         ClearInput();
                     }))
                     .addOnFailureListener(e -> {
-                        // Handle the error, e.g., show a message to the user
+                        // Handle the error
                     });
         } else {
-            // Save event without a poster URL if no image is selected
             firebaseHelper.addEvent(event);
             showQrCodeDialog(qrCodeBitmap);
             ClearInput();
@@ -161,6 +165,14 @@ public class EventCreateFragment extends Fragment {
         builder.setView(qrBinding.getRoot());
         AlertDialog dialog = builder.create();
         dialog.show();
+        //
+        Button closeButton = qrBinding.getRoot().findViewById(R.id.confirmQrButton);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 
     /**
@@ -174,7 +186,7 @@ public class EventCreateFragment extends Fragment {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] byteArray = baos.toByteArray();
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP);
     }
 
     /**
@@ -206,7 +218,7 @@ public class EventCreateFragment extends Fragment {
 
         User host = firebaseHelper.getThisUser();
         String facility = host.getFacility();
-
+        Log.d("EventCreateFragment:", " Event function finished");
         return new Event(event_id, eventTitle, host, eventDescription, startDate, endDate, price,
                 facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked, "");
     }
