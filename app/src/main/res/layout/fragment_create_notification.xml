@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <!-- Title Input -->
+    <TextView
+        android:id="@+id/tvTitleLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notification Title"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etNotificationTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter title"
+        android:inputType="text"
+        android:background="@android:color/transparent"
+        android:padding="10dp"
+        android:backgroundTint="@android:color/darker_gray"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Message Input -->
+    <TextView
+        android:id="@+id/tvMessageLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notification Message"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etNotificationMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter message"
+        android:inputType="textMultiLine"
+        android:background="@android:color/transparent"
+        android:padding="10dp"
+        android:backgroundTint="@android:color/darker_gray"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Priority Selection -->
+    <TextView
+        android:id="@+id/tvPriorityLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Priority"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/spinnerPriority"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/btn_dropdown"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Submit Button -->
+    <Button
+        android:id="@+id/btnSubmitNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create Notification"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@android:color/holo_blue_light"
+        android:layout_marginTop="24dp" />
+</LinearLayout>
