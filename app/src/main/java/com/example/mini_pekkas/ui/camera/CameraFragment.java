@@ -115,7 +115,7 @@ public class CameraFragment extends Fragment {
      */
     private void fetchEventFromFirebase(String qrCodeData) {
         Log.d("CameraFragment", "Fetching event with raw QR data: " + qrCodeData);
-        firebaseHelper.getEventByQRCode(qrCodeData, new Firebase.EventRetrievalListener() {
+        firebaseHelper.getEventByQRCode("1", new Firebase.EventRetrievalListener() {
             @Override
             public void onEventRetrievalCompleted(Event event) {
                 if (event != null) {

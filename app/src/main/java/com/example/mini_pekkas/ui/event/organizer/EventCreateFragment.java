@@ -76,7 +76,7 @@ public class EventCreateFragment extends Fragment {
             Event event = CreateEvent();
 
             // Generate a unique QR code raw string (event ID + UUID)
-            String uniqueQrData = event.getId() + "_" + UUID.randomUUID().toString();
+            String uniqueQrData = event.getId().toString();
 
             // Set the raw QR code data in the event
             event.setQrCode(uniqueQrData);
@@ -194,7 +194,7 @@ public class EventCreateFragment extends Fragment {
      * @return A populated Event object
      */
     public Event CreateEvent() {
-        String event_id = UUID.randomUUID().toString();
+        String event_id = "1";
         double latitude = 40.730610; // Example latitude
         double longitude = -73.935242; // Example longitude
         float price = 90.45f;
