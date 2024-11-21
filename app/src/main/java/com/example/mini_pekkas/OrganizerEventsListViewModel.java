@@ -23,7 +23,7 @@ public class OrganizerEventsListViewModel extends ViewModel {
     private final String DeviceId;
     private final Firebase firebaseHelper;
     private final MutableLiveData<ArrayList<Event>> EventList;
-    private LiveData SelectedEvent;
+    private MutableLiveData<Event> SelectedEvent;
     private boolean isDataInitialized = false;
 
     public OrganizerEventsListViewModel(Context context){
@@ -32,11 +32,21 @@ public class OrganizerEventsListViewModel extends ViewModel {
         ArrayList<Event> currentEventList = new ArrayList<>();
         EventList = new MutableLiveData<>();
         EventList.setValue(currentEventList);
+        SelectedEvent = new MutableLiveData<>();
     }
 
     public String getDeviceId() {
         return DeviceId;
     }
+
+    public MutableLiveData<Event> getSelectedEvent() {
+        return SelectedEvent;
+    }
+    public void setSelectedEvent(Event event) {
+        assert event != null;
+        SelectedEvent.setValue(event);
+    }
+
     public LiveData<ArrayList<Event>> getEventList(){
         return EventList;
     }
@@ -47,7 +57,6 @@ public class OrganizerEventsListViewModel extends ViewModel {
         currentEventList.add(event);
         EventList.setValue(currentEventList);
         Log.d("OrganizerEventsListViewModel", "Event added: " + event.getName() + "tempListsize: " + currentEventList.size() + "EventListsize: " + currentEventList.size());
-
 
     }
     public void deleteEvent(String eventId){
@@ -67,7 +76,7 @@ public class OrganizerEventsListViewModel extends ViewModel {
 //    }
 
     /**
-     * this function ensures that the only
+     * this function ensures that the events are only loaded once
      *
      */
     public void initializeDataIfNeeded() {

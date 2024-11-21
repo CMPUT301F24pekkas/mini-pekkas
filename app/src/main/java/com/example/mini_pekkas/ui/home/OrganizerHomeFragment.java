@@ -16,6 +16,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.EventArrayAdapter;
@@ -53,7 +56,7 @@ public class OrganizerHomeFragment extends Fragment {
         View root = binding.getRoot();
 
         EventsContainer = binding.mainContainer;
-
+        Log.d("DEVICEID", organizerEventsListViewModel.getDeviceId());
         //create observer for the event list
         organizerEventsListViewModel.getEventList().observe(getViewLifecycleOwner(), new Observer<ArrayList<Event>>() {
             @Override
@@ -61,7 +64,6 @@ public class OrganizerHomeFragment extends Fragment {
 
 
                 if (events != null) {
-
                     // Update UI with the new event list
                     updateEventListHomepageUI(events);
                 } else {
@@ -112,6 +114,16 @@ public class OrganizerHomeFragment extends Fragment {
             TextView EventSubtitleView = NewMockEventCardView.findViewById(R.id.EventSubtitle);
             TextView EventDescriptionView = NewMockEventCardView.findViewById(R.id.EventDescription);
             TextView TimeUntilEventView = NewMockEventCardView.findViewById(R.id.TimeUntilEvent);
+
+            Button EditEvent = NewMockEventCardView.findViewById(R.id.EditEvent);
+            EditEvent.setOnClickListener(v->{
+                NavController navController = NavHostFragment.findNavController(OrganizerHomeFragment.this);
+                navController.navigate(R.id.action_home_to_event_details);
+                assert event != null;
+                organizerEventsListViewModel.setSelectedEvent(event);
+                // Implement navigation to event editing fragment or activity if needed
+            });
+
 
             EventTitleView.setText(event.getName());
             EventSubtitleView.setText("hosted by " + event.getEventHost().getName());

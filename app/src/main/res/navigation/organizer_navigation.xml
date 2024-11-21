@@ -10,6 +10,9 @@
         android:name="com.example.mini_pekkas.ui.event.organizer.EventCreateFragment"
         android:label="Organizer Create Event"
         tools:layout="@layout/fragment_create_event"/>
+        <action
+            android:id="@+id/action_add_event_to_event_details"
+            app:destination="@id/navigation_org_event_details"/>
     <fragment
         android:id="@+id/navigation_org_camera"
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
@@ -25,9 +28,27 @@
         android:name="com.example.mini_pekkas.ui.home.OrganizerHomeFragment"
         android:label="Organizer Home"
         tools:layout="@layout/fragment_organizer_home"/>
+        <action
+            android:id="@+id/action_home_to_event_details"
+            app:destination="@id/navigation_org_event_details" />
+
     <fragment
         android:id="@+id/navigation_org_profile"
         android:name="com.example.mini_pekkas.ui.profile.OrganizerProfileFragment"
         android:label="Organizer Profile"
         tools:layout="@layout/fragment_organizer_profile"/>
+    <fragment
+        android:id="@+id/navigation_org_event_details"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventDetailsFragment"
+        tools:layout="@layout/fragment_event_org" />
+        <action
+            android:id="@+id/action_event_details_to_edit_event"
+            app:destination="@id/navigation_org_edit_event" />
+    <fragment
+        android:id="@+id/navigation_org_edit_event"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventEditFragment"
+        tools:layout="@layout/fragment_event_org" />
+        <action
+            android:id="@+id/action_edit_event_to_event_details"
+            app:destination="@id/navigation_org_event_details" />
 </navigation>
