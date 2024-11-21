@@ -4,7 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/organizer_navigation"
     app:startDestination="@id/navigation_org_home">
-
+    <action
+        android:id="@+id/action_global_navigation_org_home"
+        app:destination="@id/navigation_org_home"
+        app:popUpTo="@id/navigation_org_home"
+        app:popUpToInclusive="true" />
     <fragment
         android:id="@+id/navigation_org_add"
         android:name="com.example.mini_pekkas.ui.event.organizer.EventCreateFragment"

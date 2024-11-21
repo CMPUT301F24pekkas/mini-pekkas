@@ -39,6 +39,7 @@ public class OrganizerHomeFragment extends Fragment {
     private LinearLayout EventsContainer;
     private OrganizerHomeViewModel organizerHomeViewModel;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
+    private LiveData<ArrayList<Event>> EventList;
     /**
      * Called to initialize the fragment's user interface.
      *
@@ -52,6 +53,7 @@ public class OrganizerHomeFragment extends Fragment {
 //                .get(OrganizerHomeViewModel.class);
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
+
         binding = FragmentOrganizerHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -61,14 +63,24 @@ public class OrganizerHomeFragment extends Fragment {
         organizerEventsListViewModel.getEventList().observe(getViewLifecycleOwner(), new Observer<ArrayList<Event>>() {
             @Override
             public void onChanged(ArrayList<Event> events) {
-
-
                 if (events != null) {
                     // Update UI with the new event list
                     updateEventListHomepageUI(events);
                 } else {
                     Log.d("OrganizerHomeFragment", "No events available");
-                    // Handle no events case (e.g., show a message or placeholder)
+                }
+            }
+        });
+        organizerEventsListViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), new Observer<Event>() {
+            @Override
+            public void onChanged(Event event) {
+                if (event != null) {
+                    // Update UI with the new event list
+                    EventList = organizerEventsListViewModel.getEventList();
+                    assert EventList.getValue() != null;
+                    updateEventListHomepageUI(EventList.getValue());
+                } else {
+                    Log.d("OrganizerHomeFragment", "No events available");
                 }
             }
         });
@@ -135,6 +147,7 @@ public class OrganizerHomeFragment extends Fragment {
             EventsContainer.addView(eventView);
         }
     }
+
 
     /**
      * Displays the details of the given event in the fragment's layout.
