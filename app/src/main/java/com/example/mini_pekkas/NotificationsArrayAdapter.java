@@ -33,7 +33,7 @@ public class NotificationsArrayAdapter extends ArrayAdapter<Notifications>{
 
         titleTextView.setText(notifications.getTitle());
         descriptionTextView.setText(notifications.getDescription());
-        dateTextView.setText(notifications.getDate());
+        dateTextView.setText(notifications.getDate().toString());
         priorityTextView.setText(String.valueOf(notifications.getPriority()));
 
         return convertView;
