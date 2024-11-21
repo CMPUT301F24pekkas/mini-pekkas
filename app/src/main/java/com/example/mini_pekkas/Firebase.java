@@ -93,6 +93,16 @@ public class Firebase {
     }
 
     /**
+     * Interface for functions that retrieves a list of strings.
+     */
+    public interface DataListRetrievalListener {
+        void onListRetrievalCompleted(ArrayList<String> result);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error retrieving data: ", e);
+        }
+    }
+
+    /**
      * Interface for functions that check a conditional. Returns true if the conditional is met
      */
     public interface CheckListener {
@@ -106,9 +116,9 @@ public class Firebase {
      * Interface for getUser. Fetches and returns an user object
      */
     public interface UserRetrievalListener {
-        void onUserRetrievalCompleted(Event event);
+        void onUserRetrievalCompleted(User users);
         default void onError(Exception e) {
-            Log.e(TAG, "Error getting data: ", e);
+            Log.e(TAG, "Error getting user: ", e);
         }
     }
 
@@ -116,9 +126,9 @@ public class Firebase {
      * Interface for functions that retrieve an array of users
      */
     public interface UserListRetrievalListener {
-        void onUserListRetrievalCompleted(ArrayList<Event> events);
+        void onUserListRetrievalCompleted(ArrayList<User> users);
         default void onError(Exception e) {
-            Log.e(TAG, "Error getting events: ", e);
+            Log.e(TAG, "Error getting users: ", e);
         }
     }
 
@@ -929,8 +939,10 @@ public class Firebase {
     }
 
     public void searchForEvent(String query, EventListRetrievalListener listener) {
+        // Search by event name and description
         ArrayList<Task> tasks = new ArrayList<>();
-        tasks.add(eventCollection.whereEqualTo("name", query).get());
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("name", query).whereLessThanOrEqualTo("name", query + "\uf8ff").get());
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("description", query).whereLessThanOrEqualTo("description", query + "\uf8ff").get());
 
         waitForQueryCompletion(tasks, (results) -> {
             // Create new array of event objects
@@ -940,6 +952,45 @@ public class Firebase {
                 events.add(event);
             }
             listener.onEventListRetrievalCompleted(events);
+        });
+    }
+
+    /**
+     * Searches for users in the database, returns an array of users
+     * @param query the query to search for
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of users
+     */
+    public void searchForUsers(String query, UserListRetrievalListener listener) {
+        // Search by name, lastname, and email
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("name", query).whereLessThanOrEqualTo("name", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("lastname", query).whereLessThanOrEqualTo("lastname", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("email", query).whereLessThanOrEqualTo("email", query + "\uf8ff").get());
+
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<User> users = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                User user = new User(Objects.requireNonNull(document.getData()));
+                users.add(user);
+            }
+            listener.onUserListRetrievalCompleted(users);
+        });
+    }
+
+    public void searchForFacilities(String query, DataListRetrievalListener listener) {
+        // Search by name, lastname, and email
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility ", query + "\uf8ff").get());
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<String> facilities = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                facilities.add(Objects.requireNonNull(document.get("facility")).toString());
+            }
+            listener.onListRetrievalCompleted(facilities);
         });
     }
 
