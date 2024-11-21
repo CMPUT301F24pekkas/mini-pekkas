@@ -22,7 +22,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- RecyclerView for Images -->
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/imageGridRecyclerView"
         android:layout_width="0dp"
