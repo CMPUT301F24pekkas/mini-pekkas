@@ -18,6 +18,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
@@ -28,10 +29,21 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
 
     private final List<Uri> images;
     private final Context context;
+    private ImageAdapter adapter; // Add adapter reference
 
     public ImageAdapter(Context context, List<Uri> images) {
         this.context = context;
         this.images = images;
+        this.adapter = this;
+    }
+
+    /**
+     * Remove an item from the list. Used in delete button click listener
+     * @param position The position of the item to be removed
+     */
+    public void removeItem(int position) {
+        images.remove(position);
+        notifyItemRemoved(position);
     }
 
     /**
@@ -46,7 +58,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_image, parent, false);
-        return new ImageViewHolder(view);
+        return new ImageViewHolder(view, images, adapter);
     }
 
     /**
@@ -85,17 +97,61 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
         return images.size();
     }
 
+
     /**
-     * This class is used to display images in a recycler view
+     * This class is used to display images in a recycler view. Set the image view and progress bar
+     * Also set the delete button
      */
     public static class ImageViewHolder extends RecyclerView.ViewHolder {
+        public List<Uri> images;
         public ImageView imageView;
         public ProgressBar progressBar; // Add ProgressBar
+        public FloatingActionButton deleteButton;
+        public Firebase firebaseHelper;
+        public ImageAdapter adapter;
 
-        public ImageViewHolder(@NonNull View itemView) {
+        public ImageViewHolder(@NonNull View itemView, List<Uri> images, ImageAdapter adapter) {
             super(itemView);
+            this.images = images;
             imageView = itemView.findViewById(R.id.imageView);
             progressBar = itemView.findViewById(R.id.loadingProgressBar); // Initialize progressBar
+            deleteButton = itemView.findViewById(R.id.deleteImage);
+            firebaseHelper = new Firebase(itemView.getContext());
+            this.adapter = adapter;
+
+            // Set the delete button click listener
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Uri imageUri = images.get(position);
+                        String imageName = imageUri.getLastPathSegment();
+                        // Remove the first part of the string up to and including the path separator
+                        if (imageName.contains("/")) {
+                            imageName = imageName.substring(imageName.indexOf("/") + 1);
+                        }
+
+                        // Call Firebase delete function based on image type
+                        String finalImageName = imageName;
+                        System.out.println("Before");
+                        firebaseHelper.isProfilePicture(imageName, exist -> {
+                            System.out.println("Exist: " + exist);
+                            if (exist) {
+                                firebaseHelper.deleteProfilePicture(finalImageName, () -> {
+                                    adapter.removeItem(position);
+                                });
+                            } else {
+                                firebaseHelper.deletePosterPicture(finalImageName, () -> {
+                                    // Get adapter instance and call removeItem()
+                                    adapter.removeItem(position);
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
         }
     }
 }
