@@ -17,13 +17,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:text="Facilites"
+            android:text="Event"
             android:textColor="@android:color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <SearchView
-            android:id="@+id/admin_search_facilities"
+            android:id="@+id/admin_search_events"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:drawableEnd="@drawable/search"
@@ -31,7 +31,7 @@
             android:queryHint="Search for event" />
 
         <ListView
-            android:id="@+id/adminFacilityListView"
+            android:id="@+id/adminEventListView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -39,6 +39,6 @@
             android:dividerHeight="1dp" />
     </LinearLayout>
 
-    <!-- ListView for the list of profiles -->
+    <!-- ListView for the list of profiles-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

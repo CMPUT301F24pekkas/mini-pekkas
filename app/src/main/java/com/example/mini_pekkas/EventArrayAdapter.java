@@ -7,9 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
-import java.text.SimpleDateFormat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,7 +33,7 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
      * @param context The context in which the adapter is used.
      * @param events The list of Event objects to display.
      */
-    EventArrayAdapter(Context context, ArrayList<Event> events){
+    public EventArrayAdapter(Context context, ArrayList<Event> events){
 
         super(context, 0 , events);
         this.events = events;
@@ -80,7 +77,8 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
 
         currentWaitView.setText(String.valueOf(event.getWaitlist().size()));
 
-        priceView.setText(String.format(Locale.getDefault(), "$%d", event.getPrice()));
+        // Format to double
+        priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
 
         return convertView;
 

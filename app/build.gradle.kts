@@ -84,5 +84,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.1") // Core library
     implementation("com.google.zxing:javase:3.4.1")// Optional, for the MatrixToImageWriter
 
+    implementation("androidx.cardview:cardview:1.0.0")
+    
 }
 
