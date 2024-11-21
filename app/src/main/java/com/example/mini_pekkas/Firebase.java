@@ -171,6 +171,14 @@ public class Firebase {
     }
 
     /**
+     * Interface for functions that return list of image in Uri format.
+     */
+    public interface ImageListRetrievalListener {
+        void onImageListRetrievalCompleted(ArrayList<Uri> images);
+        default void onError(Exception e) {Log.e(TAG, "Error getting images: ", e);}
+    }
+
+    /**
      * Interface for admin functions that retrieve an array of document snapshots to be processed later
      */
     public interface QueryRetrievalListener {
@@ -979,6 +987,12 @@ public class Firebase {
         });
     }
 
+    /**
+     * Searches for facilities in the database, returns an array of facilities (strings)
+     * TODO Currently doesn't return anything, an issue on the firebase end
+     * @param query the query to search for
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of facilities
+     */
     public void searchForFacilities(String query, DataListRetrievalListener listener) {
         // Search by name, lastname, and email
         ArrayList<Task> tasks = new ArrayList<>();
@@ -994,5 +1008,46 @@ public class Firebase {
         });
     }
 
+    /**
+     * Gets all images from the profile and poster picture storages
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of images
+     */
+    public void getAllImages(ImageListRetrievalListener listener) {
+        ArrayList<Uri> images = new ArrayList<>();
+
+        profilePictureReference.listAll()
+            .addOnSuccessListener(result -> {
+                // Add all uri to images
+                int total_pfp = result.getItems().size();
+                AtomicInteger retrieved_pfp = new AtomicInteger();
+
+                    for (StorageReference ref : result.getItems()) {
+                        ref.getDownloadUrl()
+                            .addOnSuccessListener(images::add)
+                            .addOnFailureListener(listener::onError);
+
+                        if (retrieved_pfp.incrementAndGet() == total_pfp) {
+                            // Then fetch all poster images
+                            posterPictureReference.listAll()
+                                    .addOnSuccessListener(result2 -> {
+                                        // Counters to keep track of progress
+                                        int total_poster = result2.getItems().size();
+                                        AtomicInteger retrieved_poster = new AtomicInteger();
+
+                                        for (StorageReference ref2 : result2.getItems()) {
+                                            ref2.getDownloadUrl()
+                                                    .addOnSuccessListener(images::add)
+                                                    .addOnFailureListener(listener::onError);
+                                            if (retrieved_poster.incrementAndGet() == total_poster) {
+                                                listener.onImageListRetrievalCompleted(images);
+                                            }
+                                        }
+                                    })
+                                    .addOnFailureListener(listener::onError);
+                        }
+                    }
+                })
+            .addOnFailureListener(listener::onError);
+    }
 }
 

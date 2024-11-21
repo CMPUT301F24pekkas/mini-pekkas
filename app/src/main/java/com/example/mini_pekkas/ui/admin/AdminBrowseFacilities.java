@@ -52,7 +52,9 @@ public class AdminBrowseFacilities extends Fragment {
                     // Set the value of eventList to events
                     facilityArrayAdapter.clear();
                     facilityArrayAdapter.addAll(facilities);
-                    facilityArrayAdapter.add("Test");
+
+                    // TODO Need better format than string
+                    // Also query doesn't return anything
 
                     // Notify the dataset change to update
                     facilityArrayAdapter.notifyDataSetChanged();
