@@ -8,9 +8,12 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -90,6 +93,16 @@ public class Firebase {
     }
 
     /**
+     * Interface for functions that retrieves a list of strings.
+     */
+    public interface DataListRetrievalListener {
+        void onListRetrievalCompleted(ArrayList<String> result);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error retrieving data: ", e);
+        }
+    }
+
+    /**
      * Interface for functions that check a conditional. Returns true if the conditional is met
      */
     public interface CheckListener {
@@ -103,9 +116,9 @@ public class Firebase {
      * Interface for getUser. Fetches and returns an user object
      */
     public interface UserRetrievalListener {
-        void onUserRetrievalCompleted(Event event);
+        void onUserRetrievalCompleted(User users);
         default void onError(Exception e) {
-            Log.e(TAG, "Error getting data: ", e);
+            Log.e(TAG, "Error getting user: ", e);
         }
     }
 
@@ -113,9 +126,9 @@ public class Firebase {
      * Interface for functions that retrieve an array of users
      */
     public interface UserListRetrievalListener {
-        void onUserListRetrievalCompleted(ArrayList<Event> events);
+        void onUserListRetrievalCompleted(ArrayList<User> users);
         default void onError(Exception e) {
-            Log.e(TAG, "Error getting events: ", e);
+            Log.e(TAG, "Error getting users: ", e);
         }
     }
 
@@ -155,6 +168,24 @@ public class Firebase {
     public interface ImageRetrievalListener {
         void onImageRetrievalCompleted(Uri image);
         default void onError(Exception e) {Log.e(TAG, "Error getting image: ", e);}
+    }
+
+    /**
+     * Interface for functions that return list of image in Uri format.
+     */
+    public interface ImageListRetrievalListener {
+        void onImageListRetrievalCompleted(ArrayList<Uri> images);
+        default void onError(Exception e) {Log.e(TAG, "Error getting images: ", e);}
+    }
+
+    /**
+     * Interface for admin functions that retrieve an array of document snapshots to be processed later
+     */
+    public interface QueryRetrievalListener {
+        void onQueryRetrievalCompleted(ArrayList<DocumentSnapshot> objects);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting data: ", e);
+        }
     }
 
     /*
@@ -873,7 +904,11 @@ public class Firebase {
     public void deletePosterPicture(Event event) {
         deletePosterPicture(event, () -> {});
     }
-    // TODO add admin functions. Allows for deletion of various types of data
+
+    /*
+     *  Functionality for managing admin functionality
+     */
+
     /**
      * Checks if this user is an admin
      * @param listener the listener that is called when the check is complete. Returns true if the user is an admin
@@ -886,6 +921,133 @@ public class Firebase {
                     listener.onCheckComplete(exist);
                 });
     }
-    // TODO merge in admin functions later
+
+    /**
+     * Handles the processing of multiple search tasks and ensures all data is retrieved before calling the listener
+     * @param tasks A list of document snapshots to be processed in the calling function
+     * @param listener QueryRetrievalListener listener that returns an ArrayList of document snapshots.
+     * Document snapshots should be processed in the calling function
+     */
+    private void waitForQueryCompletion(ArrayList<Task> tasks, QueryRetrievalListener listener) {
+        // wait for all tasks to complete
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener( queries -> {
+                    ArrayList<DocumentSnapshot> results = new ArrayList<>();
+                    for (Object query : queries) {
+                        // Check what the query is and add the object to the results array
+                        if (query instanceof QuerySnapshot) {
+                            results.addAll(((QuerySnapshot) query).getDocuments());
+                        } else if (query instanceof DocumentSnapshot) {
+                            results.add(((DocumentSnapshot) query));
+                        }
+                    }
+                    listener.onQueryRetrievalCompleted(results);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    public void searchForEvent(String query, EventListRetrievalListener listener) {
+        // Search by event name and description
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("name", query).whereLessThanOrEqualTo("name", query + "\uf8ff").get());
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("description", query).whereLessThanOrEqualTo("description", query + "\uf8ff").get());
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<Event> events = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                Event event = new Event(Objects.requireNonNull(document.getData()));
+                events.add(event);
+            }
+            listener.onEventListRetrievalCompleted(events);
+        });
+    }
+
+    /**
+     * Searches for users in the database, returns an array of users
+     * @param query the query to search for
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of users
+     */
+    public void searchForUsers(String query, UserListRetrievalListener listener) {
+        // Search by name, lastname, and email
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("name", query).whereLessThanOrEqualTo("name", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("lastname", query).whereLessThanOrEqualTo("lastname", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("email", query).whereLessThanOrEqualTo("email", query + "\uf8ff").get());
+
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<User> users = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                User user = new User(Objects.requireNonNull(document.getData()));
+                users.add(user);
+            }
+            listener.onUserListRetrievalCompleted(users);
+        });
+    }
+
+    /**
+     * Searches for facilities in the database, returns an array of facilities (strings)
+     * TODO Currently doesn't return anything, an issue on the firebase end
+     * @param query the query to search for
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of facilities
+     */
+    public void searchForFacilities(String query, DataListRetrievalListener listener) {
+        // Search by name, lastname, and email
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility ", query + "\uf8ff").get());
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<String> facilities = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                facilities.add(Objects.requireNonNull(document.get("facility")).toString());
+            }
+            listener.onListRetrievalCompleted(facilities);
+        });
+    }
+
+    /**
+     * Gets all images from the profile and poster picture storages
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of images
+     */
+    public void getAllImages(ImageListRetrievalListener listener) {
+        ArrayList<Uri> images = new ArrayList<>();
+
+        profilePictureReference.listAll()
+            .addOnSuccessListener(result -> {
+                // Add all uri to images
+                int total_pfp = result.getItems().size();
+                AtomicInteger retrieved_pfp = new AtomicInteger();
+
+                    for (StorageReference ref : result.getItems()) {
+                        ref.getDownloadUrl()
+                            .addOnSuccessListener(images::add)
+                            .addOnFailureListener(listener::onError);
+
+                        if (retrieved_pfp.incrementAndGet() == total_pfp) {
+                            // Then fetch all poster images
+                            posterPictureReference.listAll()
+                                    .addOnSuccessListener(result2 -> {
+                                        // Counters to keep track of progress
+                                        int total_poster = result2.getItems().size();
+                                        AtomicInteger retrieved_poster = new AtomicInteger();
+
+                                        for (StorageReference ref2 : result2.getItems()) {
+                                            ref2.getDownloadUrl()
+                                                    .addOnSuccessListener(images::add)
+                                                    .addOnFailureListener(listener::onError);
+                                            if (retrieved_poster.incrementAndGet() == total_poster) {
+                                                listener.onImageListRetrievalCompleted(images);
+                                            }
+                                        }
+                                    })
+                                    .addOnFailureListener(listener::onError);
+                        }
+                    }
+                })
+            .addOnFailureListener(listener::onError);
+    }
 }
 

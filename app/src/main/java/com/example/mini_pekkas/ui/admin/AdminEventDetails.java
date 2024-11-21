@@ -1,4 +1,4 @@
-package com.example.mini_pekkas.ui.event.admin;
+package com.example.mini_pekkas.ui.admin;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;

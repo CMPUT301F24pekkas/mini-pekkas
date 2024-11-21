@@ -81,7 +81,6 @@ public class OrganizerProfileViewModel extends ViewModel {
                 phoneNumber.getValue(),
                 organizerLocation.getValue(),
                 profilePictureUrl.getValue()
-                //null    // TODO Set Url of user profile picture if applicable - Ryan
         );
 
         firebaseHelper.updateThisUser(updatedUser);

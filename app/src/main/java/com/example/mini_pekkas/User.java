@@ -16,7 +16,7 @@ public class User {
     /**
      * Constructs a User object from a map of attributes.
      *
-     * @param map A Map containing user details with keys "name", "lastname", "email", "phone", and "facility".
+     * @param map A Map containing user details with keys "name", "lastname", "email", "phone", "facility", and "id".
      */
     public User(Map<String, Object> map) {
         this.name = (String) map.get("name");
@@ -25,6 +25,9 @@ public class User {
         this.phone = (String) map.get("phone");
         this.facility = (String) map.get("facility");
         this.profilePhotoUrl = (String) map.get("profilePhoto");
+    }
+
+    public User() {
     }
 
     /**
@@ -45,8 +48,6 @@ public class User {
         this.profilePhotoUrl = profilePhotoUrl;
     }
 
-    public User() {
-    }
     /**
      * Gets the user's first name.
      *
@@ -149,9 +150,6 @@ public class User {
         map.put("phone", phone);
         map.put("facility", facility);
         map.put("profilePhoto", profilePhotoUrl);
-        //map.put("isOrganizer", isOrganizer);
-        // map.put("isAdmin", isAdmin);
-        //map.put("profilePhoto", profilePhoto);
         return map;
     }
 }

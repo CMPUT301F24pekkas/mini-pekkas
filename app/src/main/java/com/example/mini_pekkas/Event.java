@@ -51,6 +51,8 @@ public class Event {
         this.posterPhotoUrl = posterPhotoUrl;
     }
 
+    public Event() {
+    }
 
 
     // Getters and Setters
