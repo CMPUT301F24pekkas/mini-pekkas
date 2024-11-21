@@ -65,39 +65,34 @@ public class EventCreateFragment extends Fragment {
         View root = binding.getRoot();
 
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
-                .get(OrganizerEventsListViewModel.class);;
-        // Initialize Firebase helper
+                .get(OrganizerEventsListViewModel.class);
         firebaseHelper = new Firebase(requireContext());
 
-        // Set up poster image selection
         ImageButton posterButton = binding.addEventPicture;
         posterButton.setOnClickListener(v -> openImageChooser());
 
-        // Button to create event and show QR code confirmation dialog
         Button addButton = binding.addEventButton;
         addButton.setOnClickListener(v -> {
-            // Create the event with user input data
             Event event = CreateEvent();
 
-            // Generate a unique QR code using the event ID + a new UUID
+            // Generate a unique QR code raw string (event ID + UUID)
             String uniqueQrData = event.getId() + "_" + UUID.randomUUID().toString();
+
+            // Set the raw QR code data in the event
+            event.setQrCode(uniqueQrData);
+
+            // Generate the QR code bitmap for display purposes
             Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(uniqueQrData, 300, 300);
 
             if (qrCodeBitmap != null) {
-                // Convert QR code bitmap to Base64 string and set it in the event object
-                String qrCodeBase64 = bitmapToBase64(qrCodeBitmap);
-                // TODO
-                Log.d("PUT IN", "base64qr = " + qrCodeBase64);
-                event.setQrCode(qrCodeBase64);
-
-                // Upload poster image if available, then save the event
+                // Upload poster image (if any) and save the event
                 uploadPosterImageToFirebase(event, qrCodeBitmap);
             }
-            //update live data
+
+            // Update live data
             organizerEventsListViewModel.addEvent(event);
         });
 
-        // Button to cancel event creation and clear inputs
         Button cancelButton = binding.cancelEventButton;
         cancelButton.setOnClickListener(v -> ClearInput());
 
@@ -142,18 +137,15 @@ public class EventCreateFragment extends Fragment {
 
             storageRef.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        event.setPosterPhotoUrl(uri.toString());  // Set the poster URL in the event
-                        firebaseHelper.addEvent(event);           // Save the event with poster URL in Firebase
-
-                        // Show the QR code in a dialog after saving
+                        event.setPosterPhotoUrl(uri.toString());
+                        firebaseHelper.addEvent(event);  // Save the event in Firebase
                         showQrCodeDialog(qrCodeBitmap);
                         ClearInput();
                     }))
                     .addOnFailureListener(e -> {
-                        // Handle the error, e.g., show a message to the user
+                        // Handle the error
                     });
         } else {
-            // Save event without a poster URL if no image is selected
             firebaseHelper.addEvent(event);
             showQrCodeDialog(qrCodeBitmap);
             ClearInput();
@@ -225,7 +217,6 @@ public class EventCreateFragment extends Fragment {
 
         User host = firebaseHelper.getThisUser();
         String facility = host.getFacility();
-        Log.d("EventCreateFragment:", " Event function finished");
         return new Event(event_id, eventTitle, host, eventDescription, startDate, endDate, price,
                 facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked, "");
     }

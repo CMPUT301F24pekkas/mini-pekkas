@@ -85,6 +85,6 @@ dependencies {
     implementation("com.google.zxing:javase:3.4.1")// Optional, for the MatrixToImageWriter
 
     implementation("androidx.cardview:cardview:1.0.0")
-
+    
 }
 

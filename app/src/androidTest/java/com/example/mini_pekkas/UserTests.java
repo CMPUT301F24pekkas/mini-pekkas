@@ -83,23 +83,21 @@ public class UserTests {
         onView(withId(R.id.navigation_home)).perform(click());
     }
 
-//    /**
-//     * US 01.01.01 As an entrant, I want to join the waiting list for a specific event
-//     */
-//    @Test
-//    public void testJoinWait(){
-////        // click on the event profile
-////        onView(withId(R.id.navigation_event)).perform(click());
-////        onView(withId(R.id.joinWaitButton)).perform(click());
-//
-//    }
-//    /**
-//     * US 01.01.02 As an entrant, I want to leave the waiting list for a specific event
-//     */
-//    @Test
-//    public void testLeaveWait(){
-//
-//    }
+    /**
+     * US 01.01.01 As an entrant, I want to join the waiting list for a specific event
+     */
+    @Test
+    public void testJoinWait(){
+        onView(withId(R.id.joinWaitButton)).perform(click());
+
+    }
+    /**
+     * US 01.01.02 As an entrant, I want to leave the waiting list for a specific event
+     */
+    @Test
+    public void testLeaveWait(){
+        onView(withId(R.id.leaveWaitButton)).perform(click());
+    }
     /**
      * US 01.02.02 As an entrant I want to update information such as name, email and contact information on my profile
      */
@@ -167,63 +165,63 @@ public class UserTests {
         Thread.sleep(3000);
         onView(withId(R.id.profileText)).check(matches(withText("C")));
     }
-//    /**
-//     * US 01.04.01 As an entrant I want to receive notification when chosen from the waiting list (when I "win" the lottery)
-//     */
-//    @Test
-//    public void testChosenNotifications(){
-//
-//    }
-//
-//    /**
-//     * US 01.04.02 As an entrant I want to receive notification of not chosen on the app (when I "lose" the lottery)
-//     */
-//    @Test
-//    public void testLoseNotifications(){
-//
-//    }
-//    /**
-//     * US 01.04.03 As an entrant I want to opt out of receiving notifications from organizers and admin
-//     */
-//    @Test
-//    public void testOptOutNotifications(){
-//
-//    }
-//    /**
-//     * US 01.05.01 As an entrant I want another chance to be chosen from the waiting list if a selected user declines an invitation to sign up
-//     */
-//    @Test
-//    public void testChanceChosenAgain(){
-//
-//    }
-//    /**
-//     * US 01.05.02 As an entrant I want to be able to accept the invitation to register/sign up when chosen to participate in an event
-//     */
-//    @Test
-//    public void acceptEvent(){
-//
-//    }
-//    /**
-//     * US 01.05.03 As an entrant I want to be able to decline an invitation when chosen to participate in an event
-//     */
-//    @Test
-//    public void delineEvent(){
-//
-//    }
-//    /**
-//     * US 01.06.01 As an entrant I want to view event details within the app by scanning the promotional QR code
-//     */
-//    @Test
-//    public void viewEvent(){
-//
-//    }
-//    /**
-//     * US 01.06.02 As an entrant I want to be able to be sign up for an event by scanning the QR code
-//     */
-//    @Test
-//    public void signUpEvent(){
-//
-//    }
+    /**
+     * US 01.04.01 As an entrant I want to receive notification when chosen from the waiting list (when I "win" the lottery)
+     */
+    @Test
+    public void testChosenNotifications(){
+
+    }
+
+    /**
+     * US 01.04.02 As an entrant I want to receive notification of not chosen on the app (when I "lose" the lottery)
+     */
+    @Test
+    public void testLoseNotifications(){
+
+    }
+    /**
+     * US 01.04.03 As an entrant I want to opt out of receiving notifications from organizers and admin
+     */
+    @Test
+    public void testOptOutNotifications(){
+
+    }
+    /**
+     * US 01.05.01 As an entrant I want another chance to be chosen from the waiting list if a selected user declines an invitation to sign up
+     */
+    @Test
+    public void testChanceChosenAgain(){
+
+    }
+    /**
+     * US 01.05.02 As an entrant I want to be able to accept the invitation to register/sign up when chosen to participate in an event
+     */
+    @Test
+    public void acceptEvent(){
+
+    }
+    /**
+     * US 01.05.03 As an entrant I want to be able to decline an invitation when chosen to participate in an event
+     */
+    @Test
+    public void delineEvent(){
+
+    }
+    /**
+     * US 01.06.01 As an entrant I want to view event details within the app by scanning the promotional QR code
+     */
+    @Test
+    public void viewEvent(){
+
+    }
+    /**
+     * US 01.06.02 As an entrant I want to be able to be sign up for an event by scanning the QR code
+     */
+    @Test
+    public void signUpEvent(){
+
+    }
     /**
      * US 01.07.01 As an entrant, I want to be identified by my device, so that I don't have to use a username and password
      */
@@ -231,11 +229,11 @@ public class UserTests {
     public void deviceIdentify(){
         onView(withId(R.id.user_view)).check(matches(isDisplayed()));
     }
-//    /**
-//     * US 01.08.01 As an entrant, I want to be warned before joining a waiting list that requires geolocation.
-//     */
-//    @Test
-//    public void geolocationWarning(){
-//
-//    }
+    /**
+     * US 01.08.01 As an entrant, I want to be warned before joining a waiting list that requires geolocation.
+     */
+    @Test
+    public void geolocationWarning(){
+
+    }
 }

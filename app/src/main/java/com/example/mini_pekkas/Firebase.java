@@ -8,14 +8,21 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,13 +31,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.13.4 11/18/20224 Fixed getEventByStatus, properly increment counter and check if all events have been retrieved
+ * @version 1.15 11/21/2024 Added Search Functionality. Added more functions for deleting profile/poster pictures
  */
 public class Firebase {
     private final String deviceID;
     private final CollectionReference userCollection;
     private final CollectionReference eventCollection;
     private final CollectionReference userEventsCollection;
+    private final CollectionReference userNotificationsCollection;
     private final CollectionReference adminCollection;
     private final StorageReference profilePictureReference;
     private final StorageReference posterPictureReference;
@@ -51,6 +59,7 @@ public class Firebase {
         userCollection = db.collection("users");
         eventCollection = db.collection("events");
         userEventsCollection = db.collection("user-events");
+        userNotificationsCollection = db.collection("user-notifications");
         adminCollection = db.collection("admins");
 
         //Initialize our storage references
@@ -87,6 +96,16 @@ public class Firebase {
     }
 
     /**
+     * Interface for functions that retrieves a list of strings.
+     */
+    public interface DataListRetrievalListener {
+        void onListRetrievalCompleted(ArrayList<String> result);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error retrieving data: ", e);
+        }
+    }
+
+    /**
      * Interface for functions that check a conditional. Returns true if the conditional is met
      */
     public interface CheckListener {
@@ -100,9 +119,9 @@ public class Firebase {
      * Interface for getUser. Fetches and returns an user object
      */
     public interface UserRetrievalListener {
-        void onUserRetrievalCompleted(Event event);
+        void onUserRetrievalCompleted(User users);
         default void onError(Exception e) {
-            Log.e(TAG, "Error getting data: ", e);
+            Log.e(TAG, "Error getting user: ", e);
         }
     }
 
@@ -110,9 +129,9 @@ public class Firebase {
      * Interface for functions that retrieve an array of users
      */
     public interface UserListRetrievalListener {
-        void onUserListRetrievalCompleted(ArrayList<Event> events);
+        void onUserListRetrievalCompleted(ArrayList<User> users);
         default void onError(Exception e) {
-            Log.e(TAG, "Error getting events: ", e);
+            Log.e(TAG, "Error getting users: ", e);
         }
     }
 
@@ -137,11 +156,39 @@ public class Firebase {
     }
 
     /**
+     * Interface for functions that retrieve the notifications for this use
+     */
+    public interface NotificationListRetrievalListener {
+        void onNotificationListRetrievalCompleted(ArrayList<Notifications> notification);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting notification: ", e);
+        }
+    }
+
+    /**
      * Interface for functions that return an image in Uri format.
      */
     public interface ImageRetrievalListener {
         void onImageRetrievalCompleted(Uri image);
         default void onError(Exception e) {Log.e(TAG, "Error getting image: ", e);}
+    }
+
+    /**
+     * Interface for functions that return list of image in Uri format.
+     */
+    public interface ImageListRetrievalListener {
+        void onImageListRetrievalCompleted(ArrayList<Uri> images);
+        default void onError(Exception e) {Log.e(TAG, "Error getting images: ", e);}
+    }
+
+    /**
+     * Interface for admin functions that retrieve an array of document snapshots to be processed later
+     */
+    public interface QueryRetrievalListener {
+        void onQueryRetrievalCompleted(ArrayList<DocumentSnapshot> objects);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting data: ", e);
+        }
     }
 
     /*
@@ -391,6 +438,67 @@ public class Firebase {
      */
     public void getEvent(Event event, EventRetrievalListener listener) {
         getEvent(event.getId(), listener);
+    }
+
+    /*
+     *  Functionality for managing notifications of this user
+     */
+
+    /**
+     * Get all the notifications for this user. Returns an arrayList of notifications sorted by newest date first
+     * @param listener a NotificationListRetrievalListener listener that returns an arrayList of notifications
+     */
+    public void getThisUserNotifications(NotificationListRetrievalListener listener) {
+        userNotificationsCollection.whereEqualTo("userID", this.deviceID).get()
+                .addOnSuccessListener(task -> {
+                    // Pass an empty array if no notifications exist
+                    if (task.isEmpty()) {
+                        listener.onNotificationListRetrievalCompleted(new ArrayList<>());
+                        return;
+                    }
+
+                    ArrayList<Notifications> notifications = new ArrayList<>();
+                    int total_notifications = task.size();
+                    AtomicInteger notification_count = new AtomicInteger();
+
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        // Remove the user id so Notifications don't store the device id
+                        Map<String, Object> map = Objects.requireNonNull(document.getData());
+                        map.remove("userID");
+                        notifications.add(new Notifications(map));
+
+                        // Wait for all events to be deleted first
+                        if (notification_count.incrementAndGet() == total_notifications) {
+                            // Sort by newest date first
+                            notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+                            listener.onNotificationListRetrievalCompleted(notifications);
+                        }
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Add a notification to the user-notifications collection
+     * @param notification a notification object to be added
+     * @param listener Optional InitializationListener listener that is called after the notification is added
+     */
+    public void addNotification(Notifications notification, InitializationListener listener) {
+        // Set the user id and date field in correct format
+        HashMap<String, Object> map = notification.toMap();
+        map.put("date", notification.getTimestamp());
+        map.put("userID", this.deviceID);
+
+        userNotificationsCollection.add(map)
+                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #addNotification(Notifications, InitializationListener)} with no listener
+     */
+    public void addNotification(Notifications notification) {
+        addNotification(notification, () -> {});
     }
 
     /*
@@ -689,13 +797,12 @@ public class Firebase {
     /**
      * Deletes the profile picture from the storage.
      * Throws an error if the profile picture does not exist
-     * @param user the user object to delete the profile picture from
+     * @param profilePhotoUrl the string path of the profile photo Url to delete
      * @param listener Optional InitializationListener listener that is called when the image is deleted
      */
-    public void deleteProfilePicture(User user, InitializationListener listener) {
-        String profilePhotoUrl = user.getProfilePhotoUrl();
+    public void deleteProfilePicture(String profilePhotoUrl, InitializationListener listener) {
         if (profilePhotoUrl != null && !profilePhotoUrl.isEmpty()) {
-            profilePictureReference.child(user.getProfilePhotoUrl()).delete()
+            profilePictureReference.child(profilePhotoUrl).delete()
                     .addOnSuccessListener(aVoid -> listener.onInitialized())
                     .addOnFailureListener(listener::onError);
         } else {
@@ -705,11 +812,26 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #deleteProfilePicture(User, InitializationListener)} with no listener
+     * Overload of the {@link #deleteProfilePicture(String profilePhotoUrl, InitializationListener)} with no listener
+     */
+    public void deleteProfilePicture(String profilePhotoUrl) {
+        deleteProfilePicture(profilePhotoUrl, () -> {});
+    }
+
+    /**
+     * Overload of the {@link #deleteProfilePicture(String profilePhotoUrl, InitializationListener)} Using the user object
+     */
+    public void deleteProfilePicture(User user, InitializationListener listener) {
+        deleteProfilePicture(user.getProfilePhotoUrl(), listener);
+    }
+
+    /**
+     * Overload of the {@link #deleteProfilePicture(String profilePhotoUrl, InitializationListener)} Using the user object and no listener
      */
     public void deleteProfilePicture(User user) {
-        deleteProfilePicture(user, () -> {});
+        deleteProfilePicture(user.getProfilePhotoUrl(), () -> {});
     }
+
 
     /**
      * A private function that stores the banner picture in the storage.
@@ -777,12 +899,11 @@ public class Firebase {
     /**
      * Deletes the poster picture from the storage.
      * Throws an exception if there is no poster picture
-     * @param event the event object to delete the poster picture from
+     * @param photoUrl the string path of the poster photo Url to delete
      * @param listener Optional InitializationListener listener that is called when the image is deleted
      */
-    public void deletePosterPicture(Event event, InitializationListener listener) {
+    public void deletePosterPicture(String photoUrl, InitializationListener listener) {
         // Get the photo Url and delete it
-        String photoUrl = event.getPosterPhotoUrl();
         if (photoUrl != null && !photoUrl.isEmpty()) {
             posterPictureReference.child(photoUrl).delete()
                 .addOnSuccessListener(aVoid -> listener.onInitialized())
@@ -794,12 +915,63 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #deletePosterPicture(Event, InitializationListener)} with no listener
+     * Overload of the {@link #deletePosterPicture(String, InitializationListener)} with no listener
+     */
+    public void deletePosterPicture(String photoUrl) {
+        deletePosterPicture(photoUrl, () -> {});
+    }
+
+    /**
+     * Overload of the {@link #deletePosterPicture(String, InitializationListener)} Using the event object
+     */
+    public void deletePosterPicture(Event event, InitializationListener listener) {
+        deletePosterPicture(event.getPosterPhotoUrl(), listener);
+    }
+
+    /**
+     * Overload of the {@link #deletePosterPicture(String, InitializationListener)} Using the event object and no listener
      */
     public void deletePosterPicture(Event event) {
-        deletePosterPicture(event, () -> {});
+        deletePosterPicture(event.getPosterPhotoUrl(), () -> {});
     }
-    // TODO add admin functions. Allows for deletion of various types of data
+
+    /**
+     * Checks if the image is a profile picture.
+     * @param imageName the image name to check
+     * @param listener the listener that is called when the check is complete. Returns true if the image is a profile picture
+     *                 false if poster image,
+     *                 This function should never have to return null as either it exist in one or the other.
+     */
+    public void isProfilePicture(String imageName, CheckListener listener) {
+        // Check if the image exists in profilePictureReference
+        System.out.println("imageName: " + imageName);
+
+
+        profilePictureReference.child(imageName).getDownloadUrl()
+                .addOnSuccessListener(uri -> listener.onCheckComplete(true)) // Profile picture
+                .addOnFailureListener(e -> {
+                    if (e instanceof StorageException && ((StorageException) e).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                        // Image not found in profilePictureReference, check posterPictureReference
+                        posterPictureReference.child(imageName).getDownloadUrl()
+                                .addOnSuccessListener(uri -> listener.onCheckComplete(false)) // Poster picture
+                                .addOnFailureListener(listener::onError);
+                    } else {
+                        listener.onError(e); // Error checking profilePictureReference
+                    }
+                });
+    }
+
+    /**
+     * Overload of the {@link #isProfilePicture(String, CheckListener)} with the imageUri instead of the image name
+     */
+    public void isProfilePicture(Uri imageUrl, CheckListener listener) {
+        isProfilePicture(imageUrl.getLastPathSegment(), listener);
+    }
+
+    /*
+     *  Functionality for managing admin functionality
+     */
+
     /**
      * Checks if this user is an admin
      * @param listener the listener that is called when the check is complete. Returns true if the user is an admin
@@ -812,6 +984,124 @@ public class Firebase {
                     listener.onCheckComplete(exist);
                 });
     }
-    // TODO merge in admin functions later
+
+    /**
+     * Handles the processing of multiple search tasks and ensures all data is retrieved before calling the listener
+     * @param tasks A list of document snapshots to be processed in the calling function
+     * @param listener QueryRetrievalListener listener that returns an ArrayList of document snapshots.
+     * Document snapshots should be processed in the calling function
+     */
+    private void waitForQueryCompletion(ArrayList<Task> tasks, QueryRetrievalListener listener) {
+        // wait for all tasks to complete
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener( queries -> {
+                    ArrayList<DocumentSnapshot> results = new ArrayList<>();
+                    for (Object query : queries) {
+                        // Check what the query is and add the object to the results array
+                        if (query instanceof QuerySnapshot) {
+                            results.addAll(((QuerySnapshot) query).getDocuments());
+                        } else if (query instanceof DocumentSnapshot) {
+                            results.add(((DocumentSnapshot) query));
+                        }
+                    }
+                    listener.onQueryRetrievalCompleted(results);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    public void searchForEvent(String query, EventListRetrievalListener listener) {
+        // Search by event name and description
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("name", query).whereLessThanOrEqualTo("name", query + "\uf8ff").get());
+        tasks.add(eventCollection.whereGreaterThanOrEqualTo("description", query).whereLessThanOrEqualTo("description", query + "\uf8ff").get());
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<Event> events = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                Event event = new Event(Objects.requireNonNull(document.getData()));
+                events.add(event);
+            }
+            listener.onEventListRetrievalCompleted(events);
+        });
+    }
+
+    /**
+     * Searches for users in the database, returns an array of users
+     * @param query the query to search for
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of users
+     */
+    public void searchForUsers(String query, UserListRetrievalListener listener) {
+        // Search by name, lastname, and email
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("name", query).whereLessThanOrEqualTo("name", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("lastname", query).whereLessThanOrEqualTo("lastname", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("email", query).whereLessThanOrEqualTo("email", query + "\uf8ff").get());
+
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<User> users = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                User user = new User(Objects.requireNonNull(document.getData()));
+                users.add(user);
+            }
+            listener.onUserListRetrievalCompleted(users);
+        });
+    }
+
+    /**
+     * Searches for facilities in the database, returns an array of facilities (strings)
+     * TODO Currently doesn't return anything, an issue on the firebase end
+     * @param query the query to search for
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of facilities
+     */
+    public void searchForFacilities(String query, DataListRetrievalListener listener) {
+        // Search by name, lastname, and email
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility", query + "\uf8ff").get());
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<String> facilities = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                System.out.println(document.get("facility"));
+                facilities.add(Objects.requireNonNull(document.get("facility")).toString());
+            }
+            listener.onListRetrievalCompleted(facilities);
+        });
+    }
+
+    /**
+     * Gets all images from the profile and poster picture storages
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of images
+     */
+    public void getAllImages(ImageListRetrievalListener listener) {
+        ArrayList<Uri> images = new ArrayList<>();
+        List<Task<ListResult>> tasks = new ArrayList<>();
+
+        tasks.add(profilePictureReference.listAll());
+        tasks.add(posterPictureReference.listAll());
+
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener(results -> {
+                    List<Task<Uri>> downloadUrlTasks = new ArrayList<>();
+                    for (Object result : results) {
+                        for (StorageReference ref : ((ListResult) result).getItems()) {
+                            downloadUrlTasks.add(ref.getDownloadUrl());
+                        }
+                    }
+
+                    Tasks.whenAllSuccess(downloadUrlTasks)
+                            .addOnSuccessListener(urls -> {
+                                for (Object url : urls)
+                                    images.add((Uri) url);
+
+                                listener.onImageListRetrievalCompleted(images);
+                            })
+                            .addOnFailureListener(listener::onError);
+                })
+                .addOnFailureListener(listener::onError);
+    }
 }
 
