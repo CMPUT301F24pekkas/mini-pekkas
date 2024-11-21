@@ -27,6 +27,9 @@ public class User {
         this.profilePhotoUrl = (String) map.get("profilePhoto");
     }
 
+    public User() {
+    }
+
     /**
      * Constructs a User object with specified attributes.
      *

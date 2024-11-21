@@ -42,9 +42,9 @@ public class AdminHomeFragment extends Fragment {
 
         // Initialize UI components from the binding
         final TextView eventNameView = binding.homeUserEventView2;
-//        final TextView eventDescriptionView = binding.homeUserEventDescriptionView2;
-//        final TextView eventDayCountView = binding.dayUserCountView2;
-//        final Button eventViewButton = binding.homeUserEventViewButton2;
+        final TextView eventDescriptionView = binding.homeUserEventDescriptionView2;
+        final TextView eventDayCountView = binding.dayUserCountView2;
+        final Button eventViewButton = binding.homeUserEventViewButton2;
 
         // Set text views with data from the ViewModel
         homeViewModel.getTest().observe(getViewLifecycleOwner(), eventNameView::setText);
