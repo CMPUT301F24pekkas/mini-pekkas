@@ -8,9 +8,12 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -155,6 +158,16 @@ public class Firebase {
     public interface ImageRetrievalListener {
         void onImageRetrievalCompleted(Uri image);
         default void onError(Exception e) {Log.e(TAG, "Error getting image: ", e);}
+    }
+
+    /**
+     * Interface for admin functions that retrieve an array of document snapshots to be processed later
+     */
+    public interface QueryRetrievalListener {
+        void onQueryRetrievalCompleted(ArrayList<DocumentSnapshot> objects);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting data: ", e);
+        }
     }
 
     /*
@@ -873,7 +886,11 @@ public class Firebase {
     public void deletePosterPicture(Event event) {
         deletePosterPicture(event, () -> {});
     }
-    // TODO add admin functions. Allows for deletion of various types of data
+
+    /*
+     *  Functionality for managing admin functionality
+     */
+
     /**
      * Checks if this user is an admin
      * @param listener the listener that is called when the check is complete. Returns true if the user is an admin
@@ -886,6 +903,45 @@ public class Firebase {
                     listener.onCheckComplete(exist);
                 });
     }
-    // TODO merge in admin functions later
+
+    /**
+     * Handles the processing of multiple search tasks and ensures all data is retrieved before calling the listener
+     * @param tasks A list of document snapshots to be processed in the calling function
+     * @param listener QueryRetrievalListener listener that returns an ArrayList of document snapshots.
+     * Document snapshots should be processed in the calling function
+     */
+    private void waitForQueryCompletion(ArrayList<Task> tasks, QueryRetrievalListener listener) {
+        // wait for all tasks to complete
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener( queries -> {
+                    ArrayList<DocumentSnapshot> results = new ArrayList<>();
+                    for (Object query : queries) {
+                        // Check what the query is and add the object to the results array
+                        if (query instanceof QuerySnapshot) {
+                            results.addAll(((QuerySnapshot) query).getDocuments());
+                        } else if (query instanceof DocumentSnapshot) {
+                            results.add(((DocumentSnapshot) query));
+                        }
+                    }
+                    listener.onQueryRetrievalCompleted(results);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    public void searchForEvent(String query, EventListRetrievalListener listener) {
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(eventCollection.whereEqualTo("name", query).get());
+
+        waitForQueryCompletion(tasks, (results) -> {
+            // Create new array of event objects
+            ArrayList<Event> events = new ArrayList<>();
+            for (DocumentSnapshot document : results) {
+                Event event = new Event(Objects.requireNonNull(document.getData()));
+                events.add(event);
+            }
+            listener.onEventListRetrievalCompleted(events);
+        });
+    }
+
 }
 
