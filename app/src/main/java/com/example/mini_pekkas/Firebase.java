@@ -1059,12 +1059,13 @@ public class Firebase {
     public void searchForFacilities(String query, DataListRetrievalListener listener) {
         // Search by name, lastname, and email
         ArrayList<Task> tasks = new ArrayList<>();
-        tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility ", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility", query + "\uf8ff").get());
 
         waitForQueryCompletion(tasks, (results) -> {
             // Create new array of event objects
             ArrayList<String> facilities = new ArrayList<>();
             for (DocumentSnapshot document : results) {
+                System.out.println(document.get("facility"));
                 facilities.add(Objects.requireNonNull(document.get("facility")).toString());
             }
             listener.onListRetrievalCompleted(facilities);

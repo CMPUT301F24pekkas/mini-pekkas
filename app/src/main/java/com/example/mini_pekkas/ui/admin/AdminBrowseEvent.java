@@ -133,10 +133,10 @@ public class AdminBrowseEvent extends Fragment {
         fragment.setArguments(bundle);
 
         // Navigate to Fragment
-        getParentFragmentManager().beginTransaction()
-                .replace(R.layout.fragment_admin_browse_events, fragment)   // TODO need to finish this
-                .addToBackStack(null)
-                .commit();
+//        getParentFragmentManager().beginTransaction()
+//                .replace(R.layout.fragment_admin_browse_events, fragment)   // TODO need to finish this
+//                .addToBackStack(null)
+//                .commit();
     }
 
     @Override
