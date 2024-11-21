@@ -72,8 +72,10 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
         Uri imageUri = images.get(position);
         // Reset visibility before loading image
         holder.progressBar.setVisibility(View.VISIBLE);
+        // Render Images in set Box sizes
         Glide.with(context)
                 .load(imageUri)
+                .centerCrop()
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -123,6 +125,9 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // TODO Progress bar blocked by image
+                    progressBar.setVisibility(View.VISIBLE); // Reshow the progress bar on Click
+
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Uri imageUri = images.get(position);
@@ -134,9 +139,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
 
                         // Call Firebase delete function based on image type
                         String finalImageName = imageName;
-                        System.out.println("Before");
                         firebaseHelper.isProfilePicture(imageName, exist -> {
-                            System.out.println("Exist: " + exist);
                             if (exist) {
                                 firebaseHelper.deleteProfilePicture(finalImageName, () -> {
                                     adapter.removeItem(position);
@@ -147,6 +150,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                                     adapter.removeItem(position);
                                 });
                             }
+                            progressBar.setVisibility(View.GONE); // And hide the bar on completion
                         });
                     }
                 }
