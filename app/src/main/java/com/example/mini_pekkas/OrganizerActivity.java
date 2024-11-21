@@ -7,6 +7,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -45,5 +46,11 @@ public class OrganizerActivity extends AppCompatActivity {
         // Set up the action bar and bottom navigation
         NavigationUI.setupActionBarWithNavController(OrganizerActivity.this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.organizerView, navController);
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.organizer_main);
+        navController.navigate(R.id.action_global_navigation_org_home);
+        return true;
     }
 }
