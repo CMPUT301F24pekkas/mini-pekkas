@@ -81,23 +81,30 @@ public class OrganizerEventsListViewModel extends ViewModel {
      *
      */
     public void getEventsFromDb() {
-        Firebase.EventListRetrievalListener listener = new Firebase.EventListRetrievalListener() {
-            @Override
-            public void onEventListRetrievalCompleted(ArrayList<Event> events) {
-                Log.d("OrganizerEventsListViewModel", "Event list retrieval completed" + " size:" + events.size());
-                for (Event event : events) {
-                    addEvent(event);
+        if(EventList.getValue().isEmpty()){
+            return;
+        }
+        else {
+            Firebase.EventListRetrievalListener listener = new Firebase.EventListRetrievalListener() {
+
+                @Override
+                public void onEventListRetrievalCompleted(ArrayList<Event> events) {
+                    Log.d("OrganizerEventsListViewModel", "Event list retrieval completed" + " size:" + events.size());
+                    //if no events
+
+                    for (Event event : events) {
+                        addEvent(event);
+                    }
                 }
-            }
 
-            @Override
-            public void onError(Exception e) {
-                Log.d("OrganizerEventsListViewModel", "Error occurred: " + e.getMessage());
-            }
+                @Override
+                public void onError(Exception e) {
+                    Log.d("OrganizerEventsListViewModel", "Error occurred: " + e.getMessage());
+                }
 
-        };
-        firebaseHelper.getOrganizedEvents(listener);
-
+            };
+            firebaseHelper.getOrganizedEvents(listener);
+        }
     }
 
 }
