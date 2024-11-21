@@ -15,14 +15,13 @@
         android:gravity="center"
         android:text="Images"
         android:textColor="@android:color/black"
-        android:textSize="18sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- RecyclerView for Images -->
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/imageGridRecyclerView"
         android:layout_width="0dp"

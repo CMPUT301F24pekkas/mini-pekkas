@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 
 /**
@@ -51,7 +53,7 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         User user = getItem(position);
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.item_user, parent, false);
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_user, parent, false);
         }
 
 
@@ -69,10 +71,10 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
 
         // Set profile image if available, otherwise use a default placeholder
         if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().isEmpty()) {
-            // Load image using your preferred library (e.g., Glide or Picasso)
-            // Example: Glide.with(context).load(user.getProfilePhotoUrl()).into(profileImageView);
+            // Load profile image
+            Glide.with(context).load(user.getProfilePhotoUrl()).into(profileImageView);
         } else {
-
+            // Placeholder image or just nothing?
         }
 
         return convertView;

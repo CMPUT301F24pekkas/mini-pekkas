@@ -12,10 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.mini_pekkas.AdminEventArrayAdapter;
 import com.example.mini_pekkas.Event;
-import com.example.mini_pekkas.EventArrayAdapter;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseEventsBinding;
+import com.example.mini_pekkas.ui.event.admin.AdminEventFragment;
 
 import java.util.ArrayList;
 
@@ -40,9 +42,10 @@ public class AdminBrowseEvent extends Fragment {
         // Set the listView adapter
         listView = binding.adminEventListView;
         eventList = new ArrayList<Event>();
-        EventArrayAdapter eventListAdapter = new EventArrayAdapter(requireContext(), eventList);
+        AdminEventArrayAdapter eventListAdapter = new AdminEventArrayAdapter(requireContext(), eventList);
         listView.setAdapter(eventListAdapter);    // TODO need to add option to pass in event list fragment instead
         // TODO add listView.setOnItemClickListener()
+        //listView.setOnItemClickListener((parent, view, position, id) -> navigateToAdminEvent(view));
 
         //setupListView();
         //loadEvents();
@@ -82,6 +85,33 @@ public class AdminBrowseEvent extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    /**
+     * On click listener for the adminEventListView.
+     * Navigate to an event fragment for the given event
+     * @param v the view that was clicked
+     */
+    private void navigateToAdminEvent(View v) {
+        // Get the event that was clicked
+        int position = listView.getPositionForView(v);
+        Event selectedEvent = eventList.get(position);
+
+        // Create Bundle for event data
+        Bundle bundle = new Bundle();
+        bundle.putString("eventId", selectedEvent.getId());
+        bundle.putString("eventName", selectedEvent.getName());
+        // ... add other event data to the bundle ...
+
+        // Create Fragment and set arguments
+        AdminEventFragment fragment = new AdminEventFragment();
+        fragment.setArguments(bundle);
+
+        // Navigate to Fragment
+//        getParentFragmentManager().beginTransaction()
+//                .replace(R.layout.fragment_admin_browse_events, fragment)   // TODO need to finish this
+//                .addToBackStack(null)
+//                .commit();
     }
 
     // TODO I see what you're doing here, but list views should be done in EventArrayAdapter, and all other corresponding object
