@@ -23,11 +23,15 @@
 
     <SearchView
         android:id="@+id/admin_search_profiles"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="114dp"
-        app:layout_constraintBottom_toTopOf="@+id/adminProfileListView"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        android:drawableEnd="@drawable/search"
+        android:queryHint="Search for event"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:iconifiedByDefault="false"
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        app:layout_constraintBottom_toTopOf="@id/adminProfileListView"/>
 
     <!-- ListView for the list of profiles -->
     <ListView
