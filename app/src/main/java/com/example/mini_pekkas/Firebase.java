@@ -15,10 +15,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.15 11/21/2024 Added Searching Functionality, Plan adjusted events to handle Dates
+ * @version 1.15 11/21/2024 Added Search Functionality. Added more functions for deleting profile/poster pictures
  */
 public class Firebase {
     private final String deviceID;
@@ -794,13 +797,12 @@ public class Firebase {
     /**
      * Deletes the profile picture from the storage.
      * Throws an error if the profile picture does not exist
-     * @param user the user object to delete the profile picture from
+     * @param profilePhotoUrl the string path of the profile photo Url to delete
      * @param listener Optional InitializationListener listener that is called when the image is deleted
      */
-    public void deleteProfilePicture(User user, InitializationListener listener) {
-        String profilePhotoUrl = user.getProfilePhotoUrl();
+    public void deleteProfilePicture(String profilePhotoUrl, InitializationListener listener) {
         if (profilePhotoUrl != null && !profilePhotoUrl.isEmpty()) {
-            profilePictureReference.child(user.getProfilePhotoUrl()).delete()
+            profilePictureReference.child(profilePhotoUrl).delete()
                     .addOnSuccessListener(aVoid -> listener.onInitialized())
                     .addOnFailureListener(listener::onError);
         } else {
@@ -810,11 +812,26 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #deleteProfilePicture(User, InitializationListener)} with no listener
+     * Overload of the {@link #deleteProfilePicture(String profilePhotoUrl, InitializationListener)} with no listener
+     */
+    public void deleteProfilePicture(String profilePhotoUrl) {
+        deleteProfilePicture(profilePhotoUrl, () -> {});
+    }
+
+    /**
+     * Overload of the {@link #deleteProfilePicture(String profilePhotoUrl, InitializationListener)} Using the user object
+     */
+    public void deleteProfilePicture(User user, InitializationListener listener) {
+        deleteProfilePicture(user.getProfilePhotoUrl(), listener);
+    }
+
+    /**
+     * Overload of the {@link #deleteProfilePicture(String profilePhotoUrl, InitializationListener)} Using the user object and no listener
      */
     public void deleteProfilePicture(User user) {
-        deleteProfilePicture(user, () -> {});
+        deleteProfilePicture(user.getProfilePhotoUrl(), () -> {});
     }
+
 
     /**
      * A private function that stores the banner picture in the storage.
@@ -882,12 +899,11 @@ public class Firebase {
     /**
      * Deletes the poster picture from the storage.
      * Throws an exception if there is no poster picture
-     * @param event the event object to delete the poster picture from
+     * @param photoUrl the string path of the poster photo Url to delete
      * @param listener Optional InitializationListener listener that is called when the image is deleted
      */
-    public void deletePosterPicture(Event event, InitializationListener listener) {
+    public void deletePosterPicture(String photoUrl, InitializationListener listener) {
         // Get the photo Url and delete it
-        String photoUrl = event.getPosterPhotoUrl();
         if (photoUrl != null && !photoUrl.isEmpty()) {
             posterPictureReference.child(photoUrl).delete()
                 .addOnSuccessListener(aVoid -> listener.onInitialized())
@@ -899,10 +915,57 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #deletePosterPicture(Event, InitializationListener)} with no listener
+     * Overload of the {@link #deletePosterPicture(String, InitializationListener)} with no listener
+     */
+    public void deletePosterPicture(String photoUrl) {
+        deletePosterPicture(photoUrl, () -> {});
+    }
+
+    /**
+     * Overload of the {@link #deletePosterPicture(String, InitializationListener)} Using the event object
+     */
+    public void deletePosterPicture(Event event, InitializationListener listener) {
+        deletePosterPicture(event.getPosterPhotoUrl(), listener);
+    }
+
+    /**
+     * Overload of the {@link #deletePosterPicture(String, InitializationListener)} Using the event object and no listener
      */
     public void deletePosterPicture(Event event) {
-        deletePosterPicture(event, () -> {});
+        deletePosterPicture(event.getPosterPhotoUrl(), () -> {});
+    }
+
+    /**
+     * Checks if the image is a profile picture.
+     * @param imageName the image name to check
+     * @param listener the listener that is called when the check is complete. Returns true if the image is a profile picture
+     *                 false if poster image,
+     *                 This function should never have to return null as either it exist in one or the other.
+     */
+    public void isProfilePicture(String imageName, CheckListener listener) {
+        // Check if the image exists in profilePictureReference
+        System.out.println("imageName: " + imageName);
+
+
+        profilePictureReference.child(imageName).getDownloadUrl()
+                .addOnSuccessListener(uri -> listener.onCheckComplete(true)) // Profile picture
+                .addOnFailureListener(e -> {
+                    if (e instanceof StorageException && ((StorageException) e).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                        // Image not found in profilePictureReference, check posterPictureReference
+                        posterPictureReference.child(imageName).getDownloadUrl()
+                                .addOnSuccessListener(uri -> listener.onCheckComplete(false)) // Poster picture
+                                .addOnFailureListener(listener::onError);
+                    } else {
+                        listener.onError(e); // Error checking profilePictureReference
+                    }
+                });
+    }
+
+    /**
+     * Overload of the {@link #isProfilePicture(String, CheckListener)} with the imageUri instead of the image name
+     */
+    public void isProfilePicture(Uri imageUrl, CheckListener listener) {
+        isProfilePicture(imageUrl.getLastPathSegment(), listener);
     }
 
     /*
@@ -996,12 +1059,13 @@ public class Firebase {
     public void searchForFacilities(String query, DataListRetrievalListener listener) {
         // Search by name, lastname, and email
         ArrayList<Task> tasks = new ArrayList<>();
-        tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility ", query + "\uf8ff").get());
+        tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility", query + "\uf8ff").get());
 
         waitForQueryCompletion(tasks, (results) -> {
             // Create new array of event objects
             ArrayList<String> facilities = new ArrayList<>();
             for (DocumentSnapshot document : results) {
+                System.out.println(document.get("facility"));
                 facilities.add(Objects.requireNonNull(document.get("facility")).toString());
             }
             listener.onListRetrievalCompleted(facilities);
@@ -1014,40 +1078,30 @@ public class Firebase {
      */
     public void getAllImages(ImageListRetrievalListener listener) {
         ArrayList<Uri> images = new ArrayList<>();
+        List<Task<ListResult>> tasks = new ArrayList<>();
 
-        profilePictureReference.listAll()
-            .addOnSuccessListener(result -> {
-                // Add all uri to images
-                int total_pfp = result.getItems().size();
-                AtomicInteger retrieved_pfp = new AtomicInteger();
+        tasks.add(profilePictureReference.listAll());
+        tasks.add(posterPictureReference.listAll());
 
-                    for (StorageReference ref : result.getItems()) {
-                        ref.getDownloadUrl()
-                            .addOnSuccessListener(images::add)
-                            .addOnFailureListener(listener::onError);
-
-                        if (retrieved_pfp.incrementAndGet() == total_pfp) {
-                            // Then fetch all poster images
-                            posterPictureReference.listAll()
-                                    .addOnSuccessListener(result2 -> {
-                                        // Counters to keep track of progress
-                                        int total_poster = result2.getItems().size();
-                                        AtomicInteger retrieved_poster = new AtomicInteger();
-
-                                        for (StorageReference ref2 : result2.getItems()) {
-                                            ref2.getDownloadUrl()
-                                                    .addOnSuccessListener(images::add)
-                                                    .addOnFailureListener(listener::onError);
-                                            if (retrieved_poster.incrementAndGet() == total_poster) {
-                                                listener.onImageListRetrievalCompleted(images);
-                                            }
-                                        }
-                                    })
-                                    .addOnFailureListener(listener::onError);
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener(results -> {
+                    List<Task<Uri>> downloadUrlTasks = new ArrayList<>();
+                    for (Object result : results) {
+                        for (StorageReference ref : ((ListResult) result).getItems()) {
+                            downloadUrlTasks.add(ref.getDownloadUrl());
                         }
                     }
+
+                    Tasks.whenAllSuccess(downloadUrlTasks)
+                            .addOnSuccessListener(urls -> {
+                                for (Object url : urls)
+                                    images.add((Uri) url);
+
+                                listener.onImageListRetrievalCompleted(images);
+                            })
+                            .addOnFailureListener(listener::onError);
                 })
-            .addOnFailureListener(listener::onError);
+                .addOnFailureListener(listener::onError);
     }
 }
 

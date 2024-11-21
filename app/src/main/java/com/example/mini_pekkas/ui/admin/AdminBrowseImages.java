@@ -12,14 +12,15 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.ImageAdapter;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseImagesBinding;
 
 public class AdminBrowseImages extends Fragment {
 
     private FragmentAdminBrowseImagesBinding binding; // Declare binding variable
     private Firebase firebaseHelper;
-    private RecyclerView recycleView;
-//    private ArrayAdapter<Uri> adapter;
+    private RecyclerView recyclerView;
+    private ImageAdapter imageAdapter;
 //    private ArrayList<Uri> imageList;
 
     @Nullable
@@ -29,16 +30,18 @@ public class AdminBrowseImages extends Fragment {
         binding = FragmentAdminBrowseImagesBinding.inflate(inflater, container, false);
         firebaseHelper = new Firebase(requireContext());
 
-        recycleView = binding.imageGridRecyclerView;
+        recyclerView = binding.imageGridRecyclerView;
 
         // From the list of images, set the view to display all images
         firebaseHelper.getAllImages(images -> {
             // Set up the recycleView
-            recycleView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+            recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
-            // Make image adapter TODO make custom image adapter and list xml
-//            ArrayAdapter<Uri> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, images);
-//            recycleView.setAdapter(adapter);
+            // Make image adapter
+            imageAdapter = new ImageAdapter(requireContext(), images);
+
+            // Set the adapter after images are retrieved
+            recyclerView.setAdapter(imageAdapter);
         });
 
 
