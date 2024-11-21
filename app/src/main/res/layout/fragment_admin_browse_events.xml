@@ -7,44 +7,38 @@
     android:layout_height="match_parent">
 
     <!-- Title (Users) -->
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Event"
-        android:textColor="@android:color/black"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="Event"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <SearchView
+            android:id="@+id/admin_search_events"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:drawableEnd="@drawable/search"
+            android:iconifiedByDefault="false"
+            android:queryHint="Search for event" />
+
+        <ListView
+            android:id="@+id/adminEventListView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="1dp" />
+    </LinearLayout>
 
     <!-- ListView for the list of profiles-->
-    <SearchView
-        android:id="@+id/admin_search_events"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:drawableEnd="@drawable/search"
-        android:queryHint="Search for event"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:iconifiedByDefault="false"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
-
-    <ListView
-        android:id="@+id/adminEventListView"
-        android:layout_width="wrap_content"
-        android:layout_height="585dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/admin_search_events"
-        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,8 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.mini_pekkas.AdminEventArrayAdapter;
 import com.example.mini_pekkas.Event;
-import com.example.mini_pekkas.EventArrayAdapter;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseEventsBinding;
 
@@ -40,7 +40,7 @@ public class AdminBrowseEvent extends Fragment {
         // Set the listView adapter
         listView = binding.adminEventListView;
         eventList = new ArrayList<Event>();
-        EventArrayAdapter eventListAdapter = new EventArrayAdapter(requireContext(), eventList);
+        AdminEventArrayAdapter eventListAdapter = new AdminEventArrayAdapter(requireContext(), eventList);
         listView.setAdapter(eventListAdapter);    // TODO need to add option to pass in event list fragment instead
         // TODO add listView.setOnItemClickListener()
 
