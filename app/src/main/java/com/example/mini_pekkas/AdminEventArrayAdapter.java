@@ -86,5 +86,4 @@ public class AdminEventArrayAdapter extends ArrayAdapter<Event> {
         events.remove(position);
         notifyDataSetChanged();
     }
-
 }
