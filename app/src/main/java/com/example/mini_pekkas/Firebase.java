@@ -16,6 +16,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,13 +25,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.13.4 11/18/20224 Fixed getEventByStatus, properly increment counter and check if all events have been retrieved
+ * @version 1.14 11/20/2024 Added notification functionality
  */
 public class Firebase {
     private final String deviceID;
     private final CollectionReference userCollection;
     private final CollectionReference eventCollection;
     private final CollectionReference userEventsCollection;
+    private final CollectionReference userNotificationsCollection;
     private final CollectionReference adminCollection;
     private final StorageReference profilePictureReference;
     private final StorageReference posterPictureReference;
@@ -51,6 +53,7 @@ public class Firebase {
         userCollection = db.collection("users");
         eventCollection = db.collection("events");
         userEventsCollection = db.collection("user-events");
+        userNotificationsCollection = db.collection("user-notifications");
         adminCollection = db.collection("admins");
 
         //Initialize our storage references
@@ -133,6 +136,16 @@ public class Firebase {
         void onEventListRetrievalCompleted(ArrayList<Event> events);
         default void onError(Exception e) {
             Log.e(TAG, "Error getting events: ", e);
+        }
+    }
+
+    /**
+     * Interface for functions that retrieve the notifications for this use
+     */
+    public interface NotificationListRetrievalListener {
+        void onNotificationListRetrievalCompleted(ArrayList<Notifications> notification);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting notification: ", e);
         }
     }
 
@@ -391,6 +404,67 @@ public class Firebase {
      */
     public void getEvent(Event event, EventRetrievalListener listener) {
         getEvent(event.getId(), listener);
+    }
+
+    /*
+     *  Functionality for managing notifications of this user
+     */
+
+    /**
+     * Get all the notifications for this user. Returns an arrayList of notifications sorted by newest date first
+     * @param listener a NotificationListRetrievalListener listener that returns an arrayList of notifications
+     */
+    public void getThisUserNotifications(NotificationListRetrievalListener listener) {
+        userNotificationsCollection.whereEqualTo("userID", this.deviceID).get()
+                .addOnSuccessListener(task -> {
+                    // Pass an empty array if no notifications exist
+                    if (task.isEmpty()) {
+                        listener.onNotificationListRetrievalCompleted(new ArrayList<>());
+                        return;
+                    }
+
+                    ArrayList<Notifications> notifications = new ArrayList<>();
+                    int total_notifications = task.size();
+                    AtomicInteger notification_count = new AtomicInteger();
+
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        // Remove the user id so Notifications don't store the device id
+                        Map<String, Object> map = Objects.requireNonNull(document.getData());
+                        map.remove("userID");
+                        notifications.add(new Notifications(map));
+
+                        // Wait for all events to be deleted first
+                        if (notification_count.incrementAndGet() == total_notifications) {
+                            // Sort by newest date first
+                            notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+                            listener.onNotificationListRetrievalCompleted(notifications);
+                        }
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Add a notification to the user-notifications collection
+     * @param notification a notification object to be added
+     * @param listener Optional InitializationListener listener that is called after the notification is added
+     */
+    public void addNotification(Notifications notification, InitializationListener listener) {
+        // Set the user id and date field in correct format
+        HashMap<String, Object> map = notification.toMap();
+        map.put("date", notification.getTimestamp());
+        map.put("userID", this.deviceID);
+
+        userNotificationsCollection.add(map)
+                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #addNotification(Notifications, InitializationListener)} with no listener
+     */
+    public void addNotification(Notifications notification) {
+        addNotification(notification, () -> {});
     }
 
     /*
