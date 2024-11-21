@@ -1,32 +1,26 @@
-package com.example.mini_pekkas.ui.event.admin;
+package com.example.mini_pekkas.ui.admin;
 
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseEventsBinding;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 
 public class AdminBrowseEvent extends Fragment {
 
     private FragmentAdminBrowseEventsBinding binding;
-    private FirebaseFirestore db;
+    private Firebase firebaseHelper;
     private ArrayAdapter<String> adapter;
     private ArrayList<Event> eventList;  // Store the original event objects
     private ArrayList<String> eventNames;  // Store event names for the ListView
@@ -36,24 +30,31 @@ public class AdminBrowseEvent extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout using View Binding
         binding = FragmentAdminBrowseEventsBinding.inflate(inflater, container, false);
-        db = FirebaseFirestore.getInstance();
+        firebaseHelper = new Firebase(requireContext());
         eventList = new ArrayList<>();
         eventNames = new ArrayList<>();
 
         //setupListView();
         //loadEvents();
 
-        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        binding.adminSearchEvents.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //filterEvents(query);
-                return false;
+                firebaseHelper.searchEvents()
+                return true;
             }
 
+            /**
+             * Called when the content of the query text field has changed.
+             * @param newText the new content of the query text field.
+             *
+             * @return true if the text has been consumed, false otherwise.
+             */
             @Override
             public boolean onQueryTextChange(String newText) {
                 //filterEvents(newText);
-                return false;
+
+                return true;
             }
         });
 
