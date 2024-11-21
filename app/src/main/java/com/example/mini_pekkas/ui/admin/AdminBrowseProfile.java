@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 
@@ -24,7 +23,6 @@ public class AdminBrowseProfile extends Fragment {
     private FragmentAdminBrowseProfilesBinding binding; // Declare binding variable
     private Firebase firebaseHelper;
     private ListView listView;
-    private ArrayAdapter<String> adapter;
     private ArrayList<User> userList;  // Store the original event objects
 
     @Nullable
@@ -40,9 +38,6 @@ public class AdminBrowseProfile extends Fragment {
         UserArrayAdapter userArrayAdapter = new UserArrayAdapter(requireContext(), userList);
         listView.setAdapter(userArrayAdapter);    // TODO need to add option to pass in event list fragment instead
         // TODO add listView.setOnItemClickListener()
-
-        //setupListView();
-        //loadEvents();
 
         binding.adminSearchProfiles.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             /**
