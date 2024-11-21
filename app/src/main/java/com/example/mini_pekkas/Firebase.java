@@ -15,10 +15,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1014,40 +1016,30 @@ public class Firebase {
      */
     public void getAllImages(ImageListRetrievalListener listener) {
         ArrayList<Uri> images = new ArrayList<>();
+        List<Task<ListResult>> tasks = new ArrayList<>();
 
-        profilePictureReference.listAll()
-            .addOnSuccessListener(result -> {
-                // Add all uri to images
-                int total_pfp = result.getItems().size();
-                AtomicInteger retrieved_pfp = new AtomicInteger();
+        tasks.add(profilePictureReference.listAll());
+        tasks.add(posterPictureReference.listAll());
 
-                    for (StorageReference ref : result.getItems()) {
-                        ref.getDownloadUrl()
-                            .addOnSuccessListener(images::add)
-                            .addOnFailureListener(listener::onError);
-
-                        if (retrieved_pfp.incrementAndGet() == total_pfp) {
-                            // Then fetch all poster images
-                            posterPictureReference.listAll()
-                                    .addOnSuccessListener(result2 -> {
-                                        // Counters to keep track of progress
-                                        int total_poster = result2.getItems().size();
-                                        AtomicInteger retrieved_poster = new AtomicInteger();
-
-                                        for (StorageReference ref2 : result2.getItems()) {
-                                            ref2.getDownloadUrl()
-                                                    .addOnSuccessListener(images::add)
-                                                    .addOnFailureListener(listener::onError);
-                                            if (retrieved_poster.incrementAndGet() == total_poster) {
-                                                listener.onImageListRetrievalCompleted(images);
-                                            }
-                                        }
-                                    })
-                                    .addOnFailureListener(listener::onError);
+        Tasks.whenAllSuccess(tasks)
+                .addOnSuccessListener(results -> {
+                    List<Task<Uri>> downloadUrlTasks = new ArrayList<>();
+                    for (Object result : results) {
+                        for (StorageReference ref : ((ListResult) result).getItems()) {
+                            downloadUrlTasks.add(ref.getDownloadUrl());
                         }
                     }
+
+                    Tasks.whenAllSuccess(downloadUrlTasks)
+                            .addOnSuccessListener(urls -> {
+                                for (Object url : urls)
+                                    images.add((Uri) url);
+
+                                listener.onImageListRetrievalCompleted(images);
+                            })
+                            .addOnFailureListener(listener::onError);
                 })
-            .addOnFailureListener(listener::onError);
+                .addOnFailureListener(listener::onError);
     }
 }
 
