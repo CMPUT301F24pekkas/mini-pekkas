@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.EventArrayAdapter;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseEventsBinding;
 
@@ -21,6 +23,7 @@ public class AdminBrowseEvent extends Fragment {
 
     private FragmentAdminBrowseEventsBinding binding;
     private Firebase firebaseHelper;
+    private ListView listView;
     private ArrayAdapter<String> adapter;
     private ArrayList<Event> eventList;  // Store the original event objects
     private ArrayList<String> eventNames;  // Store event names for the ListView
@@ -31,16 +34,36 @@ public class AdminBrowseEvent extends Fragment {
         // Inflate the layout using View Binding
         binding = FragmentAdminBrowseEventsBinding.inflate(inflater, container, false);
         firebaseHelper = new Firebase(requireContext());
-        eventList = new ArrayList<>();
-        eventNames = new ArrayList<>();
+
+        eventNames = new ArrayList<>();     // Not sure this is needed
+
+        // Set the listView adapter
+        listView = binding.adminEventListView;
+        eventList = new ArrayList<Event>();
+        EventArrayAdapter eventListAdapter = new EventArrayAdapter(requireContext(), eventList);
+        listView.setAdapter(eventListAdapter);    // TODO need to add option to pass in event list fragment instead
+        // TODO add listView.setOnItemClickListener()
 
         //setupListView();
         //loadEvents();
 
         binding.adminSearchEvents.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            /**
+             * Called when the user hits enter (submits the query).
+             * @param query the query text that is to be submitted
+             *
+             * @return true if the query has been handled by the listener, false otherwise.
+             */
             @Override
             public boolean onQueryTextSubmit(String query) {
-                firebaseHelper.searchEvents()
+                firebaseHelper.searchForEvent(query, events -> {
+                    // Set the value of eventList to events
+                    eventListAdapter.clear();
+                    eventListAdapter.addAll(events);
+
+                    // Notify the dataset change to update
+                    eventListAdapter.notifyDataSetChanged();
+                });
                 return true;
             }
 
@@ -61,6 +84,7 @@ public class AdminBrowseEvent extends Fragment {
         return binding.getRoot();
     }
 
+    // TODO I see what you're doing here, but list views should be done in EventArrayAdapter, and all other corresponding object
 //    private void setupListView() {
 //        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, eventNames);
 //        binding.adminEventListView.setAdapter(adapter);
@@ -72,6 +96,9 @@ public class AdminBrowseEvent extends Fragment {
 //            // You can add navigation to a detailed view here
 //        });
 //    }
+
+// TODO Assuming this is meant to load an event object and open the admin_event intent on click? This function should open the new intent, passing the data along
+
 //
 //    private void loadEvents() {
 //        CollectionReference eventsRef = db.collection("events");  // Replace with your collection name
