@@ -108,10 +108,10 @@ public class AdminBrowseEvent extends Fragment {
         fragment.setArguments(bundle);
 
         // Navigate to Fragment
-        getParentFragmentManager().beginTransaction()
-                .replace(R.layout.fragment_admin_browse_events, fragment)   // TODO need to finish this
-                .addToBackStack(null)
-                .commit();
+//        getParentFragmentManager().beginTransaction()
+//                .replace(R.layout.fragment_admin_browse_events, fragment)   // TODO need to finish this
+//                .addToBackStack(null)
+//                .commit();
     }
 
     // TODO I see what you're doing here, but list views should be done in EventArrayAdapter, and all other corresponding object
