@@ -23,7 +23,7 @@ import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentEventJoinBinding;
 import com.example.mini_pekkas.databinding.FragmentEventJoinWaitBinding;
-import com.example.mini_pekkas.ui.home.HomeFragment;
+import com.example.mini_pekkas.databinding.FragmentEventJoinGeoBinding;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -79,34 +79,48 @@ public class EventJoinFragment extends Fragment {
 
         Button joinWaitlistButton = binding.joinWaitButton;
         joinWaitlistButton.setOnClickListener(v -> {
-            FragmentEventJoinWaitBinding joinWaitBinding = FragmentEventJoinWaitBinding.inflate(LayoutInflater.from(getContext()));
+            Event event = eventViewModel.getEvent().getValue();
+            if (event != null) {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                db.collection("events").document(event.getId())
+                        .get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                Boolean isGeoEnabled = documentSnapshot.getBoolean("geo");
+                                if (isGeoEnabled != null && isGeoEnabled) {
+                                    FragmentEventJoinGeoBinding joinGeoBinding = FragmentEventJoinGeoBinding.inflate(LayoutInflater.from(getContext()));
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                                    builder.setView(joinGeoBinding.getRoot());
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setView(joinWaitBinding.getRoot());
-            AlertDialog dialog = builder.create();
-            dialog.show();
+                                    Button joinGeoButton = joinGeoBinding.joinWaitButton;
+                                    Button cancelGeoButton = joinGeoBinding.cancelWaitButton;
+                                    showJoinDialog(dialog, joinGeoButton, cancelGeoButton);
+                                } else {
+                                    // Use FragmentEventJoinWaitBinding
+                                    FragmentEventJoinWaitBinding joinWaitBinding = FragmentEventJoinWaitBinding.inflate(LayoutInflater.from(getContext()));
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                                    builder.setView(joinWaitBinding.getRoot());
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
 
-            Button joinButton = joinWaitBinding.joinWaitButton;
-            Button cancelButton = joinWaitBinding.cancelWaitButton;
-
-            joinButton.setOnClickListener(view -> {
-                Event event = eventViewModel.getEvent().getValue();
-                if (event != null) {
-                    String deviceId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-                    joinWaitList(event, deviceId);
-                    Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
-                }
-                dialog.dismiss();
-            });
-
-            cancelButton.setOnClickListener(view -> dialog.dismiss());
+                                    Button joinWaitButton = joinWaitBinding.joinWaitButton;
+                                    Button cancelWaitButton = joinWaitBinding.cancelWaitButton;
+                                    showJoinDialog(dialog, joinWaitButton, cancelWaitButton);
+                                }
+                            } else {
+                                Toast.makeText(requireContext(), "Event not found in Firebase", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(requireContext(), "Error fetching event details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+            } else {
+                Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
+            }
         });
-
-
         return root;
-
 
     }
 
@@ -168,6 +182,28 @@ public class EventJoinFragment extends Fragment {
                     Log.e("Firebase", "Failed to add device to waitlist", e);
                     Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+    /**
+     * Shows the dialog for joining the waitlist and allows user to either join or cancel
+     *
+     * @param dialog The AlertDialog with either a simple confirmation or with a geolocation confirmation if needed
+     * @param joinButton The button to join the wait list
+     * @param cancelButton The button to cancel joining the wait list
+     */
+    private void showJoinDialog(AlertDialog dialog, Button joinButton, Button cancelButton){
+        joinButton.setOnClickListener(view -> {
+            Event event = eventViewModel.getEvent().getValue();
+            if (event != null) {
+                String deviceId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+                joinWaitList(event, deviceId);
+                Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
+            }
+            dialog.dismiss();
+        });
+
+        cancelButton.setOnClickListener(view -> dialog.dismiss());
     }
 
 
