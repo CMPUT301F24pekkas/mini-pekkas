@@ -27,6 +27,8 @@ import com.google.zxing.integration.android.IntentResult;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import android.os.Bundle;
+
 
 
 /**

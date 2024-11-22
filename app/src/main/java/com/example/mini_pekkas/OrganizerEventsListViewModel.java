@@ -70,9 +70,7 @@ public class OrganizerEventsListViewModel extends ViewModel {
     }
 
     /**
-     * Deletes an event from the event list based on the event ID.
-     *
-     * @param eventId The ID of the event to be deleted.
+     * Retrieves events created by the organizer from the database and adds them to the EventList.
      */
     public LiveData<ArrayList<Event>> getEventList(){
         return EventList;
@@ -91,8 +89,11 @@ public class OrganizerEventsListViewModel extends ViewModel {
 
     }
 
+
     /**
-     * Retrieves events created by the organizer from the database and adds them to the EventList.
+     * Deletes an event from the event list based on the event ID.
+     *
+     * @param eventId The ID of the event to be deleted.
      */
     public void deleteEvent(String eventId){
         ArrayList<Event> currentEventList = EventList.getValue();
