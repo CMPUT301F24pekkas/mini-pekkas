@@ -2,7 +2,11 @@ package com.example.mini_pekkas;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import android.content.Context;
 import android.provider.Settings;
@@ -72,7 +76,7 @@ public class AdminUiTests {
         map.put("waitlist", new ArrayList<>());
         map.put("eventHost", new User());
         //map.put("id", "Test ID");
-        map.put("posterUrl", "Test Poster URL");
+        map.put("posterUrl", null);
         map.put("facility", "Test Facility");
         testEvent = new Event(map);
 
@@ -84,6 +88,7 @@ public class AdminUiTests {
         Context context = ApplicationProvider.getApplicationContext();
         CreateTestProfile(context);
         CreateTestEvent();
+        // TODO add a poster to browse and delete
         onView(withId(R.id.adminBrowseEvents)).perform(click());
     }
 
@@ -92,7 +97,9 @@ public class AdminUiTests {
      */
     @Test
     public void testBrowseEvents() {
-
+        onView(withId(R.id.adminBrowseEvents)).perform(click());
+        onView(withId(R.id.admin_search_events)).perform(typeText("Test Event"));
+        onView(withText("Test Event")).check(matches(isDisplayed()));
     }
 
     /**
