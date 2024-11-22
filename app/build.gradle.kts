@@ -65,6 +65,8 @@ dependencies {
 
     // Implement android.jar for javadoc, replace with your own filepath
     // implementation(files("/home/ryan/Android/Sdk/platforms/android-34/android.jar"))
+    implementation(files("C:\\Users\\Arno\\AppData\\Local\\Android\\Sdk\\platforms\\android-34\\android.jar"));
+
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
