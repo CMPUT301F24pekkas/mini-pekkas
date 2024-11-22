@@ -47,7 +47,6 @@ public class OrganizerTests {
     public void CreateTestProfile(Context context) {
         database = FirebaseFirestore.getInstance();
         deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        database = FirebaseFirestore.getInstance();
         Map<String, Object> userProfile = new HashMap<>();
         userProfile.put("name", "John");
         userProfile.put("lastname", "Doe");
@@ -198,7 +197,7 @@ public class OrganizerTests {
     @Test
     public void testUpdateEventPoster() throws InterruptedException {
         Thread.sleep(3000);
-        onView(withId(R.id.homeOrgEditEvent)).perform(click());
+        onView(withId(R.id.navigation_org_add)).perform(click());
         onView(withId(R.id.editEventPictureButton)).perform(click());
 
     }

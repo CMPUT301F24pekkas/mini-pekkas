@@ -61,7 +61,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the organizer's name.
      *
-     * @return A MutableLiveData<String> containing the organizer's name.
+     * @return A MutableLiveData containing the organizer's name.
      */
     public MutableLiveData<String> getOrganizerName() {
         return organizerName;
@@ -70,7 +70,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the event name.
      *
-     * @return A MutableLiveData<String> containing the event name.
+     * @return A MutableLiveData  containing the event name.
      */
     public MutableLiveData<String> getEventName() {
         return eventName;
@@ -79,7 +79,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the event location.
      *
-     * @return A MutableLiveData<String> containing the event location.
+     * @return A MutableLiveData containing the event location.
      */
     public MutableLiveData<String> getLocation() {
         return location;
@@ -88,7 +88,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the event description.
      *
-     * @return A MutableLiveData<String> containing the event description.
+     * @return A MutableLiveData containing the event description.
      */
     public MutableLiveData<String> getEventDescription() {
         return eventDescription;
@@ -97,7 +97,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for additional event details.
      *
-     * @return A MutableLiveData<String> containing additional event details.
+     * @return A MutableLiveData containing additional event details.
      */
     public MutableLiveData<String> getEventDetails() {
         return eventDetails;
@@ -106,7 +106,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the event image.
      *
-     * @return A MutableLiveData<Integer> containing the resource ID of the event image.
+     * @return A MutableLiveData containing the resource ID of the event image.
      */
     public MutableLiveData<Integer> getEventImage() {
         return eventImage;
@@ -115,7 +115,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the number of chosen participants.
      *
-     * @return A MutableLiveData<String> containing the chosen participant count.
+     * @return A MutableLiveData containing the chosen participant count.
      */
     public MutableLiveData<String> getChosenPart() {
         return chosenPart;
@@ -124,7 +124,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the number of canceled participants.
      *
-     * @return A MutableLiveData<String> containing the canceled participant count.
+     * @return A MutableLiveData containing the canceled participant count.
      */
     public MutableLiveData<String> getCanceledPart() {
         return canceledPart;
@@ -133,7 +133,7 @@ public class EventOrgViewModel2 extends ViewModel {
     /**
      * Gets the LiveData object for the number of enrolled participants.
      *
-     * @return A MutableLiveData<String> containing the enrolled participant count.
+     * @return A MutableLiveData containing the enrolled participant count.
      */
     public MutableLiveData<String> getEnrolledPart() {
         return enrolledPart;

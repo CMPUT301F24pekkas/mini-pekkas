@@ -23,7 +23,7 @@ public class QRCodeGenerator {
      */
     public static Bitmap generateQRCode(String text, int width, int height) {
         // Append a new UUID to ensure uniqueness
-        String uniqueText = text + "_" + UUID.randomUUID().toString();
+        String uniqueText = text;
 
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         try {

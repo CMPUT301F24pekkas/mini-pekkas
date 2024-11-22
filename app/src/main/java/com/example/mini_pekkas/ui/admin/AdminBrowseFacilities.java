@@ -17,12 +17,27 @@ import com.example.mini_pekkas.databinding.FragmentAdminBrowseFacilitiesBinding;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment for browsing and managing facilities in the Admin interface.
+ * This fragment includes functionality for:
+ * - Displaying a list of facilities
+ * - Searching facilities using a search bar
+ */
 public class AdminBrowseFacilities extends Fragment {
 
     private FragmentAdminBrowseFacilitiesBinding binding; // Declare binding variable
     private Firebase firebaseHelper;
     private ListView listView;
     private ArrayList<String> facilityNames;
+
+    /**
+     * Called to initialize the fragment's view hierarchy.
+     *
+     * @param inflater           The LayoutInflater used to inflate the fragment's view.
+     * @param container          The parent view group that this fragment's view will be attached to.
+     * @param savedInstanceState A Bundle containing the fragment's previously saved state, if any.
+     * @return The root view of the fragment.
+     */
 
     @Nullable
     @Override
@@ -76,6 +91,9 @@ public class AdminBrowseFacilities extends Fragment {
         return binding.getRoot(); // Return the root view from binding
     }
 
+    /**
+     * Cleans up resources and prevents memory leaks by nullifying the binding.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

@@ -4,6 +4,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+/**
+ * ViewModel class for managing and providing home screen event data.
+ * It holds LiveData objects for event name, description, and countdown to the event.
+ */
 public class HomeViewModel extends ViewModel {
 
     private final MutableLiveData<String> eventName;
@@ -11,6 +15,10 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<String> eventDayCount;
 
 
+    /**
+     * Constructor to initialize the LiveData fields with default values.
+     * Default event values are set for testing purposes.
+     */
     public HomeViewModel() {
         eventName = new MutableLiveData<>();
         eventDescription = new MutableLiveData<>();
@@ -21,14 +29,29 @@ public class HomeViewModel extends ViewModel {
         eventDayCount.setValue("Starts in %d Days");
     }
 
+    /**
+     * Getter for the event description.
+     *
+     * @return The MutableLiveData containing the event description
+     */
     public MutableLiveData<String> getEventDescription() {
         return eventDescription;
     }
 
+    /**
+     * Getter for the event name.
+     *
+     * @return The MutableLiveData containing the event name
+     */
     public MutableLiveData<String> getEventName() {
         return eventName;
     }
 
+    /**
+     * Getter for the event day count.
+     *
+     * @return The MutableLiveData containing the countdown to the event in days
+     */
     public MutableLiveData<String> getEventDayCount() {
         return eventDayCount;
     }

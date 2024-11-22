@@ -37,12 +37,28 @@ import com.example.mini_pekkas.ui.home.OrganizerHomeFragment;
 
 import java.net.URL;
 
+/**
+ * Fragment for displaying the event details and enabling the editing of an event.
+ * It shows event description, name, organizer, location, and the event poster.
+ * The user can also navigate to the Edit Event fragment to modify the event.
+ */
 public class EventDetailsFragment extends Fragment {
 
     private FragmentEventOrgBinding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
+
+
+    /**
+     * Inflates the layout, binds the views, and sets up the event details in the fragment.
+     * Also sets up the navigation to edit event.
+     *
+     * @param inflater           the LayoutInflater object to inflate the fragment layout
+     * @param container          the ViewGroup container to attach the fragment to
+     * @param savedInstanceState the previous state of the fragment, if available
+     * @return the root view of the fragment
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentEventOrgBinding.inflate(inflater, container, false);
@@ -93,6 +109,13 @@ public class EventDetailsFragment extends Fragment {
         //make editEvent button navigate to addEvent fragment with values changed
         Button editButton = binding.editEventButton;
         editButton.setOnClickListener(new View.OnClickListener() {
+
+            /**
+             * Called when the "edit event" button is clicked.
+             * Navigates to the "edit event" fragment to modify event details.
+             *
+             * @param v The view that was clicked.
+             */
             @Override
             public void onClick(View v) {
                 //navigate to addEvent fragment with values changed

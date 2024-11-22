@@ -50,7 +50,7 @@ public class EventOrgViewModel extends ViewModel {
     /**
      * Gets the LiveData object for the organizer's name.
      *
-     * @return A MutableLiveData<String> containing the organizer's name.
+     * @return A MutableLiveData containing the organizer's name.
      */
     public MutableLiveData<String> getOrganizerName() {
         return organizerName;
@@ -59,7 +59,7 @@ public class EventOrgViewModel extends ViewModel {
     /**
      * Gets the LiveData object for the event's name.
      *
-     * @return A MutableLiveData<String> containing the event's name.
+     * @return A MutableLiveData containing the event's name.
      */
     public MutableLiveData<String> getEventName() {
         return eventName;
@@ -68,7 +68,7 @@ public class EventOrgViewModel extends ViewModel {
     /**
      * Gets the LiveData object for the event location.
      *
-     * @return A MutableLiveData<String> containing the event location.
+     * @return A MutableLiveData containing the event location.
      */
     public MutableLiveData<String> getLocation() {
         return location;
@@ -77,7 +77,7 @@ public class EventOrgViewModel extends ViewModel {
     /**
      * Gets the LiveData object for the event description.
      *
-     * @return A MutableLiveData<String> containing the event description.
+     * @return A MutableLiveData containing the event description.
      */
     public MutableLiveData<String> getEventDescription() {
         return eventDescription;
@@ -86,7 +86,7 @@ public class EventOrgViewModel extends ViewModel {
     /**
      * Gets the LiveData object for additional event details.
      *
-     * @return A MutableLiveData<String> containing additional event details.
+     * @return A MutableLiveData containing additional event details.
      */
     public MutableLiveData<String> getEventDetails() {
         return eventDetails;
@@ -95,7 +95,7 @@ public class EventOrgViewModel extends ViewModel {
     /**
      * Gets the LiveData object for the event image.
      *
-     * @return A MutableLiveData<Integer> containing the resource ID of the event image.
+     * @return A MutableLiveData containing the resource ID of the event image.
      */
     public MutableLiveData<Integer> getEventImage() {
         return eventImage;

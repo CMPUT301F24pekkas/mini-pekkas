@@ -17,7 +17,9 @@ import com.example.mini_pekkas.databinding.FragmentEventBinding;
 import com.example.mini_pekkas.ui.event.user.EventViewModel;
 
 /**
- * Fragment for the event view.
+ * Fragment that displays details of an event in the Admin interface.
+ * This fragment binds data from the EventViewModel to the UI elements.
+ * It also handles displaying a QR code.
  * TODO need to be completed
  */
 public class AdminEventFragment extends Fragment {
@@ -25,6 +27,14 @@ public class AdminEventFragment extends Fragment {
     private EventViewModel eventViewModel;
     private Firebase firebaseHelper;
 
+    /**
+     * Called when the fragment's view is created.
+     *
+     * @param inflater           The LayoutInflater used to inflate the fragment's view.
+     * @param container          The parent view group that this fragment's view will be attached to.
+     * @param savedInstanceState A Bundle containing the fragment's previously saved state, if any.
+     * @return The root view of the fragment.
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
@@ -44,7 +54,7 @@ public class AdminEventFragment extends Fragment {
         // updates text views when they are changed
         eventViewModel.getEventName().observe(getViewLifecycleOwner(), eventNameView::setText);
         eventViewModel.getOrganizerName().observe(getViewLifecycleOwner(), organizerNameView::setText);
-        eventViewModel.getLocation().observe(getViewLifecycleOwner(), locationView::setText);
+        eventViewModel.getFacility().observe(getViewLifecycleOwner(), locationView::setText);
         eventViewModel.getEventDescription().observe(getViewLifecycleOwner(), eventDescriptionView::setText);
         eventViewModel.getEventDetails().observe(getViewLifecycleOwner(), eventDetailsView::setText);
 
@@ -60,7 +70,9 @@ public class AdminEventFragment extends Fragment {
         return root;
     }
 
-
+    /**
+     * Cleans up resources and prevents memory leaks by nullifying the binding.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

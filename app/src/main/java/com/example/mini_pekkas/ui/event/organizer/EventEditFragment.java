@@ -31,12 +31,28 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.UUID;
 
-
+/**
+ * Fragment for editing event details. This fragment allows the Organizer to:
+ * - View and modify the event's name, start date, end date, description, and location.
+ * - Select a new event poster image.
+ * - Save the updated event information and navigate back to the event details.
+ */
 public class EventEditFragment extends Fragment {
     private FragmentEditEventBinding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
 
     private StorageReference posterImageRef; //ref to store the image
+
+    /**
+     * Inflates the fragment layout and sets up UI elements for editing an event.
+     * Binds event data from ViewModel and handles interactions for image selection
+     * and saving event updates.
+     *
+     * @param inflater LayoutInflater to inflate the layout
+     * @param container ViewGroup that contains the fragment's UI
+     * @param savedInstanceState Bundle containing the fragment's state
+     * @return The root view of the inflated layout
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -70,6 +86,12 @@ public class EventEditFragment extends Fragment {
         //make button navigate to addEvent fragment with values changed
         Button saveButton = binding.saveEventButton;
         saveButton.setOnClickListener(new View.OnClickListener() {
+
+            /**
+             * Called when the "save" button is clicked.
+             * Saves the event details and takes you to the updated even details screen
+             * @param v The view that was clicked.
+             */
             @Override
             public void onClick(View v) {
                 //navigate to addEvent fragment with values changed
@@ -84,8 +106,6 @@ public class EventEditFragment extends Fragment {
 
         return root;
     }
-
-
     /**
      * Updates the event details
      * @param event
@@ -131,6 +151,11 @@ public class EventEditFragment extends Fragment {
 //                        Toast.makeText(getActivity(), "Failed to upload image", Toast.LENGTH_SHORT).show()
 //                ));
 //    }
+
+
+    /**
+     * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
+     */
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

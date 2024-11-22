@@ -17,7 +17,7 @@ import java.util.Objects;
 
 /**
  * Shared ViewModel for the Organizer actions.
- * Handles retrieving, updating and adding events
+ * Handles retrieving, updating, adding, and deleting events for Organizers.
  */
 public class OrganizerEventsListViewModel extends ViewModel {
     private final String DeviceId;
@@ -26,6 +26,12 @@ public class OrganizerEventsListViewModel extends ViewModel {
     private final MutableLiveData<Event> SelectedEvent;
     private boolean isDataInitialized = false;
 
+    /**
+     * Constructor for the OrganizerEventsListViewModel.
+     * Initializes Firebase helper, DeviceId, and sets up the EventList.
+     *
+     * @param context The context for accessing system services (e.g., device ID).
+     */
     public OrganizerEventsListViewModel(Context context){
         firebaseHelper = new Firebase(context);
         DeviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -35,22 +41,45 @@ public class OrganizerEventsListViewModel extends ViewModel {
         SelectedEvent = new MutableLiveData<>();
     }
 
+    /**
+     * Returns the device ID of the organizer.
+     *
+     * @return The unique device ID of the organizer.
+     */
     public String getDeviceId() {
         return DeviceId;
     }
 
+    /**
+     * Returns the selected event.
+     *
+     * @return The MutableLiveData object representing the selected event.
+     */
     public MutableLiveData<Event> getSelectedEvent() {
         return SelectedEvent;
     }
+
+    /**
+     * Adds a new event to the event list.
+     *
+     * @param event The event to be added to the list.
+     */
     public void setSelectedEvent(Event event) {
         assert event != null;
         SelectedEvent.setValue(event);
     }
 
+    /**
+     * Retrieves events created by the organizer from the database and adds them to the EventList.
+     */
     public LiveData<ArrayList<Event>> getEventList(){
         return EventList;
     }
 
+    /**
+     * Ensures that event data is only loaded once by checking if data has already been initialized.
+     * If not, it calls getEventsFromDb() to retrieve event data.
+     */
     public void addEvent(Event event){
         ArrayList<Event> currentEventList = EventList.getValue();
         assert event != null;
@@ -59,7 +88,11 @@ public class OrganizerEventsListViewModel extends ViewModel {
         Log.d("OrganizerEventsListViewModel", "Event added: " + event.getName() + "tempListsize: " + currentEventList.size() + "EventListsize: " + currentEventList.size());
 
     }
-
+    /**
+     * Deletes an event from the event list based on the event ID.
+     *
+     * @param eventId The ID of the event to be deleted.
+     */
     public void deleteEvent(String eventId){
         ArrayList<Event> currentEventList = EventList.getValue();
         for(int i = 0; i < currentEventList.size(); i++){
