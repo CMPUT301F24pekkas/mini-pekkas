@@ -267,14 +267,14 @@
         app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
     <Button
-        android:id="@+id/leaveWaitButton"
+        android:id="@+id/joinWaitButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="245dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="9dp"
         android:layout_marginBottom="25dp"
-        android:text="Leave Waitlist"
+        android:text="Join Waitlist"
         app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
         app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
         app:layout_constraintHorizontal_bias="1.0"

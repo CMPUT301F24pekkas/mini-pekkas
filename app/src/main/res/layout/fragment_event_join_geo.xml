@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/qrDialogueImage"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
 
     <LinearLayout
         android:id="@+id/joinDialogue"
-        android:layout_width="360dp"
-        android:layout_height="243dp"
+        android:layout_width="380dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:layout_marginTop="1dp"
         android:layout_marginEnd="1dp"
