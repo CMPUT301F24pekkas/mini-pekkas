@@ -3,6 +3,7 @@ package com.example.mini_pekkas;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -33,7 +34,6 @@ public class AdminUiTests {
     public ActivityScenarioRule<AdminActivity> scenario = new
             ActivityScenarioRule<>(AdminActivity.class);
     public Firebase firebaseHelper;
-    public String deviceId;
     public Event testEvent;
 
     /**
@@ -41,8 +41,8 @@ public class AdminUiTests {
      * @param context The context of the activity
      */
     public void CreateTestProfile(Context context) {
-        Firebase firebaseHelper = new Firebase(context);
-        deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        this.firebaseHelper = new Firebase(context);
+        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // Make sure the document exist, create if not
         firebaseHelper.isThisUserAdmin(exist -> {
@@ -66,28 +66,31 @@ public class AdminUiTests {
         map.put("description", "Test Description");
         map.put("date", "Test Date");
         map.put("time", "Test Time");
-        map.put("maxAttendees", 100);
+        map.put("maxAttendees", (long) 100);
         map.put("QrCode", "Test QR Code");
         map.put("geo", true);
-        map.put("facilityGeoLat", 100.0);
-        map.put("facilityGeoLong", 100.0);
-        map.put("price", 100.0);
+        map.put("facilityGeoLat", (double) 100.0);
+        map.put("facilityGeoLong", (double) 100.0);
+        map.put("price", (double) 100.10);
         map.put("attendees", new ArrayList<>());
         map.put("waitlist", new ArrayList<>());
         map.put("eventHost", new User());
         //map.put("id", "Test ID");
         map.put("posterUrl", null);
         map.put("facility", "Test Facility");
-        testEvent = new Event(map);
+        this.testEvent = new Event(map);
 
-        firebaseHelper.addEvent(testEvent); // Id is updated in here
+        firebaseHelper.addEvent(testEvent);
     }
 
     @Before
-    public void setup() {
+    public void setup() throws InterruptedException {
         Context context = ApplicationProvider.getApplicationContext();
         CreateTestProfile(context);
         CreateTestEvent();
+
+        Thread.sleep(2000); // TODO bad idea but simple way to wait for adding events
+
         // TODO add a poster to browse and delete
         onView(withId(R.id.adminBrowseEvents)).perform(click());
     }
@@ -100,6 +103,31 @@ public class AdminUiTests {
         onView(withId(R.id.adminBrowseEvents)).perform(click());
         onView(withId(R.id.admin_search_events)).perform(typeText("Test Event"));
         onView(withText("Test Event")).check(matches(isDisplayed()));
+
+        // Search for an non-existent event, check if nothing appears
+        onView(withId(R.id.admin_search_events)).perform(typeText("Non-existent &%&@()&++!*+!*()@#$ Event"));
+        onView(withText("Non-existent &%&@()&++!*+!*()@#$ Event")).check(doesNotExist());
+    }
+
+    /**
+     * Check if browse facility tab works
+     */
+    @Test
+    public void testBrowseFacility() {
+        onView(withId(R.id.adminBrowseFacilities)).perform(click());
+        onView(withId(R.id.admin_search_facilities)).perform(typeText("Test Facility"));
+        onView(withText("Test Facility")).check(matches(isDisplayed()));
+    }
+
+    /**
+     * US 03.05.01 - Browse profiles
+     * TODO need to make a mock user for this
+     */
+    @Test
+    public void testBrowseProfile() {
+//        onView(withId(R.id.adminBrowseProfiles)).perform(click());
+//        onView(withId(R.id.admin_search_profiles)).perform(typeText("Android Unit Testing"));
+//        onView(withText("Android Unit Testing")).check(matches(isDisplayed()));
     }
 
     /**

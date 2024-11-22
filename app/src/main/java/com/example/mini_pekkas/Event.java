@@ -277,7 +277,11 @@ public class Event {
 
         this.id = (String) map.get("id");
         this.name = (String) map.get("name");
-        this.eventHost = new User((Map<String, Object>) map.get("eventHost"));
+        if (map.get("eventHost") instanceof User) {
+            this.eventHost = (User) map.get("eventHost");
+        } else {
+            this.eventHost = new User((Map<String, Object>) map.get("eventHost"));
+        }
         this.description = (String) map.get("description");
         this.startDate = (String) map.get("startDate");
         this.endDate = (String) map.get("endDate");
