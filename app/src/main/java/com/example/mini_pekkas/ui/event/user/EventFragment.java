@@ -133,13 +133,8 @@ public class EventFragment extends Fragment {
                         DocumentSnapshot document = task.getDocuments().get(0);
                         Event event = new Event(document.getData());
                         sharedViewModel.setEventDetails(event);
-                        eventViewModel.setEvent(event); // Update the ViewModel for local use
-                        Toast.makeText(getContext(), "Event Found", Toast.LENGTH_SHORT).show();
+                        eventViewModel.setEvent(event);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("EventFragment", "Error fetching event: " + e.getMessage());
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -152,32 +147,9 @@ public class EventFragment extends Fragment {
     public void leaveWaitList(Event event, String deviceId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events").document(event.getId())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        // Retrieve the current waitlist
-                        List<Map<String, Object>> waitlist = (List<Map<String, Object>>) documentSnapshot.get("waitlist");
-                        if (waitlist != null) {
-                            List<Map<String, Object>> updatedWaitlist = new ArrayList<>();
-                            for (Map<String, Object> entry : waitlist) {
-                                if (!deviceId.equals(entry.get("deviceId"))) {
-                                    updatedWaitlist.add(entry);
-                                }
-                            }
-
-                            db.collection("events").document(event.getId())
-                                    .update("waitlist", updatedWaitlist)
-                                    .addOnSuccessListener(aVoid -> Log.d("Firebase", "Device removed from waitlist"))
-                                    .addOnFailureListener(e -> Log.e("Firebase", "Failed to remove device from waitlist", e));
-                        } else {
-                            Log.w("Firebase", "Waitlist is empty or not found");
-                        }
-                    } else {
-                        Log.e("Firebase", "Event document does not exist");
-                    }
-                })
-                .addOnFailureListener(e -> Log.e("Firebase", "Failed to fetch event document", e));
+                .update("waitlist", FieldValue.arrayRemove(deviceId));
     }
+
 
     /**
      * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
