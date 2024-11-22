@@ -230,6 +230,7 @@ public class OrganizerTests {
                     document.getReference().delete();
                 });
         deleteUserEvent();
+        Thread.sleep(2000);
     }
 //    /**
 //     * US 02.05.01 As an organizer I want to send a notification to chosen entrants to sign up for events.
