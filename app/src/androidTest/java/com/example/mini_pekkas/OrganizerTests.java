@@ -62,17 +62,6 @@ public class OrganizerTests {
     public void setUp() {
         Context context = ApplicationProvider.getApplicationContext();
         CreateTestProfile(context);
-        onView(withId(R.id.navigation_org_profile)).perform(click());
-        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        try {
-            UiObject allowButton = device.findObject(new UiSelector().text("Allow"));
-            if (allowButton.exists()) {
-                allowButton.click();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        onView(withId(R.id.navigation_org_home)).perform(click());
     }
 
     /**
@@ -85,6 +74,19 @@ public class OrganizerTests {
                 .delete();
     }
 
+    /**
+     * deletes the user-event document in the firebase based on device id
+     */
+    private void deleteUserEvent() {
+        database.collection("user-events")
+                .whereEqualTo("userID", deviceId)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                    document.getReference().delete();
+                });
+    }
 
     /**
      * US 02.01.01 As an organizer I want to create a new event and generate a unique promotional QR code
@@ -107,13 +109,13 @@ public class OrganizerTests {
                     DocumentSnapshot document = task.getResult().getDocuments().get(0);
                     document.getReference().delete();
                 });
+        deleteUserEvent();
     }
     /**
      * US 02.01.02 As an organizer I want to store hash data of the generated QR code in my database
      */
     @Test
     public void testStoreHash() throws InterruptedException {
-        Thread.sleep(3000);
         onView(withId(R.id.navigation_org_add)).perform(click());
         Thread.sleep(3000);
         onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
@@ -129,6 +131,7 @@ public class OrganizerTests {
                     assertNotNull("QrCode should not be null", document.getString("QrCode"));
                     document.getReference().delete();
                 });
+        deleteUserEvent();
     }
 //    /**
 //     * US 02.02.01 As an organizer I want to view the list of entrants who joined my event waiting list
@@ -164,6 +167,7 @@ public class OrganizerTests {
                     assertEquals("Geo field should be true", Boolean.TRUE, document.getBoolean("geo"));
                     document.getReference().delete();
                 });
+        deleteUserEvent();
     }
     /**
      * US 02.03.01 As an organizer I want to OPTIONALLY limit the number of entrants who can join my waiting list
@@ -187,6 +191,7 @@ public class OrganizerTests {
                     assertEquals(300L, document.getLong("maxAttendees").longValue());
                     document.getReference().delete();
                 });
+        deleteUserEvent();
     }
     /**
      * US 02.04.01 As an organizer I want to upload an event poster to provide visual information to entrants
@@ -201,16 +206,31 @@ public class OrganizerTests {
         onView(withId(R.id.addEventPicture)).perform(click());
     }
 
-//    /**
-//     * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
-//     */
-//    @Test
-//    public void testUpdateEventPoster() throws InterruptedException {
-//        Thread.sleep(3000);
-//        onView(withId(R.id.navigation_org_add)).perform(click());
-//        onView(withId(R.id.editEventPictureButton)).perform(click());
-//
-//    }
+    /**
+     * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
+     */
+    @Test
+    public void testUpdateEventPoster() throws InterruptedException {
+        onView(withId(R.id.navigation_org_add)).perform(click());
+        Thread.sleep(3000);
+        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
+        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
+        onView(withId(R.id.addEventButton)).perform(click());
+        onView(withId(R.id.qrDialogueImageView)).check(matches(isDisplayed()));
+        onView(withId(R.id.confirmQrButton)).perform(click());
+        onView(withId(R.id.navigation_org_home)).perform(click());
+        onView(withId(R.id.EditEvent)).perform(click());
+        onView(withId(R.id.editEventPictureButton)).perform(click());
+        database.collection("events")
+                .whereEqualTo("name", "Oilers Event")
+                .limit(1)
+                .get()
+                .addOnCompleteListener(task -> {
+                    DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                    document.getReference().delete();
+                });
+        deleteUserEvent();
+    }
 //    /**
 //     * US 02.05.01 As an organizer I want to send a notification to chosen entrants to sign up for events.
 //     */
