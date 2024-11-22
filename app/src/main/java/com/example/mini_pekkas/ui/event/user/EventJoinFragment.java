@@ -1,7 +1,5 @@
 package com.example.mini_pekkas.ui.event.user;
 
-import static org.junit.Assert.assertEquals;
-
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -10,10 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.example.mini_pekkas.Firebase;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -22,23 +18,22 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
-import com.example.mini_pekkas.databinding.FragmentEventBinding;
-import com.example.mini_pekkas.databinding.FragmentEventLeaveWaitBinding;
+import com.example.mini_pekkas.databinding.FragmentEventJoinBinding;
+import com.example.mini_pekkas.databinding.FragmentEventJoinWaitBinding;
+import com.example.mini_pekkas.ui.home.HomeFragment;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-public class EventFragment extends Fragment {
+public class EventJoinFragment extends Fragment {
 
-    private FragmentEventBinding binding;
+    private FragmentEventJoinBinding binding;
     private User mockUser;
     private EventViewModel eventViewModel;
     private Firebase firebaseHelper;
@@ -49,7 +44,7 @@ public class EventFragment extends Fragment {
         firebaseHelper = new Firebase(requireContext());
 
 
-        binding = FragmentEventBinding.inflate(inflater, container, false);
+        binding = FragmentEventJoinBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         SharedEventViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
@@ -67,26 +62,24 @@ public class EventFragment extends Fragment {
             }
         });
 
-        Button joinWaitlistButton = binding.leaveWaitButton;
+        Button joinWaitlistButton = binding.joinWaitButton;
         joinWaitlistButton.setOnClickListener(v -> {
-            FragmentEventLeaveWaitBinding joinWaitBinding = FragmentEventLeaveWaitBinding.inflate(LayoutInflater.from(getContext()));
+            FragmentEventJoinWaitBinding joinWaitBinding = FragmentEventJoinWaitBinding.inflate(LayoutInflater.from(getContext()));
 
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setView(joinWaitBinding.getRoot());
             AlertDialog dialog = builder.create();
             dialog.show();
 
-            Button joinButton = joinWaitBinding.leaveWaitConfirmButton;
+            Button joinButton = joinWaitBinding.joinWaitButton;
             Button cancelButton = joinWaitBinding.cancelWaitButton;
 
             joinButton.setOnClickListener(view -> {
                 Event event = eventViewModel.getEvent().getValue();
                 if (event != null) {
                     String deviceId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-                    leaveWaitList(event, deviceId);
-                    Toast.makeText(requireContext(), "Leaving waitlist...", Toast.LENGTH_SHORT).show();
-                    NavController navController = NavHostFragment.findNavController(this);
-                    navController.navigate(R.id.action_navigation_event_to_navigation_home);
+                    joinWaitList(event, deviceId);
+                    Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
                 }
@@ -96,10 +89,12 @@ public class EventFragment extends Fragment {
             cancelButton.setOnClickListener(view -> dialog.dismiss());
         });
 
+
         return root;
 
 
     }
+
     private void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events")
@@ -122,76 +117,29 @@ public class EventFragment extends Fragment {
                 });
     }
 
-    public void leaveWaitList(Event event, String deviceId) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("events").document(event.getId())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        // Retrieve the current waitlist
-                        List<Map<String, Object>> waitlist = (List<Map<String, Object>>) documentSnapshot.get("waitlist");
-                        if (waitlist != null) {
-                            List<Map<String, Object>> updatedWaitlist = new ArrayList<>();
-                            for (Map<String, Object> entry : waitlist) {
-                                if (!deviceId.equals(entry.get("deviceId"))) {
-                                    updatedWaitlist.add(entry);
-                                }
-                            }
-
-                            db.collection("events").document(event.getId())
-                                    .update("waitlist", updatedWaitlist)
-                                    .addOnSuccessListener(aVoid -> Log.d("Firebase", "Device removed from waitlist"))
-                                    .addOnFailureListener(e -> Log.e("Firebase", "Failed to remove device from waitlist", e));
-                        } else {
-                            Log.w("Firebase", "Waitlist is empty or not found");
-                        }
-                    } else {
-                        Log.e("Firebase", "Event document does not exist");
-                    }
-                })
-                .addOnFailureListener(e -> Log.e("Firebase", "Failed to fetch event document", e));
-    }
-
-
-    private void showLeaveWaitlistDialog(Button button) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-
-        View dialogView = inflater.inflate(R.layout.fragment_event_leave_wait, null);
-        builder.setView(dialogView);
-
-        TextView messageView = dialogView.findViewById(R.id.textView33);
-        Button leaveButton = dialogView.findViewById(R.id.leaveWaitButton);
-        Button cancelButton = dialogView.findViewById(R.id.cancelWaitButton);
-
-        AlertDialog dialog = builder.create();
-
-        leaveButton.setOnClickListener(view -> {
-            Event event = eventViewModel.getEvent().getValue();
-            if (event != null && event.getWaitlist().contains(mockUser)) {
-                event.getWaitlist().remove(mockUser);
-                firebaseHelper.cancelEvent(event);
-                Toast.makeText(getContext(), "You have left the waitlist!", Toast.LENGTH_SHORT).show();
-                updateButtonText(button);
-            }
-            dialog.dismiss();
-        });
-
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
-
-        dialog.show();
-    }
-
-    // Updates the text on the join/leave button accordingly
-    private void updateButtonText(Button button) {
-        Event event = eventViewModel.getEvent().getValue();
-        if (event != null && mockUser != null) {
-            if (event.getWaitlist().contains(mockUser)) {
-                button.setText("Leave Waitlist");
-            } else {
-                button.setText("Join Waitlist");
-            }
+    public void joinWaitList(Event event, String deviceId) {
+        if (event == null || deviceId == null) {
+            Log.e("Firebase", "Event or Device ID is null");
+            return;
         }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Map<String, Object> deviceEntry = new HashMap<>();
+        deviceEntry.put("deviceId", deviceId);
+
+        db.collection("events").document(event.getId())
+                .update("waitlist", FieldValue.arrayUnion(deviceEntry))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firebase", "Device ID added to waitlist");
+                    Toast.makeText(requireContext(), "Added to waitlist", Toast.LENGTH_SHORT).show();
+
+                    NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
+                    navController.navigate(R.id.action_navigation_event2_to_navigation_event);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firebase", "Failed to add device to waitlist", e);
+                    Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
 

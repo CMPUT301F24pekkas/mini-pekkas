@@ -44,7 +44,7 @@ public class AdminEventFragment extends Fragment {
         // updates text views when they are changed
         eventViewModel.getEventName().observe(getViewLifecycleOwner(), eventNameView::setText);
         eventViewModel.getOrganizerName().observe(getViewLifecycleOwner(), organizerNameView::setText);
-        eventViewModel.getLocation().observe(getViewLifecycleOwner(), locationView::setText);
+        eventViewModel.getFacility().observe(getViewLifecycleOwner(), locationView::setText);
         eventViewModel.getEventDescription().observe(getViewLifecycleOwner(), eventDescriptionView::setText);
         eventViewModel.getEventDetails().observe(getViewLifecycleOwner(), eventDetailsView::setText);
 

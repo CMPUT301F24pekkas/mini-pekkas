@@ -15,40 +15,57 @@ import com.example.mini_pekkas.Firebase;
 
 public class EventViewModel extends ViewModel {
 
-    // all the texts that can be changed within the event view
+    // MutableLiveData for the Event object
+    private final MutableLiveData<Event> event;
+
+    // Other fields for additional event details
     private final MutableLiveData<String> eventName;
     private final MutableLiveData<String> organizerName;
-    private final MutableLiveData<String> location;
+    private final MutableLiveData<String> facility;
     private final MutableLiveData<String> eventDescription;
     private final MutableLiveData<String> eventDetails;
     private final MutableLiveData<Integer> eventImage;
 
-
     public EventViewModel() {
-        // initializing all the text views that can change as MutableLiveData types
+        // Initialize MutableLiveData fields
+        event = new MutableLiveData<>();
         eventName = new MutableLiveData<>();
         organizerName = new MutableLiveData<>();
-        location = new MutableLiveData<>();
+        facility = new MutableLiveData<>();
         eventDescription = new MutableLiveData<>();
         eventDetails = new MutableLiveData<>();
-
-        // initializing all the image views that can change
         eventImage = new MutableLiveData<>();
-
-
     }
 
-    // getters for all the text views
-    public MutableLiveData<String> getOrganizerName() {
-        return organizerName;
+    // Getter for the Event object
+    public MutableLiveData<Event> getEvent() {
+        return event;
     }
 
+    // Method to set the Event object and update other related fields
+    public void setEvent(Event event) {
+        this.event.setValue(event);
+
+        // Optionally update other fields
+        if (event != null) {
+            eventName.setValue(event.getName());
+            organizerName.setValue(event.getEventHost().getName());
+            facility.setValue(event.getFacility());
+            eventDescription.setValue(event.getDescription());
+        }
+    }
+
+    // Getters for other fields
     public MutableLiveData<String> getEventName() {
         return eventName;
     }
 
-    public MutableLiveData<String> getLocation() {
-        return location;
+    public MutableLiveData<String> getOrganizerName() {
+        return organizerName;
+    }
+
+    public MutableLiveData<String> getFacility() {
+        return facility;
     }
 
     public MutableLiveData<String> getEventDescription() {
@@ -62,7 +79,4 @@ public class EventViewModel extends ViewModel {
     public MutableLiveData<Integer> getEventImage() {
         return eventImage;
     }
-
-
-
 }

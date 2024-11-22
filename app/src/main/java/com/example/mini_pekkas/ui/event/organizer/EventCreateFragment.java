@@ -80,8 +80,6 @@ public class EventCreateFragment extends Fragment {
 
             // Generate a unique QR code raw string (event ID + UUID)
             String uniqueQrData = event.getId() + UUID.randomUUID().toString();
-
-            Toast.makeText(getContext(), uniqueQrData, Toast.LENGTH_LONG).show();
             // Set the raw QR code data in the event
             event.setQrCode(uniqueQrData);
 
