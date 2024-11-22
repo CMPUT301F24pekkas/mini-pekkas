@@ -129,10 +129,20 @@ public class User {
         this.facility = facility;
     }
 
+    /**
+     * Gets the URL of the user's profile photo.
+     *
+     * @return The profile photo URL of the user.
+     */
     public String getProfilePhotoUrl() {
         return profilePhotoUrl;
     }
 
+    /**
+     * Sets the URL of the user's profile photo.
+     *
+     * @param profilePhotoUrl The profile photo URL to set.
+     */
     public void setProfilePhotoUrl(String profilePhotoUrl) {
         this.profilePhotoUrl = profilePhotoUrl;
     }

@@ -23,6 +23,14 @@ import com.example.mini_pekkas.ui.event.admin.AdminEventFragment;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment for browsing and managing events in the Admin interface.
+ * This fragment includes functionality for:
+ * - Viewing a list of events
+ * - Searching events using a search bar
+ * - Deleting events with a confirmation dialog
+ * - Navigating to a detailed view of a selected event
+ */
 public class AdminBrowseEvent extends Fragment {
 
     private FragmentAdminBrowseEventsBinding binding;
@@ -31,6 +39,16 @@ public class AdminBrowseEvent extends Fragment {
     private ArrayAdapter<String> adapter;
     private ArrayList<Event> eventList;  // Store the original event objects
     private ArrayList<String> eventNames;  // Store event names for the ListView
+
+
+    /**
+     * Called to initialize the fragment's view hierarchy.
+     *
+     * @param inflater           The LayoutInflater used to inflate the fragment's view.
+     * @param container          The parent view group that this fragment's view will be attached to.
+     * @param savedInstanceState A Bundle containing the fragment's previously saved state, if any.
+     * @return The root view of the fragment.
+     */
 
     @Nullable
     @Override
@@ -113,7 +131,6 @@ public class AdminBrowseEvent extends Fragment {
 
 
     /**
-     * On click listener for the adminEventListView.
      * Navigate to an event fragment for the given event
      * @param v the view that was clicked
      */
@@ -139,6 +156,9 @@ public class AdminBrowseEvent extends Fragment {
 //                .commit();
     }
 
+    /**
+     * Cleans up resources and prevents memory leaks by nullifying the binding.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

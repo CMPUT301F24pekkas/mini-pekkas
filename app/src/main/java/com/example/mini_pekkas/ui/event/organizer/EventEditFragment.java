@@ -31,13 +31,29 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.UUID;
 
-
+/**
+ * Fragment for editing event details. This fragment allows the Organizer to:
+ * - View and modify the event's name, start date, end date, description, and location.
+ * - Select a new event poster image.
+ * - Save the updated event information and navigate back to the event details.
+ */
 public class EventEditFragment extends Fragment {
     private FragmentEditEventBinding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private StorageReference posterImageRef; //ref to store the image
+
+    /**
+     * Inflates the fragment layout and sets up UI elements for editing an event.
+     * Binds event data from ViewModel and handles interactions for image selection
+     * and saving event updates.
+     *
+     * @param inflater LayoutInflater to inflate the layout
+     * @param container ViewGroup that contains the fragment's UI
+     * @param savedInstanceState Bundle containing the fragment's state
+     * @return The root view of the inflated layout
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -74,6 +90,12 @@ public class EventEditFragment extends Fragment {
         //make button navigate to addEvent fragment with values changed
         Button saveButton = binding.saveEventButton;
         saveButton.setOnClickListener(new View.OnClickListener() {
+
+            /**
+             * Called when the "save" button is clicked.
+             * Saves the event details and takes you to the updated even details screen
+             * @param v The view that was clicked.
+             */
             @Override
             public void onClick(View v) {
                 //navigate to addEvent fragment with values changed
@@ -88,10 +110,22 @@ public class EventEditFragment extends Fragment {
 
         return root;
     }
+
+    /**
+     * Opens the device's image chooser to allow the user to select an image for the event poster.
+     */
     private void openImageChooser() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
+
+    /**
+     * Handles the result from the image chooser. Sets the selected image URI to the ImageView.
+     *
+     * @param requestCode The request code that identifies the image chooser
+     * @param resultCode The result code from the image chooser
+     * @param data The data returned by the image chooser, containing the image URI
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -100,6 +134,12 @@ public class EventEditFragment extends Fragment {
             binding.addEventPicture.setImageURI(imageUri);  // Show selected image in ImageView
         }
     }
+
+    /**
+     * Updates the event object with the latest values from the UI elements.
+     *
+     * @param event The event object to be updated
+     */
     private void UpdateEvent(Event event) {
 
 
@@ -146,6 +186,11 @@ public class EventEditFragment extends Fragment {
 //                        Toast.makeText(getActivity(), "Failed to upload image", Toast.LENGTH_SHORT).show()
 //                ));
 //    }
+
+
+    /**
+     * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
+     */
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
