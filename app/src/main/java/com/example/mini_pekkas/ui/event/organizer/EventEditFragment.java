@@ -103,6 +103,25 @@ public class EventEditFragment extends Fragment {
 
             }
         });
+        Button deleteButton = binding.deleteButton;
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+
+            /**
+             * Called when the "save" button is clicked.
+             * Saves the event details and takes you to the updated even details screen
+             * @param v The view that was clicked.
+             */
+            @Override
+            public void onClick(View v) {
+                //navigate to addEvent fragment with values changed
+                organizerEventsListViewModel.deleteEvent(event.getId());
+                //update viewmodel with new updated event
+
+                NavController navController = NavHostFragment.findNavController(EventEditFragment.this);
+                navController.navigate(R.id.action_global_navigation_org_home);
+
+            }
+        });
 
         return root;
     }
