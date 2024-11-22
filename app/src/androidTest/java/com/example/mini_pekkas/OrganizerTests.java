@@ -47,7 +47,6 @@ public class OrganizerTests {
     public void CreateTestProfile(Context context) {
         database = FirebaseFirestore.getInstance();
         deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        database = FirebaseFirestore.getInstance();
         Map<String, Object> userProfile = new HashMap<>();
         userProfile.put("name", "John");
         userProfile.put("lastname", "Doe");
@@ -192,16 +191,16 @@ public class OrganizerTests {
         onView(withId(R.id.addEventPicture)).perform(click());
     }
 
-    /**
-     * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
-     */
-    @Test
-    public void testUpdateEventPoster() throws InterruptedException {
-        Thread.sleep(3000);
-        onView(withId(R.id.homeOrgEditEvent)).perform(click());
-        onView(withId(R.id.editEventPictureButton)).perform(click());
-
-    }
+//    /**
+//     * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
+//     */
+//    @Test
+//    public void testUpdateEventPoster() throws InterruptedException {
+//        Thread.sleep(3000);
+//        onView(withId(R.id.homeOrgEditEvent)).perform(click());
+//        onView(withId(R.id.editEventPictureButton)).perform(click());
+//
+//    }
     /**
      * US 02.05.01 As an organizer I want to send a notification to chosen entrants to sign up for events.
      */

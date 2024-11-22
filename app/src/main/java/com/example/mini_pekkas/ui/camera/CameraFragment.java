@@ -18,9 +18,16 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentCameraBinding;
+import com.example.mini_pekkas.ui.event.user.SharedEventViewModel;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+
 
 /**
  * Fragment to handle the QR code scanning functionality.
@@ -99,8 +106,14 @@ public class CameraFragment extends Fragment {
                 String scannedData = result.getContents();
                 Log.d("CameraFragment", "Raw QR Code Data: " + scannedData);
 
-                // Fetch the event using the raw data (no Base64 encoding needed)
-                fetchEventFromFirebase(scannedData);
+                // Pass QR code data to SharedEventViewModel
+                SharedEventViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
+                sharedViewModel.setQrCodeData(scannedData);
+
+                // Optionally navigate to EventFragment
+                NavController navController = NavHostFragment.findNavController(this);
+                navController.navigate(R.id.action_navigation_camera_to_navigation_event);
+
             } else {
                 Toast.makeText(getContext(), "No QR Code detected", Toast.LENGTH_SHORT).show();
             }
