@@ -1,5 +1,7 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
+import static android.text.TextUtils.replace;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,6 +17,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -76,8 +79,9 @@ public class EventCreateFragment extends Fragment {
             Event event = CreateEvent();
 
             // Generate a unique QR code raw string (event ID + UUID)
-            String uniqueQrData = event.getId() + "_" + UUID.randomUUID().toString();
+            String uniqueQrData = event.getId() + UUID.randomUUID().toString();
 
+            Toast.makeText(getContext(), uniqueQrData, Toast.LENGTH_LONG).show();
             // Set the raw QR code data in the event
             event.setQrCode(uniqueQrData);
 
