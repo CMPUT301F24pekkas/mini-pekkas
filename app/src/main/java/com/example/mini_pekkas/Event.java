@@ -290,6 +290,7 @@ public class Event {
         this.waitlist = (ArrayList<User>) map.get("waitlist");
         this.QrCode = (String) map.get("QrCode");
         this.geo = map.get("geo") != null ? (boolean) map.get("geo") : false;
+        this.posterPhotoUrl = (String) map.get("posterUrl");
 
     }
 
