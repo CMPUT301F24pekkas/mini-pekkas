@@ -12,99 +12,118 @@ import java.util.HashMap;
 import java.util.Map;
 import com.example.mini_pekkas.Firebase;
 
-
+/**
+ * ViewModel class for managing event data in the UI.
+ * This class holds LiveData for event details and provides methods to update and retrieve them.
+ */
 public class EventViewModel extends ViewModel {
 
-    // all the texts that can be changed within the event view
+    // MutableLiveData for the Event object
+    private final MutableLiveData<Event> event;
+
+    // Other fields for additional event details
     private final MutableLiveData<String> eventName;
     private final MutableLiveData<String> organizerName;
-    private final MutableLiveData<String> location;
+    private final MutableLiveData<String> facility;
     private final MutableLiveData<String> eventDescription;
     private final MutableLiveData<String> eventDetails;
     private final MutableLiveData<Integer> eventImage;
-    private final MutableLiveData<Event> event;
 
-
+    /**
+     * Constructor for the EventViewModel.
+     * Initializes all the MutableLiveData fields.
+     */
     public EventViewModel() {
-        // initializing all the text views that can change as MutableLiveData types
+        // Initialize MutableLiveData fields
+        event = new MutableLiveData<>();
         eventName = new MutableLiveData<>();
         organizerName = new MutableLiveData<>();
-        location = new MutableLiveData<>();
+        facility = new MutableLiveData<>();
         eventDescription = new MutableLiveData<>();
         eventDetails = new MutableLiveData<>();
-
-        // initializing all the image views that can change
         eventImage = new MutableLiveData<>();
-
-        // placeholder text for now
-        eventName.setValue(mockEvent().getName());
-        organizerName.setValue(mockEvent().getEventHost().getName());
-        location.setValue("Location");
-        eventDescription.setValue(mockEvent().getDescription());
-
-        // placeholder for images for now
-        eventImage.setValue(R.drawable.ic_launcher_background);
-
-        // Mock Data Event
-        event = new MutableLiveData<>();
-        event.setValue(mockEvent());
-
     }
 
-    // getters for all the text views
-    public MutableLiveData<String> getOrganizerName() {
-        return organizerName;
+    // Getter for the Event object
+    /**
+     * Getter for the Event object.
+     *
+     * @return The MutableLiveData containing the Event object
+     */
+    public MutableLiveData<Event> getEvent() {
+        return event;
     }
 
+    // Method to set the Event object and update other related fields
+    /**
+     * Sets the Event object and updates other related fields accordingly.
+     *
+     * @param event The Event object to set
+     */
+    public void setEvent(Event event) {
+        this.event.setValue(event);
+
+        // Optionally update other fields
+        if (event != null) {
+            eventName.setValue(event.getName());
+            organizerName.setValue(event.getEventHost().getName());
+            facility.setValue(event.getFacility());
+            eventDescription.setValue(event.getDescription());
+        }
+    }
+
+    // Getters for other fields
+    /**
+     * Getter for the event name.
+     *
+     * @return The MutableLiveData containing the event name
+     */
     public MutableLiveData<String> getEventName() {
         return eventName;
     }
 
-    public MutableLiveData<String> getLocation() {
-        return location;
+    /**
+     * Getter for the organizer's name.
+     *
+     * @return The MutableLiveData containing the organizer's name
+     */
+    public MutableLiveData<String> getOrganizerName() {
+        return organizerName;
     }
 
+    /**
+     * Getter for the facility where the event is held.
+     *
+     * @return The MutableLiveData containing the facility name
+     */
+    public MutableLiveData<String> getFacility() {
+        return facility;
+    }
+
+    /**
+     * Getter for the event description.
+     *
+     * @return The MutableLiveData containing the event description
+     */
     public MutableLiveData<String> getEventDescription() {
         return eventDescription;
     }
 
+    /**
+     * Getter for the event details.
+     *
+     * @return The MutableLiveData containing additional event details
+     */
     public MutableLiveData<String> getEventDetails() {
         return eventDetails;
     }
 
+    /**
+     * Getter for the event image resource.
+     *
+     * @return The MutableLiveData containing the event image resource ID
+     */
     public MutableLiveData<Integer> getEventImage() {
         return eventImage;
     }
-
-    public MutableLiveData<Event> getEvent() { return event; }
-
-
-
-    // Mock data
-    private Event mockEvent() {
-        Map<String, Object> user1Data = new HashMap<>();
-        user1Data.put("name", "John Doe");
-        user1Data.put("email", "john@example.com");
-        user1Data.put("phone", "123-456-7890");
-        user1Data.put("isOrganizer", false);
-
-        Map<String, Object> user2Data = new HashMap<>();
-        user2Data.put("name", "Alice Smith");
-        user2Data.put("email", "alice@example.com");
-        user2Data.put("phone", "098-765-4321");
-        user2Data.put("isOrganizer", false);
-
-        User user1 = new User(user1Data);
-        User user2 = new User(user2Data);
-
-        ArrayList<User> waitlist = new ArrayList<>();
-        waitlist.add(user1);
-
-        return new Event("1", "A Community Event!", user2, "This is a very long event description because this is a very cool even that has a lot of description to it because it needs a lot of description and lots of description is very cool. Now what if this event description ran so long that it went of the page!!!! that would be crazy fr!!!!!!! but i need to test if this is actually a scrollable view and it wont just die after getting out of bounds!!!!! I need some more text here, I probably shouldve just used the built in example text they always start you off with. But hey this works!",
-                "2024-11-05", "2024-11-06", 50,
-                "Community Hall", 37.7749, -122.4194,
-                100, waitlist,
-                "CHK123", true, null);
-    }
-
 }

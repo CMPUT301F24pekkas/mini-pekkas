@@ -18,9 +18,18 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentCameraBinding;
+import com.example.mini_pekkas.ui.event.user.SharedEventViewModel;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import android.os.Bundle;
+
+
 
 /**
  * Fragment to handle the QR code scanning functionality.
@@ -95,12 +104,15 @@ public class CameraFragment extends Fragment {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() != null) {
-                // Get the raw scanned data from the QR code
                 String scannedData = result.getContents();
                 Log.d("CameraFragment", "Raw QR Code Data: " + scannedData);
 
-                // Fetch the event using the raw data (no Base64 encoding needed)
-                fetchEventFromFirebase(scannedData);
+                SharedEventViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
+                sharedViewModel.setQrCodeData(scannedData);
+
+                NavController navController = NavHostFragment.findNavController(this);
+                navController.navigate(R.id.action_navigation_camera_to_navigation_event);
+
             } else {
                 Toast.makeText(getContext(), "No QR Code detected", Toast.LENGTH_SHORT).show();
             }
@@ -111,7 +123,7 @@ public class CameraFragment extends Fragment {
     /**
      * Fetches the event associated with the provided Base64-encoded QR code from Firebase.
      *
-     * @param base64QRCode The Base64-encoded QR code string.
+     * @param qrCodeData The Base64-encoded QR code string.
      */
     private void fetchEventFromFirebase(String qrCodeData) {
         Log.d("CameraFragment", "Fetching event with raw QR data: " + qrCodeData);

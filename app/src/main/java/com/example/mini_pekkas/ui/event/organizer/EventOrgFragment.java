@@ -70,6 +70,13 @@ public class EventOrgFragment extends Fragment {
         // Sets up the choose button to open a participant selection dialog
         ImageButton chooseButton = binding.chooseButton;
         chooseButton.setOnClickListener(new View.OnClickListener() {
+
+            /**
+             * Called when the "Choose" button is clicked. It creates and displays
+             * a dialog for selecting participants.
+             *
+             * @param v The view that was clicked.
+             */
             @Override
             public void onClick(View v) {
                 // Creates a dialog for choosing participants when the button is clicked
@@ -85,8 +92,7 @@ public class EventOrgFragment extends Fragment {
     }
 
     /**
-     * Cleans up resources when the fragment's view is destroyed.
-     * Sets the binding to null to prevent memory leaks.
+     * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
      */
     @Override
     public void onDestroyView() {

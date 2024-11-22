@@ -24,8 +24,21 @@
         android:id="@+id/navigation_event"
         android:name="com.example.mini_pekkas.ui.event.user.EventFragment"
         android:label="@string/title_event"
-        tools:layout="@layout/fragment_event" />
+        tools:layout="@layout/fragment_event" >
+        <action
+            android:id="@+id/action_navigation_event_to_navigation_home"
+            app:destination="@id/navigation_home" />
+    </fragment>
 
+    <fragment
+        android:id="@+id/navigation_event2"
+        android:name="com.example.mini_pekkas.ui.event.user.EventJoinFragment"
+        android:label="@string/title_event"
+        tools:layout="@layout/fragment_event_join">
+        <action
+            android:id="@+id/action_navigation_event2_to_navigation_event"
+            app:destination="@id/navigation_event" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
@@ -41,6 +54,10 @@
         android:id="@+id/navigation_camera"
         android:name="com.example.mini_pekkas.ui.camera.CameraFragment"
         android:label="@string/title_camera"
-        tools:layout="@layout/fragment_camera" />
+        tools:layout="@layout/fragment_camera" >
+        <action
+            android:id="@+id/action_navigation_camera_to_navigation_event"
+            app:destination="@id/navigation_event2" />
+    </fragment>
 </navigation>
 
