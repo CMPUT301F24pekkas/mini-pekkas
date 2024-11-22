@@ -16,23 +16,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/addEventPicture"
-        android:layout_width="358dp"
-        android:layout_height="85dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="7dp"
-        android:adjustViewBounds="true"
-        android:background="@null"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toTopOf="@+id/createEventEditText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:srcCompat="@drawable/add_image" />
-
-
     <EditText
         android:id="@+id/createEventEditText"
         android:layout_width="363dp"
@@ -45,10 +28,9 @@
         android:ems="10"
         android:hint="New Event Title"
         android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/createEventLocationEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addEventPicture" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <EditText
         android:id="@+id/createEventLocationEditText"
@@ -62,7 +44,6 @@
         android:ems="10"
         android:hint="Location"
         android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/editStartDate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/createEventEditText" />
@@ -71,6 +52,7 @@
         android:id="@+id/editStartDate"
         android:layout_width="160dp"
         android:layout_height="48dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="16dp"
@@ -79,7 +61,6 @@
         android:hint="Select Start Date"
         android:inputType="date"
         android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/editEndDate"
         app:layout_constraintEnd_toStartOf="@+id/editStartTime"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/createEventLocationEditText" />
@@ -113,7 +94,6 @@
         android:hint="Select Start Time"
         android:inputType="time"
         android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/editEndTime"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/editStartDate"
         app:layout_constraintTop_toBottomOf="@+id/createEventLocationEditText" />
@@ -141,7 +121,6 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="2dp"
         android:text="Set Max Participants"
-        app:layout_constraintBottom_toTopOf="@+id/geoCheckBox"
         app:layout_constraintEnd_toStartOf="@+id/editMaxPart"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editEndDate" />
@@ -175,15 +154,15 @@
         android:layout_width="81dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="5dp"
         android:layout_marginEnd="306dp"
         android:text="Description"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/editDescription"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/geoCheckBox" />
+        app:layout_constraintTop_toBottomOf="@+id/geoCheckBox"
+        app:layout_constraintBottom_toTopOf= "@+id/editDescription" />
 
     <TextView
         android:id="@+id/textView4"
@@ -195,7 +174,6 @@
         android:text="Details"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/editDetails"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editDescription" />
@@ -205,7 +183,7 @@
         android:layout_width="350dp"
         android:layout_height="93dp"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="37dp"
         android:background="@drawable/rounded_edittext"
         android:ems="10"
@@ -215,38 +193,35 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/geoCheckBox" />
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <EditText
         android:id="@+id/editDetails"
         android:layout_width="351dp"
         android:layout_height="64dp"
         android:layout_marginStart="23dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="37dp"
-        android:layout_marginBottom="3dp"
+        android:layout_marginBottom="0dp"
         android:background="@drawable/rounded_edittext"
         android:ems="10"
         android:gravity="top|start"
         android:hint="Write down any extra details!"
         android:inputType="text"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/saveEventButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editDescription" />
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
     <Button
         android:id="@+id/saveEventButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="55dp"
         android:text="Save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editDetails"
         app:layout_constraintBottom_toBottomOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

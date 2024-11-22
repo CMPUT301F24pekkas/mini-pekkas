@@ -35,8 +35,7 @@ import java.util.UUID;
 public class EventEditFragment extends Fragment {
     private FragmentEditEventBinding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
-    private static final int PICK_IMAGE_REQUEST = 1;
-    private Uri imageUri;
+
     private StorageReference posterImageRef; //ref to store the image
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -47,8 +46,7 @@ public class EventEditFragment extends Fragment {
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
 
-        ImageButton posterButton = binding.addEventPicture;
-        posterButton.setOnClickListener(v -> openImageChooser());
+
         //set elements in fragment to selected event
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
         assert event != null;
@@ -67,9 +65,7 @@ public class EventEditFragment extends Fragment {
             binding.createEventLocationEditText.setText("N/A");
 
         }
-        //set poster picture
-        String PosterUrl = event.getPosterPhotoUrl();
-        Glide.with(this).load(PosterUrl).into(binding.addEventPicture);
+
 
         //make button navigate to addEvent fragment with values changed
         Button saveButton = binding.saveEventButton;
@@ -77,9 +73,9 @@ public class EventEditFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //navigate to addEvent fragment with values changed
-                UpdateEvent(event);
+                Event UpdatedEvent = UpdateEvent(event);
                 //update viewmodel with new updated event
-                organizerEventsListViewModel.setSelectedEvent(event);
+                organizerEventsListViewModel.setSelectedEvent(UpdatedEvent);
                 NavController navController = NavHostFragment.findNavController(EventEditFragment.this);
                 navController.navigate(R.id.navigation_org_event_details);
 
@@ -88,21 +84,13 @@ public class EventEditFragment extends Fragment {
 
         return root;
     }
-    private void openImageChooser() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
-            imageUri = data.getData();
-            binding.addEventPicture.setImageURI(imageUri);  // Show selected image in ImageView
-        }
-    }
-    private void UpdateEvent(Event event) {
 
 
+    /**
+     * Updates the event details
+     * @param event
+     */
+    private Event UpdateEvent(Event event) {
         event.setName(binding.createEventEditText.getText().toString());
         event.setStartDate(binding.editStartDate.getText().toString());
         event.setEndDate(binding.editEndDate.getText().toString());
@@ -110,7 +98,6 @@ public class EventEditFragment extends Fragment {
 //        event.setstartTime("10:00");
 //        event.setEndTime("14:00");
         event.setDescription(binding.editDescription.getText().toString());
-        event.setPosterPhotoUrl(String.valueOf(imageUri));
 
         boolean checked = binding.geoCheckBox.isChecked();
 
@@ -121,11 +108,9 @@ public class EventEditFragment extends Fragment {
         }
         event.setMaxAttendees(maxCapacity);
         event.setGeo(checked);
-
-
-
-
-
+        //update db
+        organizerEventsListViewModel.updateEventInDb(event);
+        return event;
     }
 //    /**
 //     * Uploads a new profile picture to Firebase Storage and updates

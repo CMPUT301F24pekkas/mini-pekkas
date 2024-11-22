@@ -23,7 +23,7 @@ public class OrganizerEventsListViewModel extends ViewModel {
     private final String DeviceId;
     private final Firebase firebaseHelper;
     private final MutableLiveData<ArrayList<Event>> EventList;
-    private MutableLiveData<Event> SelectedEvent;
+    private final MutableLiveData<Event> SelectedEvent;
     private boolean isDataInitialized = false;
 
     public OrganizerEventsListViewModel(Context context){
@@ -59,6 +59,7 @@ public class OrganizerEventsListViewModel extends ViewModel {
         Log.d("OrganizerEventsListViewModel", "Event added: " + event.getName() + "tempListsize: " + currentEventList.size() + "EventListsize: " + currentEventList.size());
 
     }
+
     public void deleteEvent(String eventId){
         ArrayList<Event> currentEventList = EventList.getValue();
         for(int i = 0; i < currentEventList.size(); i++){
@@ -70,10 +71,9 @@ public class OrganizerEventsListViewModel extends ViewModel {
         EventList.setValue(currentEventList);
 
     }
-//TODO: Edit event
-//    public void editEvent(Event event){
-//
-//    }
+    public void updateEventInDb(Event event){
+        firebaseHelper.updateEvent(event);
+    }
 
     /**
      * this function ensures that the events are only loaded once
@@ -90,30 +90,27 @@ public class OrganizerEventsListViewModel extends ViewModel {
      *
      */
     public void getEventsFromDb() {
-        if(EventList.getValue().isEmpty()){
-            return;
-        }
-        else {
-            Firebase.EventListRetrievalListener listener = new Firebase.EventListRetrievalListener() {
 
-                @Override
-                public void onEventListRetrievalCompleted(ArrayList<Event> events) {
-                    Log.d("OrganizerEventsListViewModel", "Event list retrieval completed" + " size:" + events.size());
-                    //if no events
+        Firebase.EventListRetrievalListener listener = new Firebase.EventListRetrievalListener() {
 
-                    for (Event event : events) {
-                        addEvent(event);
-                    }
+            @Override
+            public void onEventListRetrievalCompleted(ArrayList<Event> events) {
+                Log.d("OrganizerEventsListViewModel", "Event list retrieval completed" + " size:" + events.size());
+                //if no events
+
+                for (Event event : events) {
+                    addEvent(event);
                 }
+            }
 
-                @Override
-                public void onError(Exception e) {
-                    Log.d("OrganizerEventsListViewModel", "Error occurred: " + e.getMessage());
-                }
+            @Override
+            public void onError(Exception e) {
+                Log.d("OrganizerEventsListViewModel", "Error occurred: " + e.getMessage());
+            }
 
-            };
-            firebaseHelper.getOrganizedEvents(listener);
-        }
+        };
+        firebaseHelper.getOrganizedEvents(listener);
+
     }
 
 }
