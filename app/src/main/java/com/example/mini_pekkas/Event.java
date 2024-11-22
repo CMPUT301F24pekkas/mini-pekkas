@@ -31,6 +31,25 @@ public class Event {
     private String posterPhotoUrl;
 
     // Constructors
+    /**
+     * Constructs an Event object with the specified attributes.
+     *
+     * @param id               The unique identifier for the event.
+     * @param name             The name of the event.
+     * @param eventHost        The host of the event.
+     * @param description      The description of the event.
+     * @param startDate        The start date of the event.
+     * @param endDate          The end date of the event.
+     * @param price            The price of the event.
+     * @param facility         The facility where the event is held.
+     * @param facilityGeoLat   The latitude of the facility location.
+     * @param facilityGeoLong  The longitude of the facility location.
+     * @param maxAttendees     The maximum number of attendees.
+     * @param waitlist         The list of users on the event's waitlist.
+     * @param QrCode           The QR code associated with the event.
+     * @param geo              Indicates whether geographic location is enabled for the event.
+     * @param posterPhotoUrl   The URL of the event poster.
+     */
     public Event(String id, String name, User eventHost, String description, String startDate, String endDate, float price,
                  String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees,
                  ArrayList<User> waitlist, String QrCode, boolean geo, String posterPhotoUrl) {
@@ -50,7 +69,9 @@ public class Event {
         this.geo = geo;
         this.posterPhotoUrl = posterPhotoUrl;
     }
-
+    /**
+     * Default constructor for creating an empty Event object.
+     */
     public Event() {
     }
 
@@ -211,18 +232,40 @@ public class Event {
      */
     public void setGeo(boolean geo) { this.geo = geo; }
 
+    /**
+     * Gets the URL of the event poster.
+     *
+     * @return the URL of the event's poster
+     */
     public String getPosterPhotoUrl() {
         return posterPhotoUrl;
     }
 
+    /**
+     * Sets the URL of the event poster.
+     *
+     * @param posterPhotoUrl the URL to set for the poster
+     */
     public void setPosterPhotoUrl(String posterPhotoUrl) {
         this.posterPhotoUrl = posterPhotoUrl;
     }
 
+    /**
+     * Generates a QR code for the event using its unique ID.
+     *
+     * @param width  the width of the QR code
+     * @param height the height of the QR code
+     * @return a Bitmap representation of the generated QR code
+     */
     public Bitmap getQRCodeFromID(int width, int height) {
         return null;
     }
 
+    /**
+     * Constructs an Event object by initializing it with data from a Map.
+     *
+     * @param map A Map containing key-value pairs representing the event's data.
+     */
     public Event(Map<String, Object> map) {
         for (String key : map.keySet()) {
             Log.d("Event Debug", "Key: " + key);
@@ -250,6 +293,11 @@ public class Event {
 
     }
 
+    /**
+     * Converts this Event object to a Map representation for storing in Firebase.
+     *
+     * @return a Map representing the Event object with all its attributes
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);

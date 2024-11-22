@@ -179,11 +179,20 @@ public class OrganizerProfileViewModel extends ViewModel {
         organizerLocation.setValue(location);
     }
 
-
+    /**
+     * Gets the LiveData for the organizer's profile picture URL.
+     *
+     * @return LiveData containing the profile picture URL.
+     */
     public LiveData<String> getProfilePictureUrl() {
         return profilePictureUrl;
     }
 
+    /**
+     * Sets the profile picture URL of the organizer.
+     *
+     * @param url The new profile picture URL to set.
+     */
     public void setProfilePictureUrl(String url) {
         profilePictureUrl.setValue(url);
     }

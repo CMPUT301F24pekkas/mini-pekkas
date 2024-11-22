@@ -31,6 +31,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A fragment that handles joining an event's waitlist.
+ * The fragment displays event details, and allows the user to join the waitlist by providing a device ID.
+ * It fetches event data from Firebase based on the QR code data passed to it and allows the user
+ * to confirm joining the waitlist via a dialog.
+ */
 public class EventJoinFragment extends Fragment {
 
     private FragmentEventJoinBinding binding;
@@ -38,6 +44,15 @@ public class EventJoinFragment extends Fragment {
     private EventViewModel eventViewModel;
     private Firebase firebaseHelper;
 
+    /**
+     * Initializes the fragment and sets up necessary view models and Firebase helper.
+     * Observes QR code data to fetch the event details, and populates the UI with event information.
+     *
+     * @param inflater           The LayoutInflater object to inflate views in the fragment
+     * @param container          The parent view to which the fragment's UI is attached
+     * @param savedInstanceState Previously saved state information for the fragment
+     * @return The root view of the fragment's layout
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
@@ -95,6 +110,13 @@ public class EventJoinFragment extends Fragment {
 
     }
 
+    /**
+     * Fetches the event details from Firebase using the provided QR code data.
+     * Updates the event details in the shared and local view models.
+     *
+     * @param qrCodeData The QR code data used to fetch the event.
+     * @param sharedViewModel The shared view model used for updating the event data.
+     */
     private void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events")
@@ -117,6 +139,12 @@ public class EventJoinFragment extends Fragment {
                 });
     }
 
+    /**
+     * Adds the user's device ID to the event's waitlist in Firebase.
+     *
+     * @param event The event the user is attempting to join.
+     * @param deviceId The unique device ID used to identify the user.
+     */
     public void joinWaitList(Event event, String deviceId) {
         if (event == null || deviceId == null) {
             Log.e("Firebase", "Event or Device ID is null");
@@ -143,6 +171,9 @@ public class EventJoinFragment extends Fragment {
     }
 
 
+    /**
+     * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

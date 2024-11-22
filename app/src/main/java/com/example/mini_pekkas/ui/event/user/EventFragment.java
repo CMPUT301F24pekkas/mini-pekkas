@@ -36,6 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Fragment representing an event's details and waitlist functionality.
+ * Allows users to join or leave the event's waitlist.
+ */
 public class EventFragment extends Fragment {
 
     private FragmentEventBinding binding;
@@ -43,6 +47,15 @@ public class EventFragment extends Fragment {
     private EventViewModel eventViewModel;
     private Firebase firebaseHelper;
 
+    /**
+     * Inflates the fragment's view, sets up the necessary ViewModels and UI elements,
+     * and binds actions to the UI components, such as joining or leaving the waitlist.
+     *
+     * @param inflater           The LayoutInflater object to inflate views in the fragment
+     * @param container          The parent view to which the fragment's UI is attached
+     * @param savedInstanceState Previously saved state information for the fragment
+     * @return The root view of the fragment's layout
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
@@ -100,6 +113,14 @@ public class EventFragment extends Fragment {
 
 
     }
+
+    /**
+     * Fetches event data from Firebase using the provided QR code data and updates the event details
+     * in the shared view model and the local event view model.
+     *
+     * @param qrCodeData The data retrieved from scanning the event's QR code
+     * @param sharedViewModel The shared view model used to update the event details
+     */
     private void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events")
@@ -122,6 +143,12 @@ public class EventFragment extends Fragment {
                 });
     }
 
+    /**
+     * Removes the user from the event's waitlist based on the event ID and the device ID.
+     *
+     * @param event The event object from which the user should be removed
+     * @param deviceId The device ID of the user to be removed from the waitlist
+     */
     public void leaveWaitList(Event event, String deviceId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events").document(event.getId())
@@ -153,6 +180,11 @@ public class EventFragment extends Fragment {
     }
 
 
+    /**
+     * Displays a dialog for the user to confirm their decision to leave the waitlist.
+     *
+     * @param button The button that triggers the dialog when clicked
+     */
     private void showLeaveWaitlistDialog(Button button) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -183,6 +215,11 @@ public class EventFragment extends Fragment {
     }
 
     // Updates the text on the join/leave button accordingly
+    /**
+     * Updates the text on the join/leave button based on the user's waitlist status.
+     *
+     * @param button The button whose text needs to be updated
+     */
     private void updateButtonText(Button button) {
         Event event = eventViewModel.getEvent().getValue();
         if (event != null && mockUser != null) {
@@ -195,6 +232,9 @@ public class EventFragment extends Fragment {
     }
 
 
+    /**
+     * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

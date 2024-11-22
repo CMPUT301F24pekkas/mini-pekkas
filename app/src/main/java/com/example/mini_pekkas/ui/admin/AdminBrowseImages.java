@@ -15,6 +15,10 @@ import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.ImageAdapter;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseImagesBinding;
 
+/**
+ * Fragment class for browsing and managing images in the Admin interface.
+ * Retrieves and displays images stored in Firebase in a grid layout using a RecyclerView.
+ */
 public class AdminBrowseImages extends Fragment {
 
     private FragmentAdminBrowseImagesBinding binding; // Declare binding variable
@@ -23,6 +27,14 @@ public class AdminBrowseImages extends Fragment {
     private ImageAdapter imageAdapter;
 //    private ArrayList<Uri> imageList;
 
+    /**
+     * Called to initialize the fragment's view hierarchy.
+     *
+     * @param inflater           The LayoutInflater used to inflate the fragment's view.
+     * @param container          The parent view group that this fragment's view will be attached to.
+     * @param savedInstanceState A Bundle containing the fragment's previously saved state, if any.
+     * @return The root view of the fragment.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -48,6 +60,9 @@ public class AdminBrowseImages extends Fragment {
         return binding.getRoot(); // Return the root view from binding
     }
 
+    /**
+     * Cleans up resources and prevents memory leaks by nullifying the binding.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

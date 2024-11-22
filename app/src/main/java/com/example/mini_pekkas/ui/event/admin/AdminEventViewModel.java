@@ -19,7 +19,9 @@ public class AdminEventViewModel extends ViewModel {
     private final MutableLiveData<String> eventDetails;
     private final MutableLiveData<Integer> eventImage;
 
-
+    /**
+     * Constructor to initialize all mutable live data for the event details.
+     */
     public AdminEventViewModel() {
         // initializing all the text views that can change as MutableLiveData types
         eventName = new MutableLiveData<>();
@@ -44,26 +46,56 @@ public class AdminEventViewModel extends ViewModel {
     }
 
     // getters for all the text views
+    /**
+     * Gets the organizer's name.
+     *
+     * @return the live data for the organizer's name
+     */
     public MutableLiveData<String> getOrganizerName() {
         return organizerName;
     }
 
+    /**
+     * Gets the event name.
+     *
+     * @return the live data for the event name
+     */
     public MutableLiveData<String> getEventName() {
         return eventName;
     }
 
+    /**
+     * Gets the event location.
+     *
+     * @return the live data for the event location
+     */
     public MutableLiveData<String> getLocation() {
         return location;
     }
 
+    /**
+     * Gets the event description.
+     *
+     * @return the live data for the event description
+     */
     public MutableLiveData<String> getEventDescription() {
         return eventDescription;
     }
 
+    /**
+     * Gets the event details.
+     *
+     * @return the live data for the event details
+     */
     public MutableLiveData<String> getEventDetails() {
         return eventDetails;
     }
 
+    /**
+     * Gets the event image.
+     *
+     * @return the live data for the event image resource
+     */
     public MutableLiveData<Integer> getEventImage() {
         return eventImage;
     }

@@ -171,10 +171,20 @@ public class ProfileViewModel extends ViewModel {
         pfpText.setValue(text);
     }
 
+    /**
+     * Gets the LiveData for the profile picture URL.
+     *
+     * @return LiveData containing the profile picture URL.
+     */
     public LiveData<String> getProfilePictureUrl() {
         return profilePictureUrl;
     }
 
+    /**
+     * Sets the profile picture URL of the user.
+     *
+     * @param url The new profile picture URL to set.
+     */
     public void setProfilePictureUrl(String url) {
         profilePictureUrl.setValue(url);
     }

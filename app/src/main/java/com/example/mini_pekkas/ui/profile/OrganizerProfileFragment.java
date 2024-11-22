@@ -43,6 +43,13 @@ public class OrganizerProfileFragment extends Fragment {
     private ActivityResultLauncher<Intent> pickImageLauncher;
     private StorageReference profileImageRef;
 
+    /**
+     * Called when the fragment is created. Initializes the profile image reference in Firebase
+     * and checks for required permissions on devices.
+     *
+     * @param savedInstanceState If the fragment is being reinitialized, this contains
+     *                           the previous state information.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +63,14 @@ public class OrganizerProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Inflates the profile fragment layout and binds the views with the data from the ViewModel.
+     *
+     * @param inflater           The LayoutInflater object to inflate views in the fragment
+     * @param container          The parent view to which the fragment's UI is attached
+     * @param savedInstanceState Previously saved state information for the fragment
+     * @return The root view of the fragment's layout
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -230,6 +245,9 @@ public class OrganizerProfileFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
