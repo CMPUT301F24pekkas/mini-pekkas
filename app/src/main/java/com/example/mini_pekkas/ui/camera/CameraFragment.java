@@ -123,7 +123,7 @@ public class CameraFragment extends Fragment {
     /**
      * Fetches the event associated with the provided Base64-encoded QR code from Firebase.
      *
-     * @param base64QRCode The Base64-encoded QR code string.
+     * @param qrCodeData The Base64-encoded QR code string.
      */
     private void fetchEventFromFirebase(String qrCodeData) {
         Log.d("CameraFragment", "Fetching event with raw QR data: " + qrCodeData);
