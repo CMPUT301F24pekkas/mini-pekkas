@@ -179,59 +179,6 @@ public class EventFragment extends Fragment {
                 .addOnFailureListener(e -> Log.e("Firebase", "Failed to fetch event document", e));
     }
 
-
-    /**
-     * Displays a dialog for the user to confirm their decision to leave the waitlist.
-     *
-     * @param button The button that triggers the dialog when clicked
-     */
-    private void showLeaveWaitlistDialog(Button button) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-
-        View dialogView = inflater.inflate(R.layout.fragment_event_leave_wait, null);
-        builder.setView(dialogView);
-
-        TextView messageView = dialogView.findViewById(R.id.textView33);
-        Button leaveButton = dialogView.findViewById(R.id.leaveWaitButton);
-        Button cancelButton = dialogView.findViewById(R.id.cancelWaitButton);
-
-        AlertDialog dialog = builder.create();
-
-        leaveButton.setOnClickListener(view -> {
-            Event event = eventViewModel.getEvent().getValue();
-            if (event != null && event.getWaitlist().contains(mockUser)) {
-                event.getWaitlist().remove(mockUser);
-                firebaseHelper.cancelEvent(event);
-                Toast.makeText(getContext(), "You have left the waitlist!", Toast.LENGTH_SHORT).show();
-                updateButtonText(button);
-            }
-            dialog.dismiss();
-        });
-
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
-
-        dialog.show();
-    }
-
-    // Updates the text on the join/leave button accordingly
-    /**
-     * Updates the text on the join/leave button based on the user's waitlist status.
-     *
-     * @param button The button whose text needs to be updated
-     */
-    private void updateButtonText(Button button) {
-        Event event = eventViewModel.getEvent().getValue();
-        if (event != null && mockUser != null) {
-            if (event.getWaitlist().contains(mockUser)) {
-                button.setText("Leave Waitlist");
-            } else {
-                button.setText("Join Waitlist");
-            }
-        }
-    }
-
-
     /**
      * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
      */
