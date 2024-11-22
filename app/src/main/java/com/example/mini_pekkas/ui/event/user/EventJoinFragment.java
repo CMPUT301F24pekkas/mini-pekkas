@@ -98,7 +98,6 @@ public class EventJoinFragment extends Fragment {
                                     Button cancelGeoButton = joinGeoBinding.cancelWaitButton;
                                     showJoinDialog(dialog, joinGeoButton, cancelGeoButton);
                                 } else {
-                                    // Use FragmentEventJoinWaitBinding
                                     FragmentEventJoinWaitBinding joinWaitBinding = FragmentEventJoinWaitBinding.inflate(LayoutInflater.from(getContext()));
                                     AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                                     builder.setView(joinWaitBinding.getRoot());
@@ -131,7 +130,7 @@ public class EventJoinFragment extends Fragment {
      * @param qrCodeData The QR code data used to fetch the event.
      * @param sharedViewModel The shared view model used for updating the event data.
      */
-    private void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
+    public void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events")
                 .whereEqualTo("QrCode", qrCodeData)
@@ -166,11 +165,9 @@ public class EventJoinFragment extends Fragment {
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Map<String, Object> deviceEntry = new HashMap<>();
-        deviceEntry.put("deviceId", deviceId);
 
         db.collection("events").document(event.getId())
-                .update("waitlist", FieldValue.arrayUnion(deviceEntry))
+                .update("waitlist", FieldValue.arrayUnion(deviceId))
                 .addOnSuccessListener(aVoid -> {
                     Log.d("Firebase", "Device ID added to waitlist");
                     Toast.makeText(requireContext(), "Added to waitlist", Toast.LENGTH_SHORT).show();

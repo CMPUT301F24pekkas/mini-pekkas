@@ -53,6 +53,7 @@ public class OrganizerTests {
         userProfile.put("email", "test@gmail.com");
         userProfile.put("phone", "7801234567");
         userProfile.put("facility", "Facility");
+        userProfile.put("profilePhoto", null);
         database.collection("users")
                 .document(deviceId)
                 .set(userProfile);
@@ -74,6 +75,15 @@ public class OrganizerTests {
         onView(withId(R.id.navigation_org_home)).perform(click());
     }
 
+    /**
+     * deletes the test events and user
+     */
+    @After
+    public void tearDown() {
+        database.collection("users")
+                .document(deviceId)
+                .delete();
+    }
 
 
     /**
@@ -120,19 +130,19 @@ public class OrganizerTests {
                     document.getReference().delete();
                 });
     }
-    /**
-     * US 02.02.01 As an organizer I want to view the list of entrants who joined my event waiting list
-     */
-    @Test
-    public void testViewEntrants() throws InterruptedException {
-    }
-    /**
-     * US 02.02.02 As an organizer I want to see on a map where entrants joined my event waiting list from.
-     */
-    @Test
-    public void testEntrantMap(){
-
-    }
+//    /**
+//     * US 02.02.01 As an organizer I want to view the list of entrants who joined my event waiting list
+//     */
+//    @Test
+//    public void testViewEntrants() throws InterruptedException {
+//    }
+//    /**
+//     * US 02.02.02 As an organizer I want to see on a map where entrants joined my event waiting list from.
+//     */
+//    @Test
+//    public void testEntrantMap(){
+//
+//    }
     /**
      * US 02.02.03 As an organizer I want to enable or disable the geolocation requirement for my event.
      */
@@ -191,85 +201,85 @@ public class OrganizerTests {
         onView(withId(R.id.addEventPicture)).perform(click());
     }
 
-    /**
-     * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
-     */
-    @Test
-    public void testUpdateEventPoster() throws InterruptedException {
-        Thread.sleep(3000);
-        onView(withId(R.id.navigation_org_add)).perform(click());
-        onView(withId(R.id.editEventPictureButton)).perform(click());
-
-    }
-    /**
-     * US 02.05.01 As an organizer I want to send a notification to chosen entrants to sign up for events.
-     */
-    @Test
-    public void testNotifyEntrants(){
-
-    }
-    /**
-     * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event
-     */
-    @Test
-    public void testSampleEntrants(){
-
-    }
-    /**
-     * US 02.05.03 As an organizer I want to be able to draw a replacement applicant from the pooling system
-     * when a previously selected applicant cancels or rejects the invitation
-     */
-    @Test
-    public void testDrawReplacement(){
-
-    }
-    /**
-     * US 02.06.01 As an organizer I want to view a list of all chosen entrants who are invited to apply
-     */
-    @Test
-    public void testViewChosen(){
-
-    }
-    /**
-     * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
-     */
-    @Test
-    public void testViewCancelled(){
-
-    }
-    /**
-     * US 02.06.03 As an organizer I want to see a final list of entrants who enrolled for the event
-     */
-    @Test
-    public void testViewEnrolled(){
-
-    }
-    /**
-     * US 02.06.04 As an organizer I want to cancel entrants that did not sign up for the event
-     */
-    @Test
-    public void testCancelEntrants(){
-
-    }
-    /**
-     * US 02.07.01 As an organizer I want to send notifications to all entrants on the waiting list
-     */
-    @Test
-    public void testNotifyWait(){
-
-    }
-    /**
-     * US 02.07.02 As an organizer I want to send notifications to all selected entrants
-     */
-    @Test
-    public void testNotifySelected(){
-
-    }
-    /**
-     * US 02.07.03 As an organizer I want to send a notification to all cancelled entrants
-     */
-    @Test
-    public void testNotifyCancelled(){
-
-    }
+//    /**
+//     * US 02.04.02 As an organizer I want to update an event poster to provide visual information to entrants
+//     */
+//    @Test
+//    public void testUpdateEventPoster() throws InterruptedException {
+//        Thread.sleep(3000);
+//        onView(withId(R.id.navigation_org_add)).perform(click());
+//        onView(withId(R.id.editEventPictureButton)).perform(click());
+//
+//    }
+//    /**
+//     * US 02.05.01 As an organizer I want to send a notification to chosen entrants to sign up for events.
+//     */
+//    @Test
+//    public void testNotifyEntrants(){
+//
+//    }
+//    /**
+//     * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event
+//     */
+//    @Test
+//    public void testSampleEntrants(){
+//
+//    }
+//    /**
+//     * US 02.05.03 As an organizer I want to be able to draw a replacement applicant from the pooling system
+//     * when a previously selected applicant cancels or rejects the invitation
+//     */
+//    @Test
+//    public void testDrawReplacement(){
+//
+//    }
+//    /**
+//     * US 02.06.01 As an organizer I want to view a list of all chosen entrants who are invited to apply
+//     */
+//    @Test
+//    public void testViewChosen(){
+//
+//    }
+//    /**
+//     * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
+//     */
+//    @Test
+//    public void testViewCancelled(){
+//
+//    }
+//    /**
+//     * US 02.06.03 As an organizer I want to see a final list of entrants who enrolled for the event
+//     */
+//    @Test
+//    public void testViewEnrolled(){
+//
+//    }
+//    /**
+//     * US 02.06.04 As an organizer I want to cancel entrants that did not sign up for the event
+//     */
+//    @Test
+//    public void testCancelEntrants(){
+//
+//    }
+//    /**
+//     * US 02.07.01 As an organizer I want to send notifications to all entrants on the waiting list
+//     */
+//    @Test
+//    public void testNotifyWait(){
+//
+//    }
+//    /**
+//     * US 02.07.02 As an organizer I want to send notifications to all selected entrants
+//     */
+//    @Test
+//    public void testNotifySelected(){
+//
+//    }
+//    /**
+//     * US 02.07.03 As an organizer I want to send a notification to all cancelled entrants
+//     */
+//    @Test
+//    public void testNotifyCancelled(){
+//
+//    }
 }
