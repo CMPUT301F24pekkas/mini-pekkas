@@ -224,11 +224,10 @@ public class Firebase {
         if (userDocument != null) {
             listener.onCheckComplete(true);
         } else {
-            userCollection.document(deviceID)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
+            userCollection.whereEqualTo("userID", deviceID).get()
+                    .addOnSuccessListener(task -> {
                             // Check if the document exists
-                            boolean exist = documentSnapshot.exists();
+                            boolean exist = task.getDocuments().get(0).exists();
 
                             // Call the listener, return true if the document exists
                             listener.onCheckComplete(exist);
