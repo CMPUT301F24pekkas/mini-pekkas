@@ -9,11 +9,6 @@ import androidx.lifecycle.ViewModel;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.User;
 
-import android.content.Context;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * ViewModel class for managing user profile data in the UI, including name, email,
  * phone number, and other user information.
@@ -28,6 +23,7 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> organizerLocation;
     private final MutableLiveData<String> pfpText;
     private final MutableLiveData<String> profilePictureUrl;
+    private final MutableLiveData<String> userID;
     private final Firebase firebaseHelper;
     /**
      * Initializes a new ProfileViewModel instance with default profile values and
@@ -44,6 +40,8 @@ public class ProfileViewModel extends ViewModel {
         phoneNumber = new MutableLiveData<>();
         pfpText = new MutableLiveData<>();
         profilePictureUrl = new MutableLiveData<>();
+        userID = new MutableLiveData<>();
+
         firebaseHelper = new Firebase(context);
 
         // Set default values for these fields
@@ -53,6 +51,8 @@ public class ProfileViewModel extends ViewModel {
         email.setValue("example@example.com");
         phoneNumber.setValue("123-456-7890");
         profilePictureUrl.setValue("");
+        userID.setValue("");
+
         loadUserProfile();
     }
     /**
@@ -70,6 +70,7 @@ public class ProfileViewModel extends ViewModel {
                     email.setValue(user.getEmail());
                     phoneNumber.setValue(user.getPhone());
                     profilePictureUrl.setValue(user.getProfilePhotoUrl());
+                    userID.setValue(user.getId());
                 }
             }
         });
@@ -84,7 +85,8 @@ public class ProfileViewModel extends ViewModel {
                 email.getValue(),
                 phoneNumber.getValue(),
                 organizerLocation.getValue(),
-                profilePictureUrl.getValue()
+                profilePictureUrl.getValue(),
+                userID.getValue()
         );
 
         firebaseHelper.updateThisUser(updatedUser);

@@ -9,8 +9,6 @@ import androidx.lifecycle.ViewModel;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.User;
 
-import android.content.Context;
-
 /**
  * ViewModel for managing and exposing organizer profile data to the UI.
  * Interacts with Firebase to load and update profile information.
@@ -24,6 +22,7 @@ public class OrganizerProfileViewModel extends ViewModel {
     private final MutableLiveData<String> phoneNumber;
     private final MutableLiveData<String> organizerLocation;
     private final MutableLiveData<String> profilePictureUrl;
+    private final MutableLiveData<String> userID;
     private final Firebase firebaseHelper;
     /**
      * Constructor that initializes the ViewModel, sets default profile values,
@@ -39,6 +38,7 @@ public class OrganizerProfileViewModel extends ViewModel {
         phoneNumber = new MutableLiveData<>();
         organizerLocation = new MutableLiveData<>(); // Initialize organizer location
         profilePictureUrl = new MutableLiveData<>();
+        userID = new MutableLiveData<>();
         firebaseHelper = new Firebase(context);
 
         // Set default values for these fields
@@ -48,6 +48,7 @@ public class OrganizerProfileViewModel extends ViewModel {
         phoneNumber.setValue("123-456-7890");
         organizerLocation.setValue("Organizer Location");
         profilePictureUrl.setValue("");// Default organizer location
+        userID.setValue("");
         loadUserProfile();
     }
     /**
@@ -66,6 +67,7 @@ public class OrganizerProfileViewModel extends ViewModel {
                     phoneNumber.setValue(user.getPhone());
                     organizerLocation.setValue((user.getFacility()));
                     profilePictureUrl.setValue(user.getProfilePhotoUrl());
+                    userID.setValue(user.getId());
                 }
             }
         });
@@ -80,7 +82,8 @@ public class OrganizerProfileViewModel extends ViewModel {
                 email.getValue(),
                 phoneNumber.getValue(),
                 organizerLocation.getValue(),
-                profilePictureUrl.getValue()
+                profilePictureUrl.getValue(),
+                userID.getValue()
         );
 
         firebaseHelper.updateThisUser(updatedUser);

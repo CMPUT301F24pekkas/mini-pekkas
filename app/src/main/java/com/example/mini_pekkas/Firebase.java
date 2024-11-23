@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.15 11/21/2024 Added Search Functionality. Added more functions for deleting profile/poster pictures
+ * @version 1.15.1 11/22/2024 User objects and documents now hold their own ID field. replaced this.device with device
  */
 public class Firebase {
     private final String deviceID;
@@ -202,10 +202,15 @@ public class Firebase {
      * @param listener An InitializationListener listener that runs on a successful fetch
      */
     public void fetchUserDocument(InitializationListener listener) {
-        userCollection.document(this.deviceID)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    userDocument = documentSnapshot;
+        userCollection.whereEqualTo("userID", deviceID).get()
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onError(new Exception("User not found"));
+                        return;
+                    }
+
+                    // Get the one document and set the new value
+                    userDocument = task.getDocuments().get(0);
                     listener.onInitialized();
                 })
                 .addOnFailureListener(listener::onError);
@@ -238,8 +243,8 @@ public class Firebase {
      * @param listener An InitializationListener listener that is called after the user is initialized
      */
     public void InitializeThisUser(User user, InitializationListener listener) {
-        userCollection.document(this.deviceID)
-                .set(user.toMap())
+        user.setId(deviceID);
+        userCollection.add(user.toMap())
                 .addOnSuccessListener(v -> {
                     // Re fetch the user document. Listener call will now have a valid user document
                     fetchUserDocument(listener);
@@ -261,9 +266,18 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the user is updated
      */
     public void updateThisUser(User user, InitializationListener listener) {
-        userCollection.document(this.deviceID)
-                .set(user.toMap())
-                .addOnSuccessListener(aVoid -> listener.onInitialized())
+        userCollection.whereEqualTo("userID", user.getId()).get()
+            .addOnSuccessListener(task -> {
+                if (task.isEmpty()) {
+                    listener.onError(new Exception("User not found"));
+                    return;
+                }
+
+                // Get the one document and set the new value
+                task.getDocuments().get(0).getReference().set(user.toMap())
+                    .addOnSuccessListener(aVoid -> listener.onInitialized())
+                    .addOnFailureListener(listener::onError);
+            })
                 .addOnFailureListener(listener::onError);
     }
 
@@ -286,7 +300,7 @@ public class Firebase {
 
         // Delete all documents from the user-events collection
         // TODO abstract these operations in one super function
-        userEventsCollection.whereEqualTo("userID", this.deviceID).get()
+        userEventsCollection.whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
                     int total_user = task.size();
                     AtomicInteger deleted_user = new AtomicInteger();
@@ -475,7 +489,7 @@ public class Firebase {
      * @param listener a NotificationListRetrievalListener listener that returns an arrayList of notifications
      */
     public void getThisUserNotifications(NotificationListRetrievalListener listener) {
-        userNotificationsCollection.whereEqualTo("userID", this.deviceID).get()
+        userNotificationsCollection.whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Pass an empty array if no notifications exist
                     if (task.isEmpty()) {
@@ -513,7 +527,7 @@ public class Firebase {
         // Set the user id and date field in correct format
         HashMap<String, Object> map = notification.toMap();
         map.put("date", notification.getTimestamp());
-        map.put("userID", this.deviceID);
+        map.put("userID", deviceID);
 
         userNotificationsCollection.add(map)
                 .addOnSuccessListener(aVoid -> listener.onInitialized())
@@ -574,7 +588,7 @@ public class Firebase {
         // Set waitlist to an empty array of user references
         HashMap<String, Object> map = new HashMap<>();
         map.put("eventID", event.getId());
-        map.put("userID", this.deviceID);
+        map.put("userID", deviceID);
         map.put("status", "organized");
 
         userEventsCollection.add(map)
@@ -598,7 +612,7 @@ public class Firebase {
         // Set waitlist to an empty array of user references
         HashMap<String, Object> map = new HashMap<>();
         map.put("eventID", event.getId());
-        map.put("userID", this.deviceID);
+        map.put("userID", deviceID);
         map.put("status", "waitlisted");
 
         userEventsCollection.add(map)
@@ -620,7 +634,7 @@ public class Firebase {
      */
     public void enrollEvent(Event event, InitializationListener listener) {
         // Find the document that matches the user to event query
-        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Get and update the one document that matches the query
                     DocumentSnapshot document = task.getDocuments().get(0);
@@ -646,7 +660,7 @@ public class Firebase {
      */
     public void cancelEvent(Event event, InitializationListener listener) {
         // Find the document that matches the user to event query
-        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Get and update the one document that matches the query
                     DocumentSnapshot document = task.getDocuments().get(0);
@@ -671,7 +685,7 @@ public class Firebase {
      * @param listener A DataRetrievalListener listener that returns the status of the user in the event
      */
     public void getStatusInEvent(Event event, DataRetrievalListener listener) {
-        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", this.deviceID).get()
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Get the one document that matches the query
                     DocumentSnapshot document = task.getDocuments().get(0);
@@ -1037,7 +1051,7 @@ public class Firebase {
      * @param listener the listener that is called when the check is complete. Returns true if the user is an admin
      */
     public void isThisUserAdmin(CheckListener listener){
-        adminCollection.whereEqualTo("deviceID", this.deviceID).get()
+        adminCollection.whereEqualTo("deviceID", deviceID).get()
                 .addOnSuccessListener(result -> {
                     // If the result is not empty, the user is an admin
                     boolean exist = !result.isEmpty();
