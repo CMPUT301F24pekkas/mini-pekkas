@@ -12,6 +12,7 @@ public class User {
     private String phone;
     private String facility;
     private String profilePhotoUrl;
+    private String id;
 
     /**
      * Constructs a User object from a map of attributes.
@@ -25,6 +26,7 @@ public class User {
         this.phone = (String) map.get("phone");
         this.facility = (String) map.get("facility");
         this.profilePhotoUrl = (String) map.get("profilePhoto");
+        this.id = (String) map.get("userID");
     }
 
     public User() {
@@ -38,14 +40,16 @@ public class User {
      * @param email     The user's email address.
      * @param phone     The user's phone number.
      * @param facility  The user's associated facility.
+     * @param id        The user's ID. (Should only be used in firebase)
      */
-    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl) {
+    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl, String id) {
         this.name = name;
         this.lastname = lastname;
         this.email = email;
         this.phone = phone;
         this.facility = facility;
         this.profilePhotoUrl = profilePhotoUrl;
+        this.id = id;
     }
 
     /**
@@ -147,6 +151,15 @@ public class User {
         this.profilePhotoUrl = profilePhotoUrl;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
     /**
      * Converts the User object into a Map of attributes.
      *
@@ -160,6 +173,7 @@ public class User {
         map.put("phone", phone);
         map.put("facility", facility);
         map.put("profilePhoto", profilePhotoUrl);
+        map.put("userID", id);
         return map;
     }
 }
