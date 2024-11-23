@@ -1,16 +1,22 @@
 package com.example.mini_pekkas;
 
+import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.longClick;
+import static androidx.test.espresso.action.ViewActions.pressKey;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
 
 import android.content.Context;
 import android.provider.Settings;
+import android.view.KeyEvent;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -35,6 +41,7 @@ public class AdminUiTests {
             ActivityScenarioRule<>(AdminActivity.class);
     public Firebase firebaseHelper;
     public Event testEvent;
+    public User testUser;
 
     /**
      * Creates a test profile for the admin. Giving it the right permission to access the right UI
@@ -57,6 +64,22 @@ public class AdminUiTests {
     }
 
     /**
+     * Creates a test user object for the admin to use when testing
+     */
+    public void CreateTestUser() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("name", "Android Unit Testing");
+        map.put("lastname", "Testing");
+        map.put("email", "william.henry.moody@my-own-personal-domain.com");
+        map.put("phone", "1234567890");
+        map.put("profilePicture", "");
+        map.put("facility", "real location");   // This is an organizer
+        map.put("deviceID", "");
+        this.testUser = new User(map);
+        firebaseHelper.InitializeThisUser(testUser, () -> {CreateTestEvent();});
+    }
+
+    /**
      * Creates a test event for the admin to use when testing
      */
     public void CreateTestEvent() {
@@ -74,7 +97,7 @@ public class AdminUiTests {
         map.put("price", (double) 100.10);
         map.put("attendees", new ArrayList<>());
         map.put("waitlist", new ArrayList<>());
-        map.put("eventHost", new User());
+        map.put("eventHost", testUser);
         //map.put("id", "Test ID");
         map.put("posterUrl", null);
         map.put("facility", "Test Facility");
@@ -87,7 +110,7 @@ public class AdminUiTests {
     public void setup() throws InterruptedException {
         Context context = ApplicationProvider.getApplicationContext();
         CreateTestProfile(context);
-        CreateTestEvent();
+        CreateTestUser();   // Which also calls test event
 
         Thread.sleep(2000); // TODO bad idea but simple way to wait for adding events
 
@@ -101,11 +124,12 @@ public class AdminUiTests {
     @Test
     public void testBrowseEvents() {
         onView(withId(R.id.adminBrowseEvents)).perform(click());
-        onView(withId(R.id.admin_search_events)).perform(typeText("Test Event"));
+        // Press enter to search for an event, check if it appears
+        onView(withId(R.id.admin_search_events)).perform(typeText("Test Event")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
         onView(withText("Test Event")).check(matches(isDisplayed()));
 
         // Search for an non-existent event, check if nothing appears
-        onView(withId(R.id.admin_search_events)).perform(typeText("Non-existent &%&@()&++!*+!*()@#$ Event"));
+        onView(withId(R.id.admin_search_events)).perform(typeText("Non-existent &%&@()&++!*+!*()@#$ Event")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
         onView(withText("Non-existent &%&@()&++!*+!*()@#$ Event")).check(doesNotExist());
     }
 
@@ -115,7 +139,7 @@ public class AdminUiTests {
     @Test
     public void testBrowseFacility() {
         onView(withId(R.id.adminBrowseFacilities)).perform(click());
-        onView(withId(R.id.admin_search_facilities)).perform(typeText("Test Facility"));
+        onView(withId(R.id.admin_search_facilities)).perform(typeText("Test Facility")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
         onView(withText("Test Facility")).check(matches(isDisplayed()));
     }
 
@@ -125,9 +149,36 @@ public class AdminUiTests {
      */
     @Test
     public void testBrowseProfile() {
-//        onView(withId(R.id.adminBrowseProfiles)).perform(click());
-//        onView(withId(R.id.admin_search_profiles)).perform(typeText("Android Unit Testing"));
-//        onView(withText("Android Unit Testing")).check(matches(isDisplayed()));
+        onView(withId(R.id.adminBrowseProfiles)).perform(click());
+        onView(withId(R.id.admin_search_profiles)).perform(typeText("Android Unit Testing")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
+        onView(withText("Android Unit Testing")).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testDeleteEvent() throws InterruptedException {
+        CreateTestEvent();
+        Thread.sleep(2000);
+        onView(withId(R.id.adminBrowseEvents)).perform(click());
+        onView(withId(R.id.admin_search_events)).perform(typeText("Test Event")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
+        Thread.sleep(1000);
+
+        // Check if clicking no does not delete the event
+        onData(hasEntry(equalTo("name"), equalTo("Test Event")))
+                .inAdapterView(withId(R.id.adminEventListView)) // Replace with your list view ID
+                .atPosition(0) // Specify the position of the item if needed
+                .perform(longClick());
+        Thread.sleep(1000);
+        onView(withText("No")).perform(click());
+        onView(withText("Test Event")).check(matches(isDisplayed()));
+
+        // Check if clicking yes does delete the event
+        onData(hasEntry(equalTo("name"), equalTo("Test Event")))
+                .inAdapterView(withId(R.id.adminEventListView)) // Replace with your list view ID
+                .atPosition(0) // Specify the position of the item if needed
+                .perform(longClick());
+        Thread.sleep(1000);
+        onView(withText("Yes")).perform(click());
+        onView(withText("Test Event")).check(doesNotExist());
     }
 
     /**
@@ -135,6 +186,7 @@ public class AdminUiTests {
      */
     @After
     public void cleanUp() {
+        firebaseHelper.deleteUser(testUser, () -> {});
         firebaseHelper.deleteEvent(testEvent);
     }
 }
