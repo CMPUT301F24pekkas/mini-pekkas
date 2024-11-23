@@ -741,7 +741,8 @@ public class Firebase {
 
     /**
      * Retrieves an event using its QR code.
-     * @deprecated The QR code should be decoded into the event id and retrieved using {@link #getEvent(String eventID, EventRetrievalListener listener)}
+     * While we should be retrieving by {@link #getEvent(String eventID, EventRetrievalListener listener)}
+     * I've re-introduced this function for the current implementation of the QR code scanner
      * @param qrCode The Base64 encoded QR code string to match.
      * @param listener An EventRetrievalListener that returns the Event object if found.
      */
@@ -752,14 +753,11 @@ public class Firebase {
                      // Check if any documents were found
                      if (task.getDocuments().isEmpty()) {
                          // No event found, trigger callback with null
-                         Log.d("Camera Yay", "Event NOTHING");
                          listener.onEventRetrievalCompleted(null);
-                         return;
                      } else {
                          // Fetch the event details from the document
                          DocumentSnapshot document = task.getDocuments().get(0);
                          Event event = new Event(Objects.requireNonNull(document.getData()));
-                         Log.d("Camera Yay", "Event successfully Retrieved");
                          listener.onEventRetrievalCompleted(event);
                      }
                  })
