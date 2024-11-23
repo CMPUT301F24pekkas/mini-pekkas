@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.15.1 11/22/2024 User objects and documents now hold their own ID field. replaced this.device with device
+ * @version 1.15.2 11/22/2024 Fixed minor logic. User objects and documents now hold their own ID field. replaced this.device with device
  */
 public class Firebase {
     private final String deviceID;
@@ -227,7 +227,7 @@ public class Firebase {
             userCollection.whereEqualTo("userID", deviceID).get()
                     .addOnSuccessListener(task -> {
                             // Check if the document exists
-                            boolean exist = task.getDocuments().get(0).exists();
+                            boolean exist = !task.isEmpty();
 
                             // Call the listener, return true if the document exists
                             listener.onCheckComplete(exist);
