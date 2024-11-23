@@ -275,21 +275,17 @@ public class Firebase {
     }
 
     /**
-     * Deletes this user, essentially starting with a clean slate
-     * also deletes related documents in user-events collection
+     * Deletes a user from the firebase database, uses the user id and the name of its document
+     * Deletes User documents, user-events documents, profile pictures, and notifications
+     * @param user A user object to be deleted
      * @param listener Optional InitializationListener listener that is called after the user is deleted
      */
-    public void deleteThisUser(InitializationListener listener) {
-        // Delete the profile picture from user (assuming the deletion works)
-        deleteProfilePicture(new User(Objects.requireNonNull(userDocument.getData())));
+    public void deleteUser(User user, InitializationListener listener) {
+        deleteProfilePicture(user);
+        deleteAllNotification(user);
 
-        userCollection.document(this.deviceID).delete()
-                .addOnSuccessListener(aVoid -> {
-                    userDocument = null;        // Set user document to null
-                })
-                .addOnFailureListener(listener::onError);
-
-        // Delete all user document from the user-events collection
+        // Delete all documents from the user-events collection
+        // TODO abstract these operations in one super function
         userEventsCollection.whereEqualTo("userID", this.deviceID).get()
                 .addOnSuccessListener(task -> {
                     int total_user = task.size();
@@ -303,9 +299,39 @@ public class Firebase {
                         if (deleted_user.incrementAndGet() == total_user) {
                             listener.onInitialized();
                         }
+                        if (deleted_user.get() != total_user) {
+                            listener.onError(new Exception("Failed to delete all user events"));
+                        }
                     }
                 })
                 .addOnFailureListener(listener::onError);
+
+        userCollection.whereEqualTo("userID", user.getId()).get()
+            .addOnSuccessListener(task -> {
+                if (task.size() != 1) {
+                    listener.onError(new Exception("User not found"));
+                    return;
+                }
+
+                // Delete the user document
+                task.getDocuments().get(0).getReference().delete()
+                        .addOnSuccessListener(aVoid -> {
+                            userDocument = null;        // Clear the user document
+                            listener.onInitialized();
+                        })
+                        .addOnFailureListener(listener::onError);
+            })
+            .addOnFailureListener(listener::onError);
+    }
+
+
+    /**
+     * Deletes this user, essentially starting with a clean slate
+     * also deletes related documents in user-events collection
+     * @param listener Optional InitializationListener listener that is called after the user is deleted
+     */
+    public void deleteThisUser(InitializationListener listener) {
+        deleteUser(new User(Objects.requireNonNull(userDocument.getData())), listener);
     }
 
     /**
@@ -499,6 +525,40 @@ public class Firebase {
      */
     public void addNotification(Notifications notification) {
         addNotification(notification, () -> {});
+    }
+
+    /**
+     * Delete all notifications for the given user
+     * This function is used in delete user to remove it's corresponding notifications
+     * @param user a user object where the notifications are to be deleted
+     * @param listener Optional InitializationListener listener that is called after the notifications are deleted
+     */
+    private void deleteAllNotification(User user, InitializationListener listener) {
+        userNotificationsCollection.whereEqualTo("userID", user.getId()).get()
+                .addOnSuccessListener(task -> {
+                    int total_notifications = task.size();
+                    AtomicInteger deleted_notifications = new AtomicInteger();
+
+                    // Fetch all notification documents and delete it
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        document.getReference().delete()
+                                .addOnFailureListener(listener::onError);
+                        if (deleted_notifications.incrementAndGet() == total_notifications) {
+                            listener.onInitialized();
+                        }
+                    }
+                    if (deleted_notifications.get() != total_notifications) {
+                        listener.onError(new Exception("Failed to retrieve all notifications"));
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #deleteAllNotification(User, InitializationListener)} with no listener
+     */
+    private void deleteAllNotification(User user) {
+        deleteAllNotification(user, () -> {});
     }
 
     /*
