@@ -7,6 +7,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -19,12 +20,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
  */
 public class OrganizerActivity extends AppCompatActivity {
     private OrganizerMainBinding binding;
-    @Override
+
     /**
      * Called when the activity is first created.
+     * Sets up the bottom navigation view, app bar configuration, and navigation controller.
      *
      * @param savedInstanceState The state of the activity saved during a previous configuration change.
      */
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = OrganizerMainBinding.inflate(getLayoutInflater());
@@ -45,5 +48,17 @@ public class OrganizerActivity extends AppCompatActivity {
         // Set up the action bar and bottom navigation
         NavigationUI.setupActionBarWithNavController(OrganizerActivity.this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.organizerView, navController);
+    }
+
+    /**
+     * Navigates to the home screen for the organizer.
+     *
+     * @return true to indicate that the navigation is handled.
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.organizer_main);
+        navController.navigate(R.id.action_global_navigation_org_home);
+        return true;
     }
 }

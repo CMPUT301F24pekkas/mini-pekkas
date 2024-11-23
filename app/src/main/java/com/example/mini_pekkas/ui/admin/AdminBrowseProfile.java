@@ -18,6 +18,11 @@ import com.example.mini_pekkas.databinding.FragmentAdminBrowseProfilesBinding;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment for browsing and managing user profiles in the Admin interface.
+ * Allows admins to search for user profiles in the system
+ * and display user profiles in a ListVIew
+ */
 public class AdminBrowseProfile extends Fragment {
 
     private FragmentAdminBrowseProfilesBinding binding; // Declare binding variable
@@ -25,6 +30,14 @@ public class AdminBrowseProfile extends Fragment {
     private ListView listView;
     private ArrayList<User> userList;  // Store the original event objects
 
+    /**
+     * Called to initialize the fragment's view hierarchy.
+     *
+     * @param inflater           The LayoutInflater used to inflate the fragment's view.
+     * @param container          The parent view group that this fragment's view will be attached to.
+     * @param savedInstanceState A Bundle containing the fragment's previously saved state, if any.
+     * @return The root view of the fragment.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -74,6 +87,9 @@ public class AdminBrowseProfile extends Fragment {
         return binding.getRoot();
     }
 
+    /**
+     * Cleans up resources and prevents memory leaks by nullifying the binding.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

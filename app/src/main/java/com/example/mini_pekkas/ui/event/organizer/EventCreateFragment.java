@@ -1,5 +1,7 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
+import static android.text.TextUtils.replace;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,11 +17,14 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
@@ -28,6 +33,7 @@ import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentCreateEventBinding;
 import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
+import com.example.mini_pekkas.ui.event.user.EventFragment;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -48,7 +54,7 @@ public class EventCreateFragment extends Fragment {
     private Firebase firebaseHelper;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
-
+    private Event createdEvent;
     /**
      * Called to initialize the fragment's view.
      * Sets up UI components for event creation, including image selection
@@ -73,24 +79,23 @@ public class EventCreateFragment extends Fragment {
 
         Button addButton = binding.addEventButton;
         addButton.setOnClickListener(v -> {
-            Event event = CreateEvent();
+            createdEvent = CreateEvent();
 
             // Generate a unique QR code raw string (event ID + UUID)
-            String uniqueQrData = event.getId() + "_" + UUID.randomUUID().toString();
-
+            String uniqueQrData = createdEvent.getId() + UUID.randomUUID().toString();
             // Set the raw QR code data in the event
-            event.setQrCode(uniqueQrData);
+            createdEvent.setQrCode(uniqueQrData);
 
             // Generate the QR code bitmap for display purposes
             Bitmap qrCodeBitmap = QRCodeGenerator.generateQRCode(uniqueQrData, 300, 300);
 
             if (qrCodeBitmap != null) {
                 // Upload poster image (if any) and save the event
-                uploadPosterImageToFirebase(event, qrCodeBitmap);
+                uploadPosterImageToFirebase(createdEvent, qrCodeBitmap);
             }
 
             // Update live data
-            organizerEventsListViewModel.addEvent(event);
+            organizerEventsListViewModel.addEvent(createdEvent);
         });
 
         Button cancelButton = binding.cancelEventButton;
@@ -170,6 +175,10 @@ public class EventCreateFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                organizerEventsListViewModel.setSelectedEvent(createdEvent);
+                NavController navController = NavHostFragment.findNavController(EventCreateFragment.this);
+                navController.navigate(R.id.action_add_event_to_event_details);
+
             }
         });
     }
