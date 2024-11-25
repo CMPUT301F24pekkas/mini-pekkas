@@ -715,7 +715,7 @@ public class Firebase {
                     for (DocumentSnapshot document : task.getDocuments()) {
 
                         // Get the event ID to pull from the event collection
-                        String eventID = Objects.requireNonNull(document.get("eventID")).toString();
+                        String eventID = Objects.requireNonNull(document.get("id")).toString();
 
                         // Get the event from the event collection
                         eventCollection.document(eventID).get()
