@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:drawableEnd="@drawable/search"
             android:iconifiedByDefault="false"
-            android:queryHint="Search for event" />
+            android:queryHint="Search for a facility" />
 
         <ListView
             android:id="@+id/adminFacilityListView"
