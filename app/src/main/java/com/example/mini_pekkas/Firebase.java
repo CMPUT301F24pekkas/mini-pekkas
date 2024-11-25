@@ -1180,31 +1180,45 @@ public class Firebase {
      * Delete the facility of the organizer, demoting to a user
      * @param facility the facility to delete events from
      */
-    public void deleteByFacility(String facility) {
+    public void deleteByFacility(String facility, InitializationListener listener) {
         eventCollection.whereEqualTo("facility", facility).get()
                 .addOnSuccessListener(tasks -> {
                     if (!tasks.isEmpty()) {
+                        listener.onError(new Exception("No event with facility found"));
+                    } else {
                         // get the event id, delete the user-events, then delete the facility
                         for (DocumentSnapshot document : tasks.getDocuments()) {
                             String eventID = (String) document.get("id");
-                            // delete the userEvent items
+
+                            // delete the userEvent entries
                             userEventsCollection.whereEqualTo("eventID", eventID).get()
                                     .addOnSuccessListener(userEvents -> {
                                         for (DocumentSnapshot userEvent : userEvents.getDocuments()) {
-                                            userEventsCollection.document(userEvent.getId()).delete();
+                                            userEventsCollection.document(userEvent.getId()).delete()
+                                                    .addOnFailureListener(listener::onError);
                                         }
                                     });
+
+                            // Delete the event itself
                             assert eventID != null;
-                            eventCollection.document(eventID).delete();
+                            eventCollection.document(eventID).delete()
+                                    .addOnFailureListener(listener::onError);
                         }
                     }
-                });
 
-        // Then remove the facility from the user
-        userCollection.whereEqualTo("facility", facility).get()
-                .addOnSuccessListener(tasks -> {
-                    tasks.getDocuments().get(0).getReference().set("facility", null);
-        });
+                    // Then remove the facility from the user
+                    userCollection.whereEqualTo("facility", facility).get()
+                            .addOnSuccessListener(user -> {
+                                if (user.isEmpty()) {
+                                    listener.onError(new Exception("No user found with facility " + facility));
+                                } else {
+                                    user.getDocuments().get(0).getReference().set("facility", null);
+                                    listener.onInitialized();
+                                }
+                })
+                .addOnFailureListener(listener::onError);
+        })
+        .addOnFailureListener(listener::onError);
     }
 }
 
