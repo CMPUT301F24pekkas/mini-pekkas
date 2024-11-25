@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.15.2 11/22/2024 Fixed minor logic. User objects and documents now hold their own ID field. replaced this.device with device
+ * @version 1.15.3 11/25/2024 added deleteByFacility
  */
 public class Firebase {
     private final String deviceID;
@@ -1173,6 +1173,38 @@ public class Firebase {
                             .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Deletes all events associated with a facility
+     * Delete the facility of the organizer, demoting to a user
+     * @param facility the facility to delete events from
+     */
+    public void deleteByFacility(String facility) {
+        eventCollection.whereEqualTo("facility", facility).get()
+                .addOnSuccessListener(tasks -> {
+                    if (!tasks.isEmpty()) {
+                        // get the event id, delete the user-events, then delete the facility
+                        for (DocumentSnapshot document : tasks.getDocuments()) {
+                            String eventID = (String) document.get("id");
+                            // delete the userEvent items
+                            userEventsCollection.whereEqualTo("eventID", eventID).get()
+                                    .addOnSuccessListener(userEvents -> {
+                                        for (DocumentSnapshot userEvent : userEvents.getDocuments()) {
+                                            userEventsCollection.document(userEvent.getId()).delete();
+                                        }
+                                    });
+                            assert eventID != null;
+                            eventCollection.document(eventID).delete();
+                        }
+                    }
+                });
+
+        // Then remove the facility from the user
+        userCollection.whereEqualTo("facility", facility).get()
+                .addOnSuccessListener(tasks -> {
+                    tasks.getDocuments().get(0).getReference().set("facility", null);
+        });
     }
 }
 
