@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.15.4 11/22/2024 null check for get event by status, changed eventID to id.
+ * @version 1.15.4 11/22/2024 null check for get event by status, changed id to eventID
  */
 public class Firebase {
     private final String deviceID;
@@ -715,7 +715,7 @@ public class Firebase {
                     for (DocumentSnapshot document : task.getDocuments()) {
 
                         // Get the event ID to pull from the event collection
-                        String eventID = Objects.requireNonNull(document.get("id")).toString();
+                        String eventID = Objects.requireNonNull(document.get("eventID")).toString();
 
                         // Get the event from the event collection
                         eventCollection.document(eventID).get()
