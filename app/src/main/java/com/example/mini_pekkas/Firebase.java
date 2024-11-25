@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
+ * @version 1.15.3 11/25/2024 added deleteByFacility
  * @version 1.15.3 11/22/2024 null check for get event by status
  */
 public class Firebase {
@@ -1177,6 +1178,52 @@ public class Firebase {
                             .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Deletes all events associated with a facility
+     * Delete the facility of the organizer, demoting to a user
+     * @param facility the facility to delete events from
+     */
+    public void deleteByFacility(String facility, InitializationListener listener) {
+        eventCollection.whereEqualTo("facility", facility).get()
+                .addOnSuccessListener(tasks -> {
+                    if (!tasks.isEmpty()) {
+                        listener.onError(new Exception("No event with facility found"));
+                    } else {
+                        // get the event id, delete the user-events, then delete the facility
+                        for (DocumentSnapshot document : tasks.getDocuments()) {
+                            String eventID = (String) document.get("id");
+
+                            // delete the userEvent entries
+                            userEventsCollection.whereEqualTo("eventID", eventID).get()
+                                    .addOnSuccessListener(userEvents -> {
+                                        for (DocumentSnapshot userEvent : userEvents.getDocuments()) {
+                                            userEventsCollection.document(userEvent.getId()).delete()
+                                                    .addOnFailureListener(listener::onError);
+                                        }
+                                    });
+
+                            // Delete the event itself
+                            assert eventID != null;
+                            eventCollection.document(eventID).delete()
+                                    .addOnFailureListener(listener::onError);
+                        }
+                    }
+
+                    // Then remove the facility from the user
+                    userCollection.whereEqualTo("facility", facility).get()
+                            .addOnSuccessListener(user -> {
+                                if (user.isEmpty()) {
+                                    listener.onError(new Exception("No user found with facility " + facility));
+                                } else {
+                                    user.getDocuments().get(0).getReference().set("facility", null);
+                                    listener.onInitialized();
+                                }
+                })
+                .addOnFailureListener(listener::onError);
+        })
+        .addOnFailureListener(listener::onError);
     }
 }
 
