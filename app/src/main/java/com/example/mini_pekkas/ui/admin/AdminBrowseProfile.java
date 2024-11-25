@@ -1,11 +1,15 @@
 package com.example.mini_pekkas.ui.admin;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,7 +54,40 @@ public class AdminBrowseProfile extends Fragment {
         userList = new ArrayList<User>();
         UserArrayAdapter userArrayAdapter = new UserArrayAdapter(requireContext(), userList);
         listView.setAdapter(userArrayAdapter);    // TODO need to add option to pass in event list fragment instead
-        // TODO add listView.setOnItemClickListener()
+
+
+        listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id) -> {
+
+            User selectedUser = userList.get(position);
+
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Delete User")
+                    .setMessage("Are you sure you want to delete this user?")
+                    .setPositiveButton("Yes", (DialogInterface dialog, int which) -> {
+                        // Call deleteUser on confirmation
+                        firebaseHelper.deleteUser(selectedUser, new Firebase.InitializationListener() {
+                            @Override
+                            public void onInitialized() {
+                                // Remove the user from the list and notify the adapter
+                                userList.remove(selectedUser);
+                                userArrayAdapter.notifyDataSetChanged();
+                                Toast.makeText(requireContext(), "User deleted successfully", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                // Handle errors
+                                Toast.makeText(requireContext(), "Failed to delete user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+
+            return true;
+        });
+
 
         binding.adminSearchProfiles.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             /**
