@@ -1226,5 +1226,32 @@ public class Firebase {
         })
         .addOnFailureListener(listener::onError);
     }
+
+    /**
+     * Gets all events from the database
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of events
+     */
+    public void getAllEvents(EventListRetrievalListener listener) {
+        eventCollection.get()
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onEventListRetrievalCompleted(new ArrayList<>());
+                        return;
+                    }
+                    ArrayList<Event> events = new ArrayList<>();
+                    int totalEvents = task.getDocuments().size();
+                    AtomicInteger retrievedEvents = new AtomicInteger();
+                    // Fetch every event and add it to the array
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        Event event = new Event(Objects.requireNonNull(document.getData()));
+                        events.add(event);
+
+                        if (retrievedEvents.incrementAndGet() == totalEvents) {
+                            listener.onEventListRetrievalCompleted(events);
+                        }
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }
 }
 

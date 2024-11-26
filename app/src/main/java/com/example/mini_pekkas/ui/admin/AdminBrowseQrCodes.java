@@ -1,5 +1,8 @@
 package com.example.mini_pekkas.ui.admin;
 
+import static com.example.mini_pekkas.QRCodeGenerator.generateQRCode;
+
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +14,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
-import com.example.mini_pekkas.ImageAdapter;
+import com.example.mini_pekkas.QrCodeAdapter;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseImagesBinding;
+
+import java.util.ArrayList;
 
 /**
  * Fragment class for browsing and managing images in the Admin interface.
@@ -24,7 +30,7 @@ public class AdminBrowseQrCodes extends Fragment {
     private FragmentAdminBrowseImagesBinding binding; // Declare binding variable
     private Firebase firebaseHelper;
     private RecyclerView recyclerView;
-    private ImageAdapter imageAdapter;
+    private QrCodeAdapter qrCodeAdapter;
 //    private ArrayList<Uri> imageList;
 
     /**
@@ -45,15 +51,22 @@ public class AdminBrowseQrCodes extends Fragment {
         recyclerView = binding.imageGridRecyclerView;
 
         // From the list of images, set the view to display all images
-        firebaseHelper.getAllImages(images -> {
-            // Set up the recycleView
+        firebaseHelper.getAllEvents(events ->  {
             recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+            ArrayList<Bitmap> images = new ArrayList<>();
+            // For every base64 QR code, convert it to a URI and add it to the list
+            for (Event event : events) {
+                String base64String = event.getQrCode();
+
+                // Generated QR code defined in QRCodeGenerator
+                Bitmap bit = generateQRCode(base64String, 300, 300);
+                images.add(bit);
+            }
 
             // Make image adapter
-            imageAdapter = new ImageAdapter(requireContext(), images);
+            qrCodeAdapter = new QrCodeAdapter(requireContext(), images);
 
-            // Set the adapter after images are retrieved
-            recyclerView.setAdapter(imageAdapter);
+            recyclerView.setAdapter(qrCodeAdapter);
         });
 
 
