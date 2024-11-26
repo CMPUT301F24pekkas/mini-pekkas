@@ -10,6 +10,7 @@
     <string name="search_event">Browse Events</string>
     <string name="search_facilities">Browse Facilities</string>
     <string name="search_images">Browse Images</string>
+    <string name="search_qr_codes">Browse QR HashData</string>
     <string name="search_profiles">Browse Profiles</string>
     <string name="add_event">Add Event</string>
 </resources>

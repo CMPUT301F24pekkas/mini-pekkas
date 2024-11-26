@@ -1,18 +1,23 @@
 package com.example.mini_pekkas.ui.admin;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseFacilitiesBinding;
 
 import java.util.ArrayList;
@@ -51,7 +56,38 @@ public class AdminBrowseFacilities extends Fragment {
         facilityNames = new ArrayList<String>();
         ArrayAdapter<String> facilityArrayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, facilityNames);
         listView.setAdapter(facilityArrayAdapter);    // TODO need to add option to pass in event list fragment instead
-        // TODO add listView.setOnItemClickListener()
+
+        listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id) -> {
+
+            String selectedFacility = facilityNames.get(position);
+
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Delete User")
+                    .setMessage("Are you sure you want to delete this user?")
+                    .setPositiveButton("Yes", (DialogInterface dialog, int which) -> {
+                        // Call deleteUser on confirmation
+                        firebaseHelper.deleteByFacility(selectedFacility, new Firebase.InitializationListener() {
+                            @Override
+                            public void onInitialized() {
+                                // Remove the user from the list and notify the adapter
+                                facilityNames.remove(selectedFacility);
+                                facilityArrayAdapter.notifyDataSetChanged();
+                                Toast.makeText(requireContext(), "User deleted successfully", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                // Handle errors
+                                Toast.makeText(requireContext(), "Failed to delete user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+
+            return true;
+        });
 
 
         binding.adminSearchFacilities.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

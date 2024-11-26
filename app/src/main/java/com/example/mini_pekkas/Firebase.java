@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
  * @version 1.15.4 11/22/2024 null check for get event by status, changed id to eventID
+ * @version 1.15.3 11/25/2024 added deleteByFacility
+ * @version 1.15.3 11/22/2024 null check for get event by status
  */
 public class Firebase {
     private final String deviceID;
@@ -1175,6 +1177,79 @@ public class Firebase {
                                 listener.onImageListRetrievalCompleted(images);
                             })
                             .addOnFailureListener(listener::onError);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Deletes all events associated with a facility
+     * Delete the facility of the organizer, demoting to a user
+     * @param facility the facility to delete events from
+     */
+    public void deleteByFacility(String facility, InitializationListener listener) {
+        eventCollection.whereEqualTo("facility", facility).get()
+                .addOnSuccessListener(tasks -> {
+                    if (!tasks.isEmpty()) {
+                        listener.onError(new Exception("No event with facility found"));
+                    } else {
+                        // get the event id, delete the user-events, then delete the facility
+                        for (DocumentSnapshot document : tasks.getDocuments()) {
+                            String eventID = (String) document.get("id");
+
+                            // delete the userEvent entries
+                            userEventsCollection.whereEqualTo("eventID", eventID).get()
+                                    .addOnSuccessListener(userEvents -> {
+                                        for (DocumentSnapshot userEvent : userEvents.getDocuments()) {
+                                            userEventsCollection.document(userEvent.getId()).delete()
+                                                    .addOnFailureListener(listener::onError);
+                                        }
+                                    });
+
+                            // Delete the event itself
+                            assert eventID != null;
+                            eventCollection.document(eventID).delete()
+                                    .addOnFailureListener(listener::onError);
+                        }
+                    }
+
+                    // Then remove the facility from the user
+                    userCollection.whereEqualTo("facility", facility).get()
+                            .addOnSuccessListener(user -> {
+                                if (user.isEmpty()) {
+                                    listener.onError(new Exception("No user found with facility " + facility));
+                                } else {
+                                    user.getDocuments().get(0).getReference().set("facility", null);
+                                    listener.onInitialized();
+                                }
+                })
+                .addOnFailureListener(listener::onError);
+        })
+        .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Gets all events from the database
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of events
+     */
+    public void getAllEvents(EventListRetrievalListener listener) {
+        eventCollection.get()
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onEventListRetrievalCompleted(new ArrayList<>());
+                        return;
+                    }
+                    ArrayList<Event> events = new ArrayList<>();
+                    int totalEvents = task.getDocuments().size();
+                    AtomicInteger retrievedEvents = new AtomicInteger();
+                    // Fetch every event and add it to the array
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        Event event = new Event(Objects.requireNonNull(document.getData()));
+                        events.add(event);
+
+                        if (retrievedEvents.incrementAndGet() == totalEvents) {
+                            listener.onEventListRetrievalCompleted(events);
+                        }
+                    }
                 })
                 .addOnFailureListener(listener::onError);
     }
