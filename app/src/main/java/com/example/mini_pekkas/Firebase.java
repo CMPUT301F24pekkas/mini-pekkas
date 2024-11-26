@@ -14,6 +14,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.0 Added startEnrollingEvent and supporting functions for enrolling users into events
+ * @version 1.16.1 expanded sendNotification to send to all users in an event with a given status.
  */
 public class Firebase {
     private final String deviceID;
@@ -527,7 +528,7 @@ public class Firebase {
      * @param notification a notification object to be added
      * @param listener Optional InitializationListener listener that is called after the notification is added
      */
-    public void addNotification(Notifications notification, String userID, InitializationListener listener) {
+    public void sendNotification(Notifications notification, String userID, InitializationListener listener) {
         // Set the user id and date field in correct format
         HashMap<String, Object> map = notification.toMap();
         map.put("date", notification.getTimestamp());
@@ -539,10 +540,38 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #addNotification(Notifications, String, InitializationListener)} with no listener
+     * Overload of the {@link #sendNotification(Notifications, String, InitializationListener)} with no listener
      */
-    public void addNotification(Notifications notification, String userID) {
-        addNotification(notification, userID, () -> {});
+    public void sendNotification(Notifications notification, String userID) {
+        sendNotification(notification, userID, () -> {});
+    }
+
+    /**
+     * Send a notification to all users in an event with a given status.
+     * If status == all, send to all users.
+     * @param notification the notification to be sent
+     * @param event the event where the notification is to be sent
+     * @param status the status to target, if {all}, send to all users {organized}, {pending}, {waitlisted}, {enrolled}
+     */
+    public void sendEventNotificationByStatus(Notifications notification, Event event, String status, InitializationListener listener) {
+        Query query = userEventsCollection.whereEqualTo("eventID", event.getId());
+        if (!status.equals("all")) {
+            query = query.whereEqualTo("status", status); // Add status filter if not "all"
+        }
+
+        query.get()
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onError(new Exception("No users found"));
+                        return;
+                    }
+                    // Send notification to every user in task
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        sendNotification(notification, Objects.requireNonNull(document.get("userID")).toString());
+                    }
+
+                })
+                .addOnFailureListener(listener::onError);
     }
 
     /**
@@ -863,7 +892,7 @@ public class Firebase {
      * @param event the event to enroll users in
      * @param listener Optional InitializationListener listener that is called after the event is updated
      */
-    public void startEnrollingEvent(Event event, InitializationListener listener) {
+    public void startEnrollingEvent(Event event, Notifications notification, InitializationListener listener) {
         long user_cap = event.getMaxAttendees();
         // TODO waitlist size should be stored in the event object, I will calculate it in firebase for now
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("status", "waitlisted").get()
@@ -893,18 +922,22 @@ public class Firebase {
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
+
                     // Update the status to pending
                     setNewStatus("pending", userID, event.getId(), () -> {});
 
                     // Send a notification to each user
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put("title", "Event Enrollment");
-                    map.put("description", "You have been enrolled in the event!");
-                    map.put("priority", 1);
-                    map.put("fragmentDestination", "EventFragment");
-                    map.put("date", Timestamp.now());
-
-                    addNotification(new Notifications(map), userID);
+                    if (notification == null) {
+                        HashMap<String, Object> map = new HashMap<>();
+                        map.put("title", "Event Enrollment");
+                        map.put("description", "You have been enrolled in the event!");
+                        map.put("priority", 1);
+                        map.put("fragmentDestination", "EventFragment");
+                        map.put("date", Timestamp.now());
+                        sendNotification(new Notifications(map), userID);
+                    } else {
+                        sendNotification(notification, userID);
+                    }
                 }
 
                 listener.onInitialized();   // TODO this doesnt wait for all notifications to be sent
