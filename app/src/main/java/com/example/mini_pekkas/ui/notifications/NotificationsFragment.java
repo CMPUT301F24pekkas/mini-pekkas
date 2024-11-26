@@ -13,12 +13,16 @@ import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.mini_pekkas.Notifications;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentNotificationsBinding;
+import com.example.mini_pekkas.ui.event.user.EventFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Fragment to display and manage user notifications.
@@ -28,6 +32,7 @@ public class NotificationsFragment extends Fragment {
 
     private FragmentNotificationsBinding binding;
     private ListView listView;
+    private List<Notifications> notificationList;
     private static final String PREFS_NAME = "NotificationPreferences";
     private static final String KEY_OPT_OUT = "optOut";
 
@@ -68,6 +73,10 @@ public class NotificationsFragment extends Fragment {
                 notificationList
         );
         listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            navigateToFragment(position);
+        });
 
         // Observe new notifications
         notificationsViewModel.getNotification().observe(getViewLifecycleOwner(), text -> {
@@ -138,5 +147,34 @@ public class NotificationsFragment extends Fragment {
     private boolean isUserOptedOut() {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean(KEY_OPT_OUT, false);
+    }
+
+    /**
+     * Navigates to a different fragment based on the selected notification.
+     * TODO add in all other fragments we may need
+     * TODO with fragments like EventFragment, we may need to fetch more data like the event itself
+     * @param position The position of the selected notification in the ListView.
+     */
+    private void navigateToFragment(int position) {
+        String fragmentDestination = notificationList.get(position).getFragmentDestination();
+
+        if (fragmentDestination != null) {
+            FragmentManager fragmentManager = getParentFragmentManager(); // Get FragmentManager from Activity
+            Fragment fragment = null;
+            switch (fragmentDestination) {
+                case "EventFragment":
+                    fragment = new EventFragment();
+                    // Pass in any other data
+                    break;
+                // ... other cases ...
+            }
+
+            if (fragment != null) {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.text_notifications, fragment) // TODO the R.id may be wrong - ryan
+                        .addToBackStack(null)
+                        .commit();
+            }
+        }
     }
 }
