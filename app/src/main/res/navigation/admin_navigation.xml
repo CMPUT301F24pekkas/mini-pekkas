@@ -13,12 +13,17 @@
     <fragment
         android:id="@+id/adminBrowseFacilities"
         android:name="com.example.mini_pekkas.ui.admin.AdminBrowseFacilities"
-        android:label="fragment_admin_event_detail"
+        android:label="AdminModerationSearchFacility"
         tools:layout="@layout/fragment_admin_browse_facilities" />
     <fragment
         android:id="@+id/adminBrowseImages"
         android:name="com.example.mini_pekkas.ui.admin.AdminBrowseImages"
         android:label="AdminModerationSearchFragment"
+        tools:layout="@layout/fragment_admin_browse_images" />
+    <fragment
+        android:id="@+id/adminBrowseQrCodes"
+        android:name="com.example.mini_pekkas.ui.admin.AdminBrowseQrCodes"
+        android:label="AdminModerationSearchQrCodes"
         tools:layout="@layout/fragment_admin_browse_images" />
     <fragment
         android:id="@+id/adminBrowseProfiles"
