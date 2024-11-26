@@ -944,6 +944,13 @@ public class Firebase {
             });
     }
 
+    /**
+     * Overload of the {@link #startEnrollingEvent(Event, Notifications, InitializationListener)} with no listener
+     */
+    public void startEnrollingEvent(Event event, Notifications notification) {
+        startEnrollingEvent(event, notification, () -> {});
+    }
+
     /*
      *  Functionality for managing profile and poster images
      */
