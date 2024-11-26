@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.1 expanded sendNotification to send to all users in an event with a given status.
+ * @version 1.16.2 Redraw new users when people cancel, TODO further testing is needed. Notifications need to be passed around
  */
 public class Firebase {
     private final String deviceID;
@@ -872,13 +872,14 @@ public class Firebase {
      */
     public void userAcceptEvent(boolean didAccept, String eventID, InitializationListener listener) {
         setNewStatus(didAccept ? "enrolled" : "cancelled", deviceID, eventID, listener);
+        if (!didAccept) redrawUserInEvent(eventID, listener);   // Draw new user on rejection
     }
 
     /**
      * Overload of the {@link #userAcceptEvent(boolean, String, InitializationListener)} with no listener
      */
     public void userAcceptEvent(boolean didAccept, String eventID) {
-        setNewStatus(didAccept ? "enrolled" : "cancelled", deviceID, eventID, () -> {});
+        userAcceptEvent(didAccept, eventID, () -> {});
     }
 
     /*
@@ -949,6 +950,24 @@ public class Firebase {
      */
     public void startEnrollingEvent(Event event, Notifications notification) {
         startEnrollingEvent(event, notification, () -> {});
+    }
+
+    /**
+     * This function is called whenever a user cancels an event from {@link #userAcceptEvent(boolean, String, InitializationListener)}
+     * Redraw a new user from the pool of events (from waitlist into pending)
+     */
+    private void redrawUserInEvent(String eventID, InitializationListener listener) {
+        userEventsCollection.whereEqualTo("eventID", eventID).whereEqualTo("status", "waitlisted").limit(1).get()
+                .addOnSuccessListener(user -> {
+                    if (!user.isEmpty()) {
+                        String userID = Objects.requireNonNull(user.getDocuments().get(0).get("userID")).toString();
+                        // Set the status to pending
+                        setNewStatus("pending", userID, eventID, listener);
+
+                        // TODO I need the notification that's send initially
+                    }
+                })
+                .addOnFailureListener(listener::onError);
     }
 
     /*
