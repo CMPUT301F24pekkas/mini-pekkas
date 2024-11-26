@@ -15,6 +15,7 @@ public class Notifications {
     private Date date;
     private long priority;
     private String title;
+    private String fragmentDestination;     // Set to the filename of the Fragment to navigate to
 
     /**
      * Constructor for creating a Notification object with a Date.
@@ -23,12 +24,14 @@ public class Notifications {
      * @param description A brief description of the notification.
      * @param date        The date when the notification was created.
      * @param priority    The priority level of the notification (higher value means higher priority).
+     * @param fragmentDestination The filename of the Fragment to navigate to.
      */
-    public Notifications(String title, String description, Date date, long priority) {
+    public Notifications(String title, String description, Date date, long priority, String fragmentDestination) {
         this.description = description;
         this.date = date;
         this.priority = priority;
         this.title = title;
+        this.fragmentDestination = fragmentDestination;
     }
 
     /**
@@ -38,12 +41,14 @@ public class Notifications {
      * @param description A brief description of the notification.
      * @param date        The Firebase Timestamp when the notification was created.
      * @param priority    The priority level of the notification (higher value means higher priority).
+     * @param fragmentDestination The filename of the Fragment to navigate to.
      */
-    public Notifications(String title, String description, Timestamp date, long priority) {
+    public Notifications(String title, String description, Timestamp date, long priority, String fragmentDestination) {
         this.description = description;
         this.date = date.toDate();
         this.priority = priority;
         this.title = title;
+        this.fragmentDestination = fragmentDestination;
     }
 
     /**
@@ -64,6 +69,7 @@ public class Notifications {
 
         this.priority = (long) map.get("priority");
         this.title = (String) map.get("title");
+        this.fragmentDestination = (String) map.get("fragmentDestination");
     }
 
     public HashMap<String, Object> toMap() {
@@ -72,6 +78,7 @@ public class Notifications {
         map.put("date", date);
         map.put("priority", priority);
         map.put("title", title);
+        map.put("fragmentDestination", fragmentDestination);
         return map;
     }
 
@@ -158,6 +165,21 @@ public class Notifications {
         this.title = title;
     }
 
+    /**
+     * Sets the fragment destination for navigation.
+     * @param fragmentDestination The filename of the Fragment to navigate to.
+     */
+    public void setFragmentDestination(String fragmentDestination) {
+        this.fragmentDestination = fragmentDestination;
+    }
+
+    /**
+     * Gets the fragment destination for navigation.
+     * @return The filename of the Fragment to navigate to.
+     */
+    public String getFragmentDestination() {
+        return fragmentDestination;
+    }
 }
 
 
