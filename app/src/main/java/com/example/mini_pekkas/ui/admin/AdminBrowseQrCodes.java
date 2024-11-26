@@ -64,7 +64,7 @@ public class AdminBrowseQrCodes extends Fragment {
             }
 
             // Make image adapter
-            qrCodeAdapter = new QrCodeAdapter(requireContext(), images);
+            qrCodeAdapter = new QrCodeAdapter(requireContext(), images, events);
 
             recyclerView.setAdapter(qrCodeAdapter);
         });

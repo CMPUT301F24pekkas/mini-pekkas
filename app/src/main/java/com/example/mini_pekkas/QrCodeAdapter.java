@@ -30,11 +30,13 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
     private final List<Bitmap> images;
     private final Context context;
     private QrCodeAdapter adapter; // Add adapter reference
+    private List<Event> events; // Add events list>
 
-    public QrCodeAdapter(Context context, List<Bitmap> images) {
+    public QrCodeAdapter(Context context, List<Bitmap> images, List<Event> events) {
         this.context = context;
         this.images = images;
         this.adapter = this;
+        this.events = events;
     }
 
     /**
@@ -58,7 +60,7 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_image, parent, false);
-        return new ImageViewHolder(view, images, adapter);
+        return new ImageViewHolder(view, images, adapter, events);
     }
 
     /**
@@ -112,8 +114,9 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
         public FloatingActionButton deleteButton;
         public Firebase firebaseHelper;
         public QrCodeAdapter adapter;
+        public List<Event> events;
 
-        public ImageViewHolder(@NonNull View itemView, List<Bitmap> images, QrCodeAdapter adapter) {
+        public ImageViewHolder(@NonNull View itemView, List<Bitmap> images, QrCodeAdapter adapter, List<Event> events) {
             super(itemView);
             this.images = images;
             imageView = itemView.findViewById(R.id.imageView);
@@ -121,6 +124,7 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
             deleteButton = itemView.findViewById(R.id.deleteImage);
             firebaseHelper = new Firebase(itemView.getContext());
             this.adapter = adapter;
+            this.events = events;
 
             // Set the delete button click listener
             deleteButton.setOnClickListener(new View.OnClickListener() {
@@ -131,9 +135,10 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
 
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
-                        Bitmap imageUri = images.get(position);
-                        // Encode back to base 64 and delete the event
-                        // TODO
+                        Event event = events.get(position);
+                        // Delete the event, update the adapter
+                        firebaseHelper.deleteEvent(event);
+                        adapter.removeItem(position);
                     }
                 }
             });
