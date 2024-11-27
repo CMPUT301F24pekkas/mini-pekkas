@@ -45,6 +45,7 @@ public class Firebase {
     private final CollectionReference eventCollection;
     private final CollectionReference userEventsCollection;
     private final CollectionReference userNotificationsCollection;
+    private final CollectionReference notificationCollection;
     private final CollectionReference adminCollection;
     private final StorageReference profilePictureReference;
     private final StorageReference posterPictureReference;
@@ -67,7 +68,7 @@ public class Firebase {
         userEventsCollection = db.collection("user-events");
         userNotificationsCollection = db.collection("user-notifications");
         adminCollection = db.collection("admins");
-
+        notificationCollection = db.collection("notifications");
         //Initialize our storage references
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         profilePictureReference = storageReference.child("profile-pictures");
@@ -381,6 +382,21 @@ public class Firebase {
 
                     // Set this user as the organizer of the event
                     organizeEvent(event);
+
+                    // Finally call the listener on completion
+                    listener.onRetrievalCompleted(id);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+    public void addNotification(Notifications notification, DataRetrievalListener listener) {
+        notificationCollection.add(notification.toMap())
+                .addOnSuccessListener(documentReference -> {
+                    // Retrieve the ID of the document and update the notification object
+                    String id = documentReference.getId();
+                    notification.setId(id);
+
+                    // Update the id field in Firestore
+                    documentReference.update("id", id);
 
                     // Finally call the listener on completion
                     listener.onRetrievalCompleted(id);
@@ -1408,17 +1424,25 @@ public class Firebase {
                     ArrayList<Event> events = new ArrayList<>();
                     int totalEvents = task.getDocuments().size();
                     AtomicInteger retrievedEvents = new AtomicInteger();
-                    // Fetch every event and add it to the array
-                    for (DocumentSnapshot document : task.getDocuments()) {
-                        Event event = new Event(Objects.requireNonNull(document.getData()));
-                        events.add(event);
 
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        try {
+                            // Use toObject if Event class is compatible with Firestore mapping
+                            Event event = document.toObject(Event.class);
+                            if (event != null) {
+                                events.add(event);
+                            } else {
+                                Log.e("Firebase", "Event document is null: " + document.getId());
+                            }
+                        } catch (Exception e) {
+                            Log.e("Firebase", "Error parsing event: " + e.getMessage(), e);
+                        }
+
+                        // Increment and check completion
                         if (retrievedEvents.incrementAndGet() == totalEvents) {
                             listener.onEventListRetrievalCompleted(events);
                         }
                     }
                 })
                 .addOnFailureListener(listener::onError);
-    }
-}
-
+    }}

@@ -11,6 +11,7 @@ import java.util.Map;
  * title, description, date, and priority.
  */
 public class Notifications {
+    private String id;
     private String description;
     private Date date;
     private long priority;
@@ -27,6 +28,7 @@ public class Notifications {
      * @param fragmentDestination The filename of the Fragment to navigate to.
      */
     public Notifications(String title, String description, Date date, long priority, String fragmentDestination) {
+        this.id = id;
         this.description = description;
         this.date = date;
         this.priority = priority;
@@ -44,6 +46,7 @@ public class Notifications {
      * @param fragmentDestination The filename of the Fragment to navigate to.
      */
     public Notifications(String title, String description, Timestamp date, long priority, String fragmentDestination) {
+        this.id = id;
         this.description = description;
         this.date = date.toDate();
         this.priority = priority;
@@ -59,7 +62,7 @@ public class Notifications {
      */
     public Notifications(Map<String, Object> map) {
         this.description = (String) map.get("description");
-
+        this.id = (String) map.get("id");
         // Check if the date field is of type Date or Timestamp, Convert to Date
         if (map.get("date") instanceof Date) {
             this.date = (Date) map.get("date");
@@ -75,6 +78,7 @@ public class Notifications {
     public HashMap<String, Object> toMap() {
         HashMap<String, Object> map = new HashMap<>();
         map.put("description", description);
+        map.put("id", id);
         map.put("date", date);
         map.put("priority", priority);
         map.put("title", title);
@@ -99,6 +103,7 @@ public class Notifications {
     public Date getDate() {
         return date;
     }
+    public String getId() {return id; }
 
     /**
      * Gets the Firebase Timestamp of the notification.
@@ -146,7 +151,7 @@ public class Notifications {
     public void setDate(Date date) {
         this.date = date;
     }
-
+    public void setId(String id) {this.id = id;}
     /**
      * Sets the priority level of the notification.
      *
