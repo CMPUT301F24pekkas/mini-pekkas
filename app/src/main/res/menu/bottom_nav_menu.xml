@@ -14,6 +14,11 @@
         android:title="@string/title_camera" />
 
     <item
+        android:id="@+id/navigation_user_organizer"
+        android:icon="@drawable/add_ring"
+        android:title="@string/title_event" />
+
+    <item
         android:id="@+id/navigation_notifications"
         android:icon="@drawable/bell"
         android:title="@string/title_notifications" />
