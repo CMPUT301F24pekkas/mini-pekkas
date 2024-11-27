@@ -193,6 +193,7 @@ public class EventJoinFragment extends Fragment {
             if (event != null) {
                 String deviceId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
                 joinWaitList(event, deviceId);
+                firebaseHelper.waitlistEvent(event);
                 Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
