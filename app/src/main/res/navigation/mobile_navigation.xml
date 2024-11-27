@@ -59,5 +59,10 @@
             android:id="@+id/action_navigation_camera_to_navigation_event"
             app:destination="@id/navigation_event2" />
     </fragment>
+    <fragment
+        android:id="@+id/navigation_user_organizer"
+        android:name="com.example.mini_pekkas.ui.event.user.UserOrganizerFragment"
+        android:label="UserOrganizerFragment"
+        tools:layout="@layout/fragment_user_organizer"/>
 </navigation>
 
