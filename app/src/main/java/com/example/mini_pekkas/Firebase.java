@@ -22,6 +22,7 @@ import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1445,4 +1446,32 @@ public class Firebase {
                     }
                 })
                 .addOnFailureListener(listener::onError);
-    }}
+
+    }
+    /**
+     * Checks if the user is already waitlisted or enrolled for the event.
+     *
+     * @param eventId  The ID of the event.
+     * @param callback The callback to handle the result (true if joined, false otherwise).
+     */
+    public void checkUserJoined(String eventId, UserJoinCheckCallback callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("user-events")
+                .whereEqualTo("userID", deviceID)
+                .whereEqualTo("eventID", eventId)
+                .whereIn("status", Arrays.asList("waitlisted", "enrolled"))
+                .get()
+                .addOnSuccessListener(task -> {
+                    boolean hasJoined = !task.getDocuments().isEmpty();
+                    callback.onCheckComplete(hasJoined);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("EventJoinFragment", "Error checking user status: " + e.getMessage());
+                    callback.onCheckComplete(false);
+                });
+    }
+
+
+}
+
+
