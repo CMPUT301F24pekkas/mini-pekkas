@@ -1,5 +1,6 @@
 package com.example.mini_pekkas.ui.event.user;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -12,7 +13,23 @@ import com.example.mini_pekkas.Event;
 public class SharedEventViewModel extends ViewModel {
     private final MutableLiveData<String> qrCodeData = new MutableLiveData<>();
     private final MutableLiveData<Event> eventDetails = new MutableLiveData<>();
+    private final MutableLiveData<String> navigationSource = new MutableLiveData<>();
 
+    /**
+     * Setter for navigation source
+     * @param source
+     */
+    public void setNavigationSource(String source) {
+        navigationSource.setValue(source);
+    }
+
+    /**
+     * Getter for navigation source
+     * @return
+     */
+    public LiveData<String> getNavigationSource() {
+        return navigationSource;
+    }
     /**
      * Getter for the QR code data.
      *

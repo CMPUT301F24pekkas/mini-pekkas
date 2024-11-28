@@ -140,25 +140,10 @@ public class EventJoinFragment extends Fragment {
      * @param sharedViewModel The shared view model used for updating the event data.
      */
     public void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("events")
-                .whereEqualTo("QrCode", qrCodeData)
-                .get()
-                .addOnSuccessListener(task -> {
-                    if (task.getDocuments().isEmpty()) {
-                        Toast.makeText(getContext(), "No Event Found", Toast.LENGTH_SHORT).show();
-                    } else {
-                        DocumentSnapshot document = task.getDocuments().get(0);
-                        Event event = new Event(document.getData());
-                        sharedViewModel.setEventDetails(event);
-                        eventViewModel.setEvent(event);
-                        Toast.makeText(getContext(), "Event Found", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("EventFragment", "Error fetching event: " + e.getMessage());
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        firebaseHelper.getEventByQRCode(qrCodeData, event ->{
+            sharedViewModel.setEventDetails(event);
+            eventViewModel.setEvent(event);
+        });
     }
 
     /**

@@ -23,6 +23,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentHomeBinding;
+import com.example.mini_pekkas.ui.event.user.SharedEventViewModel;
 
 import java.util.ArrayList;
 
@@ -35,6 +36,7 @@ public class HomeFragment extends Fragment {
     private LinearLayout EventsContainer;
     private HomeEventsListViewModel homeEventsListViewModel;
     private LiveData<ArrayList<Event>> EventList;
+
 
     /**
      * Initializes the fragment's user interface.
@@ -53,24 +55,28 @@ public class HomeFragment extends Fragment {
 
         EventsContainer = binding.mainContainer;
         Log.d("DEVICEID", homeEventsListViewModel.getDeviceId());
+        homeEventsListViewModel.getEventList().observe(getViewLifecycleOwner(), new Observer<ArrayList<Event>>() {
+            @Override
+            public void onChanged(ArrayList<Event> events) {
+                if (events != null) {
+                    // Update UI with the new event list
+                    updateEventListHomepageUI(events);
+                } else {
+                    Log.d("HomeFragment", "No events available");
+                }
+            }
+        });
         homeEventsListViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), new Observer<Event>() {
             @Override
             public void onChanged(Event event) {
                 if (event != null) {
-                    Toast.makeText(requireContext(), "event list changed", Toast.LENGTH_SHORT).show();
+                    // Update UI with the new event list
                     EventList = homeEventsListViewModel.getEventList();
                     assert EventList.getValue() != null;
                     updateEventListHomepageUI(EventList.getValue());
                 } else {
                     Log.d("HomeFragment", "No events available");
                 }
-            }
-        });
-        homeEventsListViewModel.getEventList().observe(getViewLifecycleOwner(), events -> {
-            if (events != null && !events.isEmpty()) {
-                updateEventListHomepageUI(events);
-            } else {
-                Log.d("HomeFragment", "No events to display");
             }
         });
         //add the current events in db ONCE
@@ -105,6 +111,8 @@ public class HomeFragment extends Fragment {
                 navController.navigate(R.id.action_navigation_home_to_navigation_event);
                 assert event != null;
                 homeEventsListViewModel.setSelectedEvent(event);
+                SharedEventViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
+                sharedViewModel.setNavigationSource("HOME");
             });
 
 
