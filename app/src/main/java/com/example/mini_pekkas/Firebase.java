@@ -10,9 +10,11 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
@@ -21,9 +23,12 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -31,7 +36,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.15.2 11/22/2024 Fixed minor logic. User objects and documents now hold their own ID field. replaced this.device with device
+ * @version 1.16.5 Added getUsersInEventByStatus, retrieve the users in an event with a given status
+ * TODO further testing is needed. Notifications need to be passed around
+ * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
 public class Firebase {
     private final String deviceID;
@@ -39,6 +46,7 @@ public class Firebase {
     private final CollectionReference eventCollection;
     private final CollectionReference userEventsCollection;
     private final CollectionReference userNotificationsCollection;
+    private final CollectionReference notificationCollection;
     private final CollectionReference adminCollection;
     private final StorageReference profilePictureReference;
     private final StorageReference posterPictureReference;
@@ -61,7 +69,7 @@ public class Firebase {
         userEventsCollection = db.collection("user-events");
         userNotificationsCollection = db.collection("user-notifications");
         adminCollection = db.collection("admins");
-
+        notificationCollection = db.collection("notifications");
         //Initialize our storage references
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         profilePictureReference = storageReference.child("profile-pictures");
@@ -501,43 +509,115 @@ public class Firebase {
                     AtomicInteger notification_count = new AtomicInteger();
 
                     for (DocumentSnapshot document : task.getDocuments()) {
-                        // Remove the user id so Notifications don't store the device id
-                        Map<String, Object> map = Objects.requireNonNull(document.getData());
-                        map.remove("userID");
-                        notifications.add(new Notifications(map));
+                        notificationCollection.whereEqualTo("id", document.get("notificationID")).get()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    if (!documentSnapshot.isEmpty()) {
+                                        // Retrieve the notification
+                                        Notifications notif = new Notifications(Objects.requireNonNull(documentSnapshot.getDocuments().get(0).getData()));
+                                        notifications.add(notif);
 
-                        // Wait for all events to be deleted first
-                        if (notification_count.incrementAndGet() == total_notifications) {
-                            // Sort by newest date first
-                            notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-                            listener.onNotificationListRetrievalCompleted(notifications);
-                        }
+                                        // Wait for all notifications to be fetched first
+                                        if (notification_count.incrementAndGet() == total_notifications) {
+                                            // Sort by newest date first
+                                            notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+                                            listener.onNotificationListRetrievalCompleted(notifications);
+                                        }
+                                    }
+                                })
+                                .addOnFailureListener(listener::onError);
                     }
                 })
                 .addOnFailureListener(listener::onError);
     }
 
     /**
-     * Add a notification to the user-notifications collection
+     * Add a notification to the notifications collection.
+     * This collection is a storage for all notifications.
      * @param notification a notification object to be added
-     * @param listener Optional InitializationListener listener that is called after the notification is added
+     * @param listener Optional DataRetrievalListener listener that is called after the notification is added
      */
-    public void addNotification(Notifications notification, InitializationListener listener) {
-        // Set the user id and date field in correct format
-        HashMap<String, Object> map = notification.toMap();
-        map.put("date", notification.getTimestamp());
-        map.put("userID", deviceID);
+    private void storeNotification(Notifications notification, DataRetrievalListener listener) {
+        notificationCollection.add(notification.toMap())
+                .addOnSuccessListener(documentReference -> {
+                    // Retrieve the ID of the document and update the notification object
+                    String id = documentReference.getId();
+                    notification.setId(id);
 
-        userNotificationsCollection.add(map)
-                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                    // Keep the id copy in firestore for querying
+                    documentReference.update("id", id);
+
+                    // Finally call the listener on completion
+                    listener.onRetrievalCompleted(id);
+                })
                 .addOnFailureListener(listener::onError);
     }
 
     /**
-     * Overload of the {@link #addNotification(Notifications, InitializationListener)} with no listener
+     * Overload of the {@link #storeNotification(Notifications, DataRetrievalListener)} with no listener
      */
-    public void addNotification(Notifications notification) {
-        addNotification(notification, () -> {});
+    private void storeNotification(Notifications notification) {
+        storeNotification(notification, id -> {});
+    }
+
+    /**
+     * Add a notification to the user-notifications collection, effectively sending a notification to a user
+     * @param notification a notification object to be added
+     * @param listener Optional InitializationListener listener that is called after the notification is added
+     */
+    private void sendNotification(Notifications notification, String userID, InitializationListener listener) {
+        // First store the notification
+        storeNotification(notification, id -> {
+            // Create the user-notification entry
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("notificationID", id);
+            map.put("userID", userID);
+
+            // Call the listener on successful add
+            userNotificationsCollection.add(map)
+                    .addOnSuccessListener(aVoid -> listener.onInitialized())
+                    .addOnFailureListener(listener::onError);
+        });
+    }
+
+    /**
+     * Overload of the {@link #sendNotification(Notifications, String, InitializationListener)} with no listener
+     */
+    private void sendNotification(Notifications notification, String userID) {
+        sendNotification(notification, userID, () -> {});
+    }
+
+    /**
+     * Send a notification to all users in an event with a given status.
+     * If status == all, send to all users.
+     * @param notification the notification to be sent
+     * @param event the event where the notification is to be sent
+     * @param status the status to target, if {all}, send to all users {organized}, {pending}, {waitlisted}, {enrolled}
+     */
+    public void sendEventNotificationByStatus(Notifications notification, Event event, String status, InitializationListener listener) {
+        Query query = userEventsCollection.whereEqualTo("eventID", event.getId());
+        if (!status.equals("all")) {
+            query = query.whereEqualTo("status", status); // Add status filter if not "all"
+        }
+        query.get()     // Performs the query with the given filter
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onError(new Exception("No users found"));
+                        return;
+                    }
+                    // Send notification to every user in task
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        sendNotification(notification, Objects.requireNonNull(document.get("userID")).toString());
+                    }
+
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #sendEventNotificationByStatus(Notifications, Event, String, InitializationListener)} with no listener
+     */
+    public void sendEventNotificationByStatus(Notifications notification, Event event, String status) {
+        sendEventNotificationByStatus(notification, event, status, () -> {});
     }
 
     /**
@@ -701,7 +781,12 @@ public class Firebase {
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
     private void getEventByStatus(String status, EventListRetrievalListener listener) {
-        userEventsCollection.whereEqualTo("userID", deviceID).whereEqualTo("status", status).get()
+        // Create the query
+        Query query = userEventsCollection.whereEqualTo("userID", deviceID);
+        if (!status.equals("all")) {
+            query = query.whereEqualTo("status", status);
+        }
+        query.get()     // perform the query
                 .addOnSuccessListener(task -> {
                     if (task.isEmpty()) {
                         listener.onEventListRetrievalCompleted(new ArrayList<>());
@@ -720,6 +805,10 @@ public class Firebase {
                         // Get the event from the event collection
                         eventCollection.document(eventID).get()
                                 .addOnSuccessListener(documentSnapshot -> {
+                                    if (documentSnapshot == null) {
+                                        listener.onError(new Exception("Event does not exist"));
+                                        return;
+                                    }
 
                                     // Create the new event object and store it in the array
                                     Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
@@ -781,6 +870,14 @@ public class Firebase {
     }
 
     /**
+     * Get all events the user is waitlisted in
+     * @param listener a EventListRetrievalListener that returns an ArrayList of events
+     */
+    public void getPendingEvents(EventListRetrievalListener listener) {
+        getEventByStatus("pending", listener);
+    }
+
+    /**
      * Get all events the user is enrolled in
      * @param listener a EventListRetrievalListener that returns an ArrayList of events
      */
@@ -794,6 +891,259 @@ public class Firebase {
      */
     public void getCancelledEvents(EventListRetrievalListener listener) {
         getEventByStatus("cancelled", listener);
+    }
+
+    /**
+     * Get all events the user has interacted with
+     * @param listener a EventListRetrievalListener that returns an ArrayList of events
+     */
+    public void getAllEvents(EventListRetrievalListener listener) {
+        getEventByStatus("all", listener);
+    }
+
+    /**
+     * Set the new status of given user in the given event
+     * @param status the new status to set
+     * @param userID the user ID to update
+     * @param eventID the event ID to update
+     */
+    private void setNewStatus(String status, String userID, String eventID, InitializationListener listener) {
+        userEventsCollection.whereEqualTo("eventID", eventID).whereEqualTo("userID", userID).get()
+                .addOnSuccessListener(task -> {
+                    // This should be a unique entry
+                    if (task.size() != 1) {
+                        listener.onError(new Exception("Invalid event"));
+                        return;
+                    }
+                    // Update the document and return
+                    task.getDocuments().get(0).getReference().update("status", status)
+                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnFailureListener(listener::onError);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Retrieve a list of all users in an event with a given status
+     * @param status the status to retrieve {organized, waitlisted, pending, enrolled, cancelled, all}. set to all to retrieve all users in the event
+     * @param eventID the event ID to retrieve
+     * @param listener a UserListRetrievalListener that returns an ArrayList of users
+     */
+    private void getUsersInEventByStatus(String status, String eventID, UserListRetrievalListener listener) {
+        Query query = userEventsCollection.whereEqualTo("eventID", eventID);
+        if (status.equals("all")) {
+            query.whereEqualTo("status", "waitlisted");
+        }
+        query.get().addOnSuccessListener(task -> {
+            // Check if no documents were found
+            if (task.isEmpty()) {
+                listener.onUserListRetrievalCompleted(new ArrayList<>());
+                return;
+            }
+
+            ArrayList<User> users = new ArrayList<>(); // Get the array of events the user is waitlisted in
+            int totalUser = task.size(); // Total events to retrieve
+            AtomicInteger retrievedUsers = new AtomicInteger(); // Counter for retrieved events
+
+            for (DocumentSnapshot document : task.getDocuments()) {
+
+                // Get the event ID to pull from the event collection
+                String userID = Objects.requireNonNull(document.get("userID")).toString();
+
+                // Get the event from the event collection
+                userCollection.whereEqualTo("userID ", userID).get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            // This should be unique
+                            if (documentSnapshot.size() != 1) {
+                                listener.onError(new Exception("User does not exist"));
+                                return;
+                            }
+
+                            // Create the new event object and store it in the array
+                            User user = new User(Objects.requireNonNull(documentSnapshot.getDocuments().get(0).getData()));
+                            users.add(user);
+
+                            // Increment and check if we have retrieved all events
+                            if (retrievedUsers.incrementAndGet() == totalUser){
+                                listener.onUserListRetrievalCompleted(users);
+                            }
+                        })
+                        .addOnFailureListener(listener::onError);
+            }
+            if (retrievedUsers.get() != totalUser){
+                listener.onError(new Exception("Not all users were retrieved"));
+            }
+        })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Get all organized users for an event (ie the organizer itself). This shouldn't need to be called
+     * @param eventID the event ID to query
+     * @param listener a UserListRetrievalListener that returns an ArrayList of users
+     */
+    public void getOrganizedUsers(String eventID, UserListRetrievalListener listener) {
+        getUsersInEventByStatus("organized", eventID, listener);
+    }
+
+    /**
+     * Get all waitlisted users for an event
+     * @param eventID the event ID to query
+     * @param listener a UserListRetrievalListener that returns an ArrayList of users
+     */
+    public void getWaitlistedUsers(String eventID, UserListRetrievalListener listener) {
+        getUsersInEventByStatus("waitlisted", eventID, listener);
+    }
+
+    /**
+     * Get all pending users for an event
+     * @param eventID the event ID to query
+     * @param listener a UserListRetrievalListener that returns an ArrayList of users
+     */
+    public void getPendingUsers(String eventID, UserListRetrievalListener listener) {
+        getUsersInEventByStatus("pending", eventID, listener);
+    }
+
+    /**
+     * Get all enrolled users for an event
+     * @param eventID the event ID to query
+     * @param listener a UserListRetrievalListener that returns an ArrayList of users
+     */
+    public void getEnrolledUsers(String eventID, UserListRetrievalListener listener) {
+        getUsersInEventByStatus("enrolled", eventID, listener);
+    }
+
+    /**
+     * Get all cancelled users for an event
+     * @param eventID the event ID to query
+     * @param listener a UserListRetrievalListener that returns an ArrayList of users
+     */
+    public void getCancelledUsers(String eventID, UserListRetrievalListener listener) {
+        getUsersInEventByStatus("cancelled", eventID, listener);
+    }
+
+    /**
+     * Get all users in an event
+     * @param eventID the event ID to query
+     * @param listener a UserListRetrievalListener that returns an ArrayList of users
+     */
+    public void getAllUsers(String eventID, UserListRetrievalListener listener) {
+        getUsersInEventByStatus("all", eventID, listener);
+    }
+
+    /**
+     * Call when this user accepts or rejects an event. Updates the user-event collection
+     * @param didAccept true if this user accepted (enrolled), false if user rejected (cancelled)
+     * @param eventID the event ID to update
+     * @param notification the notification to send to either the user accepting, or a new user getting enrolled.
+     *                     (not a cancellation notification) Make sure to send the right notification on either condition
+     * @param listener Optional InitializationListener listener that is called after the event is updated
+     */
+    public void userAcceptEvent(boolean didAccept, String eventID, Notifications notification, InitializationListener listener) {
+        setNewStatus(didAccept ? "enrolled" : "cancelled", deviceID, eventID, listener);
+        if(didAccept) {
+            sendNotification(notification, deviceID);   // Send a notification of success
+        } else {
+            redrawUserInEvent(eventID, notification, listener);   // Draw new user on rejection. Notify
+        }
+    }
+
+    /**
+     * Overload of the {@link #userAcceptEvent(boolean, String, Notifications, InitializationListener)} with no listener
+     */
+    public void userAcceptEvent(boolean didAccept, String eventID, Notifications notification) {
+        userAcceptEvent(didAccept, eventID, notification, () -> {});
+    }
+
+    /*
+     *  Functionality for organizer starting and automating the enrollment process
+     */
+
+    /**
+     * Call when the organizer starts the enrollment process
+     * Sample x number of users, set them to pending, send a notification
+     * The view event page should now give the accept button (for all events labeled pending)
+     * @param event the event to enroll users in
+     * @param notification the notification to send to all selected users. Set null for a generic notification
+     *                     (IDEALLY PLEASE GIVE A NOTIFICATION)
+     * @param listener Optional InitializationListener listener that is called after the event is updated
+     */
+    public void startEnrollingEvent(Event event, Notifications notification, InitializationListener listener) {
+        // Create and store a default notification if none is provided
+        if (notification == null) {
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("title", "Event Enrollment for" + event.getName());
+            map.put("description", "Click here to accept your position!");
+            map.put("priority", 1);
+            map.put("fragmentDestination", "EventFragment");
+            map.put("date", Timestamp.now());
+            notification = new Notifications(map);
+            storeNotification(notification);
+        }
+        final Notifications final_notification = notification;  // For funky java behaviour
+        long user_cap = event.getMaxAttendees();        // The max number of attendees to draw
+        // TODO waitlist size should be stored in the event object, I will calculate it in firebase for now
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("status", "waitlisted").get()
+            .addOnSuccessListener(task -> {
+                int waitlist_size = task.size();
+                Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
+
+                // If we have more users than the waitlist size, randomly pick x users to enroll
+                if (waitlist_size > user_cap) {
+                    Random random = new Random();
+                    while (randomIntegers.size() < user_cap) { // Keep generating until we have 'numIntegers' unique integers
+                        randomIntegers.add(random.nextInt(waitlist_size));
+                    }
+                } else {
+                    // If we have less users than the waitlist size, pick all users
+                    for (int i = 0; i < waitlist_size; i++) {
+                        randomIntegers.add(i);
+                    }
+                }
+
+                // Now we sample X users (Or all users if we're under capacity
+                List<String> selectedUsersID = new ArrayList<>();
+                Iterator<Integer> iterator = randomIntegers.iterator();
+                for (int i = 0; i < waitlist_size && i < user_cap; i++) {
+                    selectedUsersID.add(Objects.requireNonNull(task.getDocuments().get(iterator.next()).get("userID")).toString());
+                }
+
+                // Now enroll everyone
+                for (String userID : selectedUsersID) {
+                    // Update the status to pending
+                    setNewStatus("pending", userID, event.getId(), () -> {});
+
+                    // Send a notification to each user
+                    sendNotification(final_notification, userID);
+                }
+
+                listener.onInitialized();   // TODO this doesnt wait for all notifications to be sent
+            });
+    }
+
+    /**
+     * Overload of the {@link #startEnrollingEvent(Event, Notifications, InitializationListener)} with no listener
+     */
+    public void startEnrollingEvent(Event event, Notifications notification) {
+        startEnrollingEvent(event, notification, () -> {});
+    }
+
+    /**
+     * This function is called whenever a user cancels an event from {@link #userAcceptEvent(boolean, String, Notifications, InitializationListener)}
+     * Redraw a new user from the pool of events (from waitlist into pending)
+     */
+    private void redrawUserInEvent(String eventID, Notifications notification, InitializationListener listener) {
+        userEventsCollection.whereEqualTo("eventID", eventID).whereEqualTo("status", "waitlisted").limit(1).get()
+                .addOnSuccessListener(user -> {
+                    if (!user.isEmpty()) {
+                        String userID = Objects.requireNonNull(user.getDocuments().get(0).get("userID")).toString();
+                        // Set the status to pending
+                        setNewStatus("pending", userID, eventID, listener);
+                        // And send a success notification
+                        sendNotification(notification, userID);
+                    }
+                })
+                .addOnFailureListener(listener::onError);
     }
 
     /*
@@ -1123,7 +1473,6 @@ public class Firebase {
 
     /**
      * Searches for facilities in the database, returns an array of facilities (strings)
-     * TODO Currently doesn't return anything, an issue on the firebase end
      * @param query the query to search for
      * @param listener the listener that is called when the search is complete. Returns an ArrayList of facilities
      */
@@ -1174,5 +1523,86 @@ public class Firebase {
                 })
                 .addOnFailureListener(listener::onError);
     }
-}
 
+    /**
+     * Deletes all events associated with a facility
+     * Delete the facility of the organizer, demoting to a user
+     * @param facility the facility to delete events from
+     */
+    public void deleteByFacility(String facility, InitializationListener listener) {
+        eventCollection.whereEqualTo("facility", facility).get()
+                .addOnSuccessListener(tasks -> {
+                    if (!tasks.isEmpty()) {
+                        listener.onError(new Exception("No event with facility found"));
+                    } else {
+                        // get the event id, delete the user-events, then delete the facility
+                        for (DocumentSnapshot document : tasks.getDocuments()) {
+                            String eventID = (String) document.get("id");
+
+                            // delete the userEvent entries
+                            userEventsCollection.whereEqualTo("eventID", eventID).get()
+                                    .addOnSuccessListener(userEvents -> {
+                                        for (DocumentSnapshot userEvent : userEvents.getDocuments()) {
+                                            userEventsCollection.document(userEvent.getId()).delete()
+                                                    .addOnFailureListener(listener::onError);
+                                        }
+                                    });
+
+                            // Delete the event itself
+                            assert eventID != null;
+                            eventCollection.document(eventID).delete()
+                                    .addOnFailureListener(listener::onError);
+                        }
+                    }
+
+                    // Then remove the facility from the user
+                    userCollection.whereEqualTo("facility", facility).get()
+                            .addOnSuccessListener(user -> {
+                                if (user.isEmpty()) {
+                                    listener.onError(new Exception("No user found with facility " + facility));
+                                } else {
+                                    user.getDocuments().get(0).getReference().set("facility", null);
+                                    listener.onInitialized();
+                                }
+                })
+                .addOnFailureListener(listener::onError);
+        })
+        .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Gets all events from the database
+     * @param listener the listener that is called when the search is complete. Returns an ArrayList of events
+     */
+    public void searchAllEvents(EventListRetrievalListener listener) {
+        eventCollection.get()
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onEventListRetrievalCompleted(new ArrayList<>());
+                        return;
+                    }
+                    ArrayList<Event> events = new ArrayList<>();
+                    int totalEvents = task.getDocuments().size();
+                    AtomicInteger retrievedEvents = new AtomicInteger();
+
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        try {
+                            // Use toObject if Event class is compatible with Firestore mapping
+                            Event event = document.toObject(Event.class);
+                            if (event != null) {
+                                events.add(event);
+                            } else {
+                                Log.e("Firebase", "Event document is null: " + document.getId());
+                            }
+                        } catch (Exception e) {
+                            Log.e("Firebase", "Error parsing event: " + e.getMessage(), e);
+                        }
+
+                        // Increment and check completion
+                        if (retrievedEvents.incrementAndGet() == totalEvents) {
+                            listener.onEventListRetrievalCompleted(events);
+                        }
+                    }
+                })
+                .addOnFailureListener(listener::onError);
+    }}

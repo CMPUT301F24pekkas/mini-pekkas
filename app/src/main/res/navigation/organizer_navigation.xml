@@ -24,7 +24,7 @@
         tools:layout="@layout/fragment_camera" />
     <fragment
         android:id="@+id/navigation_org_notifications"
-        android:name="com.example.mini_pekkas.ui.notifications.NotificationsFragment"
+        android:name="com.example.mini_pekkas.ui.notifications.NotificationsCreateFragment"
         android:label="Organizer Notifications"
         tools:layout="@layout/fragment_create_notification" />
     <fragment

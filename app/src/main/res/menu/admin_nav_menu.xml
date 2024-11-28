@@ -7,12 +7,18 @@
         android:title="@string/search_event" />
     <item
         android:id="@+id/adminBrowseFacilities"
-        android:icon="@drawable/ticket"
+        android:icon="@drawable/home"
         android:title="@string/search_facilities" />
     <item
         android:id="@+id/adminBrowseImages"
         android:icon="@drawable/camera"
         android:title="@string/search_images" />
+
+    <item
+        android:id="@+id/adminBrowseQrCodes"
+        android:icon="@drawable/qr_code"
+        android:title="@string/search_qr_codes" />
+
     <item
         android:id="@+id/adminBrowseProfiles"
         android:icon="@drawable/user"

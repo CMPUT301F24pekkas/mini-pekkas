@@ -2,8 +2,10 @@ package com.example.mini_pekkas.ui.event.organizer;
 
 import static android.text.TextUtils.replace;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +23,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -36,6 +40,10 @@ import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
 import com.example.mini_pekkas.ui.event.user.EventFragment;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -50,6 +58,9 @@ import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
  */
 public class EventCreateFragment extends Fragment {
     private OrganizerEventsListViewModel organizerEventsListViewModel;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private double latitude = 0.0; // Default value
+    private double longitude = 0.0;
     private FragmentCreateEventBinding binding;
     private Firebase firebaseHelper;
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -73,6 +84,19 @@ public class EventCreateFragment extends Fragment {
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
         firebaseHelper = new Firebase(requireContext());
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        CheckBox geoCheckBox = binding.geoCheckBox;
+        geoCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                requestLocation();
+            } else {
+                latitude = 0.0;
+                longitude = 0.0;
+                Toast.makeText(getContext(), "Geolocation cleared.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         ImageButton posterButton = binding.addEventPicture;
         posterButton.setOnClickListener(v -> openImageChooser());
@@ -101,6 +125,38 @@ public class EventCreateFragment extends Fragment {
         cancelButton.setOnClickListener(v -> ClearInput());
 
         return root;
+    }
+    /**
+     * Requests the device's location if permissions are granted.
+     * Updates the latitude and longitude fields with the current location.
+     */
+    private void requestLocation() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1001);
+        } else {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                    Toast.makeText(getContext(), "Location acquired: Lat: " + latitude + ", Lng: " + longitude, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Unable to fetch location.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    /**
+     * Handles the result of the permission request for location access.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1001 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            requestLocation();
+        } else {
+            Toast.makeText(getContext(), "Location permission denied.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -203,8 +259,6 @@ public class EventCreateFragment extends Fragment {
      */
     public Event CreateEvent() {
         String event_id = UUID.randomUUID().toString();
-        double latitude = 40.730610; // Example latitude
-        double longitude = -73.935242; // Example longitude
         float price = 90.45f;
         ArrayList<User> waitlist = new ArrayList<>();
 

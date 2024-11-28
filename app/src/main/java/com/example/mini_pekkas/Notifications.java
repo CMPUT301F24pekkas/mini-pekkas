@@ -11,10 +11,12 @@ import java.util.Map;
  * title, description, date, and priority.
  */
 public class Notifications {
+    private String id;
     private String description;
     private Date date;
     private long priority;
     private String title;
+    private String fragmentDestination;     // Set to the filename of the Fragment to navigate to
 
     /**
      * Constructor for creating a Notification object with a Date.
@@ -23,12 +25,15 @@ public class Notifications {
      * @param description A brief description of the notification.
      * @param date        The date when the notification was created.
      * @param priority    The priority level of the notification (higher value means higher priority).
+     * @param fragmentDestination The filename of the Fragment to navigate to.
      */
-    public Notifications(String title, String description, Date date, long priority) {
+    public Notifications(String title, String description, Date date, long priority, String fragmentDestination) {
+        //this.id = id;
         this.description = description;
         this.date = date;
         this.priority = priority;
         this.title = title;
+        this.fragmentDestination = fragmentDestination;
     }
 
     /**
@@ -38,12 +43,15 @@ public class Notifications {
      * @param description A brief description of the notification.
      * @param date        The Firebase Timestamp when the notification was created.
      * @param priority    The priority level of the notification (higher value means higher priority).
+     * @param fragmentDestination The filename of the Fragment to navigate to.
      */
-    public Notifications(String title, String description, Timestamp date, long priority) {
+    public Notifications(String title, String description, Timestamp date, long priority, String fragmentDestination) {
+        //this.id = id;
         this.description = description;
         this.date = date.toDate();
         this.priority = priority;
         this.title = title;
+        this.fragmentDestination = fragmentDestination;
     }
 
     /**
@@ -54,7 +62,7 @@ public class Notifications {
      */
     public Notifications(Map<String, Object> map) {
         this.description = (String) map.get("description");
-
+        this.id = (String) map.get("id");
         // Check if the date field is of type Date or Timestamp, Convert to Date
         if (map.get("date") instanceof Date) {
             this.date = (Date) map.get("date");
@@ -64,14 +72,17 @@ public class Notifications {
 
         this.priority = (long) map.get("priority");
         this.title = (String) map.get("title");
+        this.fragmentDestination = (String) map.get("fragmentDestination");
     }
 
     public HashMap<String, Object> toMap() {
         HashMap<String, Object> map = new HashMap<>();
         map.put("description", description);
+        map.put("id", id);
         map.put("date", date);
         map.put("priority", priority);
         map.put("title", title);
+        map.put("fragmentDestination", fragmentDestination);
         return map;
     }
 
@@ -92,6 +103,7 @@ public class Notifications {
     public Date getDate() {
         return date;
     }
+    public String getId() {return id; }
 
     /**
      * Gets the Firebase Timestamp of the notification.
@@ -139,7 +151,7 @@ public class Notifications {
     public void setDate(Date date) {
         this.date = date;
     }
-
+    public void setId(String id) {this.id = id;}
     /**
      * Sets the priority level of the notification.
      *
@@ -158,6 +170,33 @@ public class Notifications {
         this.title = title;
     }
 
+    /**
+     * Sets the fragment destination for navigation.
+     * @param fragmentDestination The filename of the Fragment to navigate to.
+     */
+    public void setFragmentDestination(String fragmentDestination) {
+        this.fragmentDestination = fragmentDestination;
+    }
+
+    /**
+     * Gets the fragment destination for navigation.
+     * @return The filename of the Fragment to navigate to.
+     */
+    public String getFragmentDestination() {
+        return fragmentDestination;
+    }
+
+    /**
+     * Gets the ID of the notification.
+     * @return The ID of the notification.
+     */
+    public String getID() {return id;}
+
+    /**
+     * Sets the ID of the notification.
+     * @param id The new value to be set
+     */
+    public void setID(String id) {this.id = id;}
 }
 
 
