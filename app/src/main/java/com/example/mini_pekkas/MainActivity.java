@@ -107,13 +107,44 @@ public class MainActivity extends AppCompatActivity {
         String phone = phoneInput.getText().toString().trim();
         String facility = facilityInput.getText().toString().trim();
 
+        // Input validation
+        if (firstname.isEmpty()) {
+            firstNameInput.setError("First name cannot be empty");
+            firstNameInput.requestFocus();
+            return;
+        }
+
+        if (lastName.isEmpty()) {
+            lastNameInput.setError("Last name cannot be empty");
+            lastNameInput.requestFocus();
+            return;
+        }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailInput.setError("Please enter a valid email address");
+            emailInput.requestFocus();
+            return;
+        }
+
+        if (!phone.matches("\\d+")) {
+            phoneInput.setError("Phone number must contain only digits");
+            phoneInput.requestFocus();
+            return;
+        }
+
+        if (phone.length() < 10 || phone.length() > 15) {
+            phoneInput.setError("Phone number must be between 10 and 15 digits");
+            phoneInput.requestFocus();
+            return;
+        }
+
         // Create a map and put values into it
         Map<String, Object> map = new HashMap<>();
         map.put("name", firstname);
         map.put("lastname", lastName);
         map.put("email", email);
         map.put("phone", phone);
-        map.put("facility", facility);
+        map.put("facility", facility); // Facility can be empty
 
         User tempUser = new User(map);
 

@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -22,6 +21,7 @@ import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.5 Added getUsersInEventByStatus, retrieve the users in an event with a given status
- * TODO further testing is needed. Notifications need to be passed around
+ * @version 1.16.7 StartEnrollingEvents now notify not selected users, eventExpiredCleanup should be called post expiry date to remove unseleceted users
+ * TODO further testing is needed.
  * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
 public class Firebase {
@@ -537,19 +537,31 @@ public class Firebase {
      * @param listener Optional DataRetrievalListener listener that is called after the notification is added
      */
     private void storeNotification(Notifications notification, DataRetrievalListener listener) {
-        notificationCollection.add(notification.toMap())
-                .addOnSuccessListener(documentReference -> {
-                    // Retrieve the ID of the document and update the notification object
-                    String id = documentReference.getId();
-                    notification.setId(id);
+        // Check if the notification already exist
+        notificationCollection.whereEqualTo("title", notification.getTitle()).whereEqualTo("description", notification.getDescription())
+                .whereEqualTo("date", notification.getTimestamp())  //.whereEqualTo("priority", notification.getPriority()) TODO this fails the check
+                .whereEqualTo("fragmentDestination", notification.getFragmentDestination()).get()
+                        .addOnSuccessListener(task -> {
+                            // This notification already exist
+                            if(!task.isEmpty()) {
+                                listener.onRetrievalCompleted(Objects.requireNonNull(task.getDocuments().get(0).getId()));
+                            } else {
+                                // Create a new notification
+                                notificationCollection.add(notification.toMap())
+                                        .addOnSuccessListener(documentReference -> {
+                                            // Retrieve the ID of the document and update the notification object
+                                            String id = documentReference.getId();
+                                            notification.setId(id);
 
-                    // Keep the id copy in firestore for querying
-                    documentReference.update("id", id);
+                                            // Keep the id copy in firestore for querying
+                                            documentReference.update("id", id);
 
-                    // Finally call the listener on completion
-                    listener.onRetrievalCompleted(id);
-                })
-                .addOnFailureListener(listener::onError);
+                                            // Finally call the listener on completion
+                                            listener.onRetrievalCompleted(id);
+                                        })
+                                        .addOnFailureListener(listener::onError);
+                            }
+                        }).addOnFailureListener(listener::onError);
     }
 
     /**
@@ -1064,23 +1076,11 @@ public class Firebase {
      * Sample x number of users, set them to pending, send a notification
      * The view event page should now give the accept button (for all events labeled pending)
      * @param event the event to enroll users in
-     * @param notification the notification to send to all selected users. Set null for a generic notification
-     *                     (IDEALLY PLEASE GIVE A NOTIFICATION)
+     * @param notifications a length 2 array of notification. not[1] for users selected, not[2] for users not selected (but may be re-drawed eventually)
      * @param listener Optional InitializationListener listener that is called after the event is updated
      */
-    public void startEnrollingEvent(Event event, Notifications notification, InitializationListener listener) {
+    public void startEnrollingEvent(Event event, ArrayList<Notifications> notifications, InitializationListener listener) {
         // Create and store a default notification if none is provided
-        if (notification == null) {
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("title", "Event Enrollment for" + event.getName());
-            map.put("description", "Click here to accept your position!");
-            map.put("priority", 1);
-            map.put("fragmentDestination", "EventFragment");
-            map.put("date", Timestamp.now());
-            notification = new Notifications(map);
-            storeNotification(notification);
-        }
-        final Notifications final_notification = notification;  // For funky java behaviour
         long user_cap = event.getMaxAttendees();        // The max number of attendees to draw
         // TODO waitlist size should be stored in the event object, I will calculate it in firebase for now
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("status", "waitlisted").get()
@@ -1110,22 +1110,32 @@ public class Firebase {
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
+                    // Send a success notification to each user
+                    sendNotification(notifications.get(0), userID);
+
+                    int total_users = selectedUsersID.size();
+                    AtomicInteger pending_users = new AtomicInteger();
                     // Update the status to pending
-                    setNewStatus("pending", userID, event.getId(), () -> {});
-
-                    // Send a notification to each user
-                    sendNotification(final_notification, userID);
+                    setNewStatus("pending", userID, event.getId(), () -> {
+                        if (pending_users.incrementAndGet() == total_users) {
+                            // Fetch the rest of the users who were not selected
+                            getWaitlistedUsers(event.getId(), users -> {
+                                for (User user : users) {
+                                    sendNotification(notifications.get(1), user.getId(), () -> {});     // Send the not selected notification
+                                    listener.onInitialized();
+                                }
+                            });
+                        }
+                    });
                 }
-
-                listener.onInitialized();   // TODO this doesnt wait for all notifications to be sent
             });
     }
 
     /**
-     * Overload of the {@link #startEnrollingEvent(Event, Notifications, InitializationListener)} with no listener
+     * Overload of the {@link #startEnrollingEvent(Event, ArrayList, InitializationListener)} with no listener
      */
-    public void startEnrollingEvent(Event event, Notifications notification) {
-        startEnrollingEvent(event, notification, () -> {});
+    public void startEnrollingEvent(Event event, ArrayList<Notifications> notifications) {
+        startEnrollingEvent(event, notifications, () -> {});
     }
 
     /**
@@ -1137,13 +1147,49 @@ public class Firebase {
                 .addOnSuccessListener(user -> {
                     if (!user.isEmpty()) {
                         String userID = Objects.requireNonNull(user.getDocuments().get(0).get("userID")).toString();
+                        // Send a success notification
+                        sendNotification(notification, userID);
+
                         // Set the status to pending
                         setNewStatus("pending", userID, eventID, listener);
-                        // And send a success notification
-                        sendNotification(notification, userID);
                     }
                 })
                 .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Should be called when the expiration date of the event is reached. Cancel all pending user. Delete and notified all waitlisted users
+     * @param eventID the event ID to cancel
+     * @param notification the notification to send to cancelled users. Should describe a message of cancellation/no acceptance
+     * @param listener Optional InitializationListener listener that is called after the event is updated
+     */
+    public void eventExpiredCleanup(String eventID, Notifications notification, InitializationListener listener) {
+        getPendingUsers(eventID, users -> {
+            for (User user : users) {
+                sendNotification(notification, user.getId());
+                setNewStatus("cancelled", user.getId(), eventID, () -> {});
+            }
+        });
+        getWaitlistedUsers(eventID, users -> {
+            for (User user : users) {
+                sendNotification(notification, user.getId());
+            }
+            // delete the event-user entry from the database
+            userEventsCollection.whereEqualTo("eventID", eventID).whereEqualTo("userID", deviceID).whereEqualTo("status", "waitlisted").get()
+                    .addOnSuccessListener(task -> {
+                        for (DocumentSnapshot document : task.getDocuments()) {
+                            document.getReference().delete();
+                        }
+                        listener.onInitialized();
+                    }).addOnFailureListener(listener::onError);
+        });
+    }
+
+    /**
+     * Overload of the {@link #eventExpiredCleanup(String, Notifications, InitializationListener)} with no listener
+     */
+    public void eventExpiredCleanup(String eventID, Notifications notification) {
+        eventExpiredCleanup(eventID, notification, () -> {});
     }
 
     /*
@@ -1605,4 +1651,32 @@ public class Firebase {
                     }
                 })
                 .addOnFailureListener(listener::onError);
-    }}
+
+    }
+    /**
+     * Checks if the user is already waitlisted or enrolled for the event.
+     *
+     * @param eventId  The ID of the event.
+     * @param callback The callback to handle the result (true if joined, false otherwise).
+     */
+    public void checkUserJoined(String eventId, UserJoinCheckCallback callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("user-events")
+                .whereEqualTo("userID", deviceID)
+                .whereEqualTo("eventID", eventId)
+                .whereIn("status", Arrays.asList("waitlisted", "enrolled"))
+                .get()
+                .addOnSuccessListener(task -> {
+                    boolean hasJoined = !task.getDocuments().isEmpty();
+                    callback.onCheckComplete(hasJoined);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("EventJoinFragment", "Error checking user status: " + e.getMessage());
+                    callback.onCheckComplete(false);
+                });
+    }
+
+
+}
+
+

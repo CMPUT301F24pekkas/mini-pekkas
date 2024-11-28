@@ -1,20 +1,31 @@
 package com.example.mini_pekkas.ui.home;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentHomeBinding;
+import com.example.mini_pekkas.ui.event.user.SharedEventViewModel;
+
+import java.util.ArrayList;
 
 /**
  * Fragment that serves as the home screen for regular users, displaying basic event details.
@@ -22,6 +33,10 @@ import com.example.mini_pekkas.databinding.FragmentHomeBinding;
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
+    private LinearLayout EventsContainer;
+    private HomeEventsListViewModel homeEventsListViewModel;
+    private LiveData<ArrayList<Event>> EventList;
+
 
     /**
      * Initializes the fragment's user interface.
@@ -32,39 +47,97 @@ public class HomeFragment extends Fragment {
      * @return The root view of the fragment.
      */
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Initialize ViewModel for home screen
-        HomeViewModel homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        homeEventsListViewModel = new ViewModelProvider(requireActivity(), new HomeEventsListViewModelFactory(getActivity()))
+                .get(HomeEventsListViewModel.class);
 
-        // Inflate the layout using ViewBinding
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // Initialize UI components from the binding
-        final TextView eventNameView = binding.homeUserEventView2;
-        final TextView eventDescriptionView = binding.homeUserEventDescriptionView2;
-        final TextView eventDayCountView = binding.dayUserCountView2;
-        final Button eventViewButton = binding.homeUserEventViewButton2;
-
-        // Set text views with data from the ViewModel
-        homeViewModel.getEventName().observe(getViewLifecycleOwner(), eventNameView::setText);
-        homeViewModel.getEventDescription().observe(getViewLifecycleOwner(), eventDescriptionView::setText);
-        homeViewModel.getEventDayCount().observe(getViewLifecycleOwner(), eventDayCountView::setText);
-
-        // Set an OnClickListener to navigate to the event view when the button is clicked
-        eventViewButton.setOnClickListener(new View.OnClickListener() {
-            /**
-             * Navigates to the event detail screen when the button is clicked.
-             *
-             * @param v The view that was clicked.
-             */
+        EventsContainer = binding.mainContainer;
+        Log.d("DEVICEID", homeEventsListViewModel.getDeviceId());
+        homeEventsListViewModel.getEventList().observe(getViewLifecycleOwner(), new Observer<ArrayList<Event>>() {
             @Override
-            public void onClick(View v) {
-                NavController navController = NavHostFragment.findNavController(HomeFragment.this);
-                navController.navigate(R.id.action_navigation_home_to_navigation_event);
+            public void onChanged(ArrayList<Event> events) {
+                if (events != null) {
+                    // Update UI with the new event list
+                    updateEventListHomepageUI(events);
+                } else {
+                    Log.d("HomeFragment", "No events available");
+                }
             }
         });
-
+        homeEventsListViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), new Observer<Event>() {
+            @Override
+            public void onChanged(Event event) {
+                if (event != null) {
+                    // Update UI with the new event list
+                    EventList = homeEventsListViewModel.getEventList();
+                    assert EventList.getValue() != null;
+                    updateEventListHomepageUI(EventList.getValue());
+                } else {
+                    Log.d("HomeFragment", "No events available");
+                }
+            }
+        });
+        //add the current events in db ONCE
+        homeEventsListViewModel.initializeDataIfNeeded();
         return root;
+    }
+    //TODO calculate the time until the start of the event
+
+    /**
+     * this function updates the UI with the given Livedata eventList
+     *
+     * @param events
+     */
+    @SuppressLint("SetTextI18n")
+    private void updateEventListHomepageUI(ArrayList<Event> events){
+        //remove all events
+        EventsContainer.removeAllViews();
+
+        // Add views for each event
+        for (Event event : events) {
+            View eventView = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_organizer_event, EventsContainer, false);
+            CardView NewMockEventCardView = eventView.findViewById(R.id.EventCardView);
+            TextView EventTitleView = NewMockEventCardView.findViewById(R.id.EventName);
+            TextView EventSubtitleView = NewMockEventCardView.findViewById(R.id.EventSubtitle);
+            TextView EventDescriptionView = NewMockEventCardView.findViewById(R.id.EventDescription);
+            TextView TimeUntilEventView = NewMockEventCardView.findViewById(R.id.TimeUntilEvent);
+
+            Button EditEvent = NewMockEventCardView.findViewById(R.id.EditEvent);
+            EditEvent.setText("VIEW");
+            EditEvent.setOnClickListener(v->{
+                NavController navController = NavHostFragment.findNavController(HomeFragment.this);
+                navController.navigate(R.id.action_navigation_home_to_navigation_event);
+                assert event != null;
+                homeEventsListViewModel.setSelectedEvent(event);
+                SharedEventViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
+                sharedViewModel.setNavigationSource("HOME");
+            });
+
+
+            EventTitleView.setText(event.getName());
+            EventSubtitleView.setText("hosted by " + event.getEventHost().getName());
+            EventDescriptionView.setText(event.getDescription());
+            TimeUntilEventView.setText("10 days until event");
+            //set tag for identification later
+            eventView.setTag(event.getId());
+
+            EventsContainer.addView(eventView);
+        }
+    }
+
+
+    /**
+     * Calculates the number of days until the event starts based on its start date.
+     *
+     * @param startDate The start date of the event in string format (e.g., "YYYY-MM-DD").
+     * @return The number of days until the event starts.
+     */
+    private int calculateDaysUntilEvent(String startDate) {
+        // Implement logic to calculate days until event start based on `startDate`
+        // Placeholder value; replace with actual date calculation logic
+        return 12;
     }
 
     /**

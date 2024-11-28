@@ -1,7 +1,5 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
-import static android.text.TextUtils.replace;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -11,13 +9,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -37,20 +33,23 @@ import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentCreateEventBinding;
 import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
-import com.example.mini_pekkas.ui.event.user.EventFragment;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.UUID;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import com.example.mini_pekkas.OrganizerEventsListViewModel;
-import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
+
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 /**
  * Fragment for creating events within the organizer's UI.
  * Handles input collection for event details, poster image selection, and
@@ -259,28 +258,97 @@ public class EventCreateFragment extends Fragment {
      */
     public Event CreateEvent() {
         String event_id = UUID.randomUUID().toString();
-        float price = 90.45f;
+        float price = 90.45f; // Default price; update as needed
         ArrayList<User> waitlist = new ArrayList<>();
 
-        String eventTitle = binding.createEventEditText.getText().toString();
-        String eventLocation = binding.createEventLocationEditText.getText().toString();
-        String startDate = binding.editStartDate.getText().toString();
-        String endDate = binding.editEndDate.getText().toString();
-        String startTime = binding.editStartTime.getText().toString();
-        String endTime = binding.editEndTime.getText().toString();
-        String eventDescription = binding.editDescription.getText().toString();
-        String eventDetails = binding.editDetails.getText().toString();
-        boolean checked = binding.geoCheckBox.isChecked();
+        // Get input values
+        String eventTitle = binding.createEventEditText.getText().toString().trim();
+        String eventLocation = binding.createEventLocationEditText.getText().toString().trim();
+        String startDateString = binding.editStartDate.getText().toString().trim();
+        String endDateString = binding.editEndDate.getText().toString().trim();
+        String startTime = binding.editStartTime.getText().toString().trim();
+        String endTime = binding.editEndTime.getText().toString().trim();
+        String eventDescription = binding.editDescription.getText().toString().trim();
+        String eventDetails = binding.editDetails.getText().toString().trim();
+        boolean geolocationEnabled = binding.geoCheckBox.isChecked();
 
-        int maxCapacity = -1;
-        if (binding.maxPartCheckBox.isChecked()) {
-            maxCapacity = Integer.parseInt(binding.editMaxPart.getText().toString());
+        // Validate required inputs
+        if (eventTitle.isEmpty()) {
+            Toast.makeText(requireContext(), "Event title is required.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        if (eventDescription.isEmpty()) {
+            Toast.makeText(requireContext(), "Event description is required.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        if (startDateString.isEmpty() || endDateString.isEmpty()) {
+            Toast.makeText(requireContext(), "Start and end dates are required.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        if (eventLocation.isEmpty()) {
+            Toast.makeText(requireContext(), "Event location is required.", Toast.LENGTH_SHORT).show();
+            return null;
         }
 
+        // Parse dates
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Date startDate, endDate;
+        try {
+            startDate = dateFormat.parse(startDateString);
+            endDate = dateFormat.parse(endDateString);
+
+            if (startDate.after(endDate)) {
+                Toast.makeText(requireContext(), "Start date must be before or equal to the end date.", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        } catch (ParseException e) {
+            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // Parse max participants if applicable
+        int maxCapacity = -1;
+        if (binding.maxPartCheckBox.isChecked()) {
+            try {
+                maxCapacity = Integer.parseInt(binding.editMaxPart.getText().toString().trim());
+                if (maxCapacity <= 0) {
+                    Toast.makeText(requireContext(), "Max participants must be greater than 0.", Toast.LENGTH_SHORT).show();
+                    return null;
+                }
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Invalid max participant number.", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        }
+
+        // Get host user details
         User host = firebaseHelper.getThisUser();
+
+        // Ensure the host is not null
+        if (host == null) {
+            Toast.makeText(requireContext(), "Host user data is missing. Please try again.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
         String facility = host.getFacility();
-        return new Event(event_id, eventTitle, host, eventDescription, startDate, endDate, price,
-                facility, latitude, longitude, maxCapacity, waitlist, "QrCodePlaceholder", checked, "");
+
+        return new Event(
+                event_id,
+                eventTitle,
+                host,
+                eventDescription,
+                startDate,
+                endDate,
+                price,
+                facility,
+                latitude,
+                longitude,
+                maxCapacity,
+                waitlist,
+                "QrCodePlaceholder", // Replace with actual QR code
+                geolocationEnabled,
+                eventDetails
+        );
     }
 
     /**

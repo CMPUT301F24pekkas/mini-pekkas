@@ -233,11 +233,40 @@ public class OrganizerProfileFragment extends Fragment {
                 .setTitle("Edit Profile")
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
-                    organizerProfileViewModel.setFirstName(firstNameInput.getText().toString());
-                    organizerProfileViewModel.setLastName(lastNameInput.getText().toString());
-                    organizerProfileViewModel.setEmail(emailInput.getText().toString());
-                    organizerProfileViewModel.setPhoneNumber(phoneInput.getText().toString());
-                    organizerProfileViewModel.setOrganizerLocation(organizerLocationInput.getText().toString());
+                    String firstName = firstNameInput.getText().toString().trim();
+                    String lastName = lastNameInput.getText().toString().trim();
+                    String email = emailInput.getText().toString().trim();
+                    String phoneNumber = phoneInput.getText().toString().trim();
+                    String organizerLocation = organizerLocationInput.getText().toString().trim();
+
+                    // Validate inputs
+                    if (firstName.isEmpty()) {
+                        Toast.makeText(getActivity(), "First name cannot be empty", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (lastName.isEmpty()) {
+                        Toast.makeText(getActivity(), "Last name cannot be empty", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Toast.makeText(getActivity(), "Please enter a valid email", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!phoneNumber.matches("\\d+")) {
+                        Toast.makeText(getActivity(), "Phone number must contain only digits", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (phoneNumber.length() < 10 || phoneNumber.length() > 15) {
+                        Toast.makeText(getActivity(), "Phone number must be between 10 and 15 digits", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Update profile details in ViewModel
+                    organizerProfileViewModel.setFirstName(firstName);
+                    organizerProfileViewModel.setLastName(lastName);
+                    organizerProfileViewModel.setEmail(email);
+                    organizerProfileViewModel.setPhoneNumber(phoneNumber);
+                    organizerProfileViewModel.setOrganizerLocation(organizerLocation);
                     organizerProfileViewModel.updateProfileInFirebase();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
