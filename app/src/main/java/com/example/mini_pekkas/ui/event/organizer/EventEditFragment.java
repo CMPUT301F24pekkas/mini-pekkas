@@ -19,6 +19,11 @@ import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentEditEventBinding;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Fragment for editing event details. This fragment allows the Organizer to:
  * - View and modify the event's name, start date, end date, description, and location.
@@ -50,13 +55,14 @@ public class EventEditFragment extends Fragment {
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         //set elements in fragment to selected event
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
         assert event != null;
         binding.createEventEditText.setText(event.getName());
-        binding.editStartDate.setText(event.getStartDate());
-        binding.editEndDate.setText(event.getEndDate());
+        binding.editStartDate.setText(dateFormat.format(event.getStartDate()));
+        binding.editEndDate.setText(dateFormat.format(event.getEndDate()));
         binding.editStartTime.setText("10:00");
         binding.editEndTime.setText("14:00");
         binding.editDescription.setText(event.getDescription());
@@ -83,7 +89,12 @@ public class EventEditFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //navigate to addEvent fragment with values changed
-                Event UpdatedEvent = UpdateEvent(event);
+                Event UpdatedEvent = null;
+                try {
+                    UpdatedEvent = UpdateEvent(event);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
                 //update viewmodel with new updated event
                 organizerEventsListViewModel.setSelectedEvent(UpdatedEvent);
                 NavController navController = NavHostFragment.findNavController(EventEditFragment.this);
@@ -117,10 +128,15 @@ public class EventEditFragment extends Fragment {
      * Updates the event details
      * @param event
      */
-    private Event UpdateEvent(Event event) {
+    private Event UpdateEvent(Event event) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
         event.setName(binding.createEventEditText.getText().toString());
-        event.setStartDate(binding.editStartDate.getText().toString());
-        event.setEndDate(binding.editEndDate.getText().toString());
+        Date startDate = dateFormat.parse(binding.editStartDate.getText().toString());
+        Date endDate = dateFormat.parse(binding.editEndDate.getText().toString());
+
+        event.setStartDate(startDate);
+        event.setEndDate(endDate);
         //TODO figure out time
 //        event.setstartTime("10:00");
 //        event.setEndTime("14:00");
