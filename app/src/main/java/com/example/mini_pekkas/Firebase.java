@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.5 Added getUsersInEventByStatus, retrieve the users in an event with a given status
+ * @version 1.16.6 Made a duplicate notification check to reduce the number of stored documents
  * TODO further testing is needed. Notifications need to be passed around
  * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
@@ -538,19 +538,31 @@ public class Firebase {
      * @param listener Optional DataRetrievalListener listener that is called after the notification is added
      */
     private void storeNotification(Notifications notification, DataRetrievalListener listener) {
-        notificationCollection.add(notification.toMap())
-                .addOnSuccessListener(documentReference -> {
-                    // Retrieve the ID of the document and update the notification object
-                    String id = documentReference.getId();
-                    notification.setId(id);
+        // Check if the notification already exist
+        notificationCollection.whereEqualTo("title", notification.getTitle()).whereEqualTo("description", notification.getDescription())
+                .whereEqualTo("date", notification.getTimestamp())  //.whereEqualTo("priority", notification.getPriority()) TODO this fails the check
+                .whereEqualTo("fragmentDestination", notification.getFragmentDestination()).get()
+                        .addOnSuccessListener(task -> {
+                            // This notification already exist
+                            if(!task.isEmpty()) {
+                                listener.onRetrievalCompleted(Objects.requireNonNull(task.getDocuments().get(0).getId()));
+                            } else {
+                                // Create a new notification
+                                notificationCollection.add(notification.toMap())
+                                        .addOnSuccessListener(documentReference -> {
+                                            // Retrieve the ID of the document and update the notification object
+                                            String id = documentReference.getId();
+                                            notification.setId(id);
 
-                    // Keep the id copy in firestore for querying
-                    documentReference.update("id", id);
+                                            // Keep the id copy in firestore for querying
+                                            documentReference.update("id", id);
 
-                    // Finally call the listener on completion
-                    listener.onRetrievalCompleted(id);
-                })
-                .addOnFailureListener(listener::onError);
+                                            // Finally call the listener on completion
+                                            listener.onRetrievalCompleted(id);
+                                        })
+                                        .addOnFailureListener(listener::onError);
+                            }
+                        }).addOnFailureListener(listener::onError);
     }
 
     /**
