@@ -36,8 +36,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.3 Made a new collection to store notifications. user-notifications is now a cross table
+ * @version 1.16.4 Rewrote enrollment and handling of notifications. Made a new collection to store notifications. user-notifications is now a cross table
  * TODO further testing is needed. Notifications need to be passed around
+ * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
 public class Firebase {
     private final String deviceID;
@@ -535,7 +536,7 @@ public class Firebase {
      * @param notification a notification object to be added
      * @param listener Optional DataRetrievalListener listener that is called after the notification is added
      */
-    public void storeNotification(Notifications notification, DataRetrievalListener listener) {
+    private void storeNotification(Notifications notification, DataRetrievalListener listener) {
         notificationCollection.add(notification.toMap())
                 .addOnSuccessListener(documentReference -> {
                     // Retrieve the ID of the document and update the notification object
@@ -554,7 +555,7 @@ public class Firebase {
     /**
      * Overload of the {@link #storeNotification(Notifications, DataRetrievalListener)} with no listener
      */
-    public void storeNotification(Notifications notification) {
+    private void storeNotification(Notifications notification) {
         storeNotification(notification, id -> {});
     }
 
@@ -563,21 +564,25 @@ public class Firebase {
      * @param notification a notification object to be added
      * @param listener Optional InitializationListener listener that is called after the notification is added
      */
-    public void sendNotification(Notifications notification, String userID, InitializationListener listener) {
-        // Set the user id and date field in correct format
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("notificationID", notification.getID());
-        map.put("userID", userID);
+    private void sendNotification(Notifications notification, String userID, InitializationListener listener) {
+        // First store the notification
+        storeNotification(notification, id -> {
+            // Create the user-notification entry
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("notificationID", id);
+            map.put("userID", userID);
 
-        userNotificationsCollection.add(map)
-                .addOnSuccessListener(aVoid -> listener.onInitialized())
-                .addOnFailureListener(listener::onError);
+            // Call the listener on successful add
+            userNotificationsCollection.add(map)
+                    .addOnSuccessListener(aVoid -> listener.onInitialized())
+                    .addOnFailureListener(listener::onError);
+        });
     }
 
     /**
      * Overload of the {@link #sendNotification(Notifications, String, InitializationListener)} with no listener
      */
-    public void sendNotification(Notifications notification, String userID) {
+    private void sendNotification(Notifications notification, String userID) {
         sendNotification(notification, userID, () -> {});
     }
 
@@ -593,8 +598,7 @@ public class Firebase {
         if (!status.equals("all")) {
             query = query.whereEqualTo("status", status); // Add status filter if not "all"
         }
-
-        query.get()
+        query.get()     // Performs the query with the given filter
                 .addOnSuccessListener(task -> {
                     if (task.isEmpty()) {
                         listener.onError(new Exception("No users found"));
@@ -607,6 +611,13 @@ public class Firebase {
 
                 })
                 .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #sendEventNotificationByStatus(Notifications, Event, String, InitializationListener)} with no listener
+     */
+    public void sendEventNotificationByStatus(Notifications notification, Event event, String status) {
+        sendEventNotificationByStatus(notification, event, status, () -> {});
     }
 
     /**
@@ -903,18 +914,24 @@ public class Firebase {
      * Call when this user accepts or rejects an event. Updates the user-event collection
      * @param didAccept true if this user accepted (enrolled), false if user rejected (cancelled)
      * @param eventID the event ID to update
+     * @param notification the notification to send to either the user accepting, or a new user getting enrolled.
+     *                     (not a cancellation notification) Make sure to send the right notification on either condition
      * @param listener Optional InitializationListener listener that is called after the event is updated
      */
-    public void userAcceptEvent(boolean didAccept, String eventID, InitializationListener listener) {
+    public void userAcceptEvent(boolean didAccept, String eventID, Notifications notification, InitializationListener listener) {
         setNewStatus(didAccept ? "enrolled" : "cancelled", deviceID, eventID, listener);
-        if (!didAccept) redrawUserInEvent(eventID, listener);   // Draw new user on rejection
+        if(didAccept) {
+            sendNotification(notification, deviceID);   // Send a notification of success
+        } else {
+            redrawUserInEvent(eventID, notification, listener);   // Draw new user on rejection. Notify
+        }
     }
 
     /**
-     * Overload of the {@link #userAcceptEvent(boolean, String, InitializationListener)} with no listener
+     * Overload of the {@link #userAcceptEvent(boolean, String, Notifications, InitializationListener)} with no listener
      */
-    public void userAcceptEvent(boolean didAccept, String eventID) {
-        userAcceptEvent(didAccept, eventID, () -> {});
+    public void userAcceptEvent(boolean didAccept, String eventID, Notifications notification) {
+        userAcceptEvent(didAccept, eventID, notification, () -> {});
     }
 
     /*
@@ -926,15 +943,29 @@ public class Firebase {
      * Sample x number of users, set them to pending, send a notification
      * The view event page should now give the accept button (for all events labeled pending)
      * @param event the event to enroll users in
+     * @param notification the notification to send to all selected users. Set null for a generic notification
+     *                     (IDEALLY PLEASE GIVE A NOTIFICATION)
      * @param listener Optional InitializationListener listener that is called after the event is updated
      */
     public void startEnrollingEvent(Event event, Notifications notification, InitializationListener listener) {
-        long user_cap = event.getMaxAttendees();
+        // Create and store a default notification if none is provided
+        if (notification == null) {
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("title", "Event Enrollment for" + event.getName());
+            map.put("description", "Click here to accept your position!");
+            map.put("priority", 1);
+            map.put("fragmentDestination", "EventFragment");
+            map.put("date", Timestamp.now());
+            notification = new Notifications(map);
+            storeNotification(notification);
+        }
+        final Notifications final_notification = notification;  // For funky java behaviour
+        long user_cap = event.getMaxAttendees();        // The max number of attendees to draw
         // TODO waitlist size should be stored in the event object, I will calculate it in firebase for now
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("status", "waitlisted").get()
             .addOnSuccessListener(task -> {
                 int waitlist_size = task.size();
-                Set<Integer> randomIntegers = new HashSet<>();  // Set to store unique random integers
+                Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
                 if (waitlist_size > user_cap) {
@@ -958,22 +989,11 @@ public class Firebase {
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
-
                     // Update the status to pending
                     setNewStatus("pending", userID, event.getId(), () -> {});
 
                     // Send a notification to each user
-                    if (notification == null) {
-                        HashMap<String, Object> map = new HashMap<>();
-                        map.put("title", "Event Enrollment");
-                        map.put("description", "You have been enrolled in the event!");
-                        map.put("priority", 1);
-                        map.put("fragmentDestination", "EventFragment");
-                        map.put("date", Timestamp.now());
-                        sendNotification(new Notifications(map), userID);
-                    } else {
-                        sendNotification(notification, userID);
-                    }
+                    sendNotification(final_notification, userID);
                 }
 
                 listener.onInitialized();   // TODO this doesnt wait for all notifications to be sent
@@ -988,18 +1008,18 @@ public class Firebase {
     }
 
     /**
-     * This function is called whenever a user cancels an event from {@link #userAcceptEvent(boolean, String, InitializationListener)}
+     * This function is called whenever a user cancels an event from {@link #userAcceptEvent(boolean, String, Notifications, InitializationListener)}
      * Redraw a new user from the pool of events (from waitlist into pending)
      */
-    private void redrawUserInEvent(String eventID, InitializationListener listener) {
+    private void redrawUserInEvent(String eventID, Notifications notification, InitializationListener listener) {
         userEventsCollection.whereEqualTo("eventID", eventID).whereEqualTo("status", "waitlisted").limit(1).get()
                 .addOnSuccessListener(user -> {
                     if (!user.isEmpty()) {
                         String userID = Objects.requireNonNull(user.getDocuments().get(0).get("userID")).toString();
                         // Set the status to pending
                         setNewStatus("pending", userID, eventID, listener);
-
-                        // TODO I need the notification that's send initially
+                        // And send a success notification
+                        sendNotification(notification, userID);
                     }
                 })
                 .addOnFailureListener(listener::onError);
