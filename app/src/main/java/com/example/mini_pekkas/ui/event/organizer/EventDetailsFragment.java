@@ -26,8 +26,8 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
-import com.example.mini_pekkas.OrganizerEventsListViewModel;
-import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;

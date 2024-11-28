@@ -13,11 +13,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
-import com.example.mini_pekkas.OrganizerEventsListViewModel;
-import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.UserArrayAdapter;
 import com.example.mini_pekkas.databinding.FragmentWaitlistBinding;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 
 import java.util.ArrayList;
 
