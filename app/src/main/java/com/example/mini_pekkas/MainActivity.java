@@ -100,11 +100,6 @@ public class MainActivity extends AppCompatActivity {
      * and initializes the user in Firebase. Based on the facility information,
      * this method navigates the user to either UserActivity or OrganizerActivity.
      */
-    /**
-     * Gathers the user input from the form fields, validates them, creates a temporary User object,
-     * and initializes the user in Firebase. Based on the facility information,
-     * this method navigates the user to either UserActivity or OrganizerActivity.
-     */
     private void navigateBasedOnFacility() {
         String firstname = firstNameInput.getText().toString().trim();
         String lastName = lastNameInput.getText().toString().trim();
