@@ -1,6 +1,7 @@
 package com.example.mini_pekkas.ui.notifications;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.Notifications;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentCreateNotificationBinding;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class NotificationsCreateFragment extends Fragment {
@@ -54,7 +57,7 @@ public class NotificationsCreateFragment extends Fragment {
         fetchEvents();
 
         // Handle notification creation
-        //btnCreateNotification.setOnClickListener(view -> createNotification());
+        btnCreateNotification.setOnClickListener(view -> createNotification());
 
 
 
@@ -88,43 +91,54 @@ public class NotificationsCreateFragment extends Fragment {
     /**
      * Create a notification for the selected event.
      */
-//    private void createNotification() {
-//        String title = etTitle.getText().toString().trim();
-//        String description = etMessage.getText().toString().trim();
-//        String selectedEvent = (String) spinnerEvents.getSelectedItem();
-//
-//        if (title.isEmpty() || description.isEmpty() || selectedEvent == null) {
-//            Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//
-//        // Create a Notifications object
-//        Notifications notification = new Notifications(
-//                title,
-//                description,
-//                new Date(), // Current date
-//                1, // Default priority for now; update as needed
-//                selectedEvent // Using selected event as fragment destination
-//        );
-//
-//        // Push the notification to Firebase
-//        firebaseHelper.addNotification(notification, new Firebase.DataRetrievalListener() {
-//            @Override
-//            public void onRetrievalCompleted(String id) {
-//                Log.d("FirebaseHelper", "Notification added successfully with ID: " + id);
-//                Toast.makeText(getContext(), "Notification created successfully with ID: " + id, Toast.LENGTH_SHORT).show();
-//                clearFields();
-//            }
-//
-//            @Override
-//            public void onError(Exception e) {
-//                Log.e("FirebaseHelper", "Error adding notification", e);
-//                Toast.makeText(getContext(), "Failed to create notification: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//
-//
-//    }
+    private void createNotification() {
+        String title = etTitle.getText().toString().trim();
+        String description = etMessage.getText().toString().trim();
+        String selectedEventName = (String) spinnerEvents.getSelectedItem();
+
+        if (title.isEmpty() || description.isEmpty() || selectedEventName == null) {
+            Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Event selectedEvent = null;
+        for (Event event : eventList) {
+            if (event.getName().equals(selectedEventName)) {
+                selectedEvent = event;
+                break;
+            }
+        }
+
+        if (selectedEvent == null) {
+            Toast.makeText(getContext(), "Selected event not found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String status = "all";
+        // Create a Notifications object
+        Notifications notification = new Notifications(
+                title,
+                description,
+                new Date(), // Current date
+                1, // Default priority for now; update as needed
+                selectedEvent.getName()
+        );
+
+        // Push the notification to Firebase
+        firebaseHelper.sendEventNotificationByStatus(notification, selectedEvent, status, new Firebase.InitializationListener() {
+
+            @Override
+            public void onInitialized() {
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("FirebaseHelper", "Error adding notification", e);
+                Toast.makeText(getContext(), "Failed to create notification: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+    }
 
 
 
