@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.7 StartEnrollingEvents now notify not selected users, eventExpiredCleanup should be called post expiry date to remove unseleceted users
+ * @version 1.16.8 getUserbyEventStatus bug fix in queries other than status=all
  * TODO further testing is needed.
  * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
@@ -943,8 +943,8 @@ public class Firebase {
      */
     private void getUsersInEventByStatus(String status, String eventID, UserListRetrievalListener listener) {
         Query query = userEventsCollection.whereEqualTo("eventID", eventID);
-        if (status.equals("all")) {
-            query.whereEqualTo("status", "waitlisted");
+        if (!status.equals("all")) {
+            query.whereEqualTo("status", status);
         }
         query.get().addOnSuccessListener(task -> {
             // Check if no documents were found
