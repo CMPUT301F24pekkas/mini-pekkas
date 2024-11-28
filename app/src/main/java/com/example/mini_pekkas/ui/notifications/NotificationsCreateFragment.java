@@ -1,7 +1,6 @@
 package com.example.mini_pekkas.ui.notifications;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +13,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.Event;
-import com.example.mini_pekkas.Notifications;
+import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentCreateNotificationBinding;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class NotificationsCreateFragment extends Fragment {
@@ -68,7 +65,7 @@ public class NotificationsCreateFragment extends Fragment {
      * Fetch events from Firebase and populate the spinner.
      */
     private void fetchEvents() {
-        firebaseHelper.getAllEvents(events -> {
+        firebaseHelper.searchAllEvents(events -> {     // TODO This retrieves every single event, even ones the user doesn't own - ryan
             if (events.isEmpty()) {
                 Toast.makeText(getContext(), "No events available.", Toast.LENGTH_SHORT).show();
                 return;
