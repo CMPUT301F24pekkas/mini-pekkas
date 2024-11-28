@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 /**
@@ -16,8 +17,8 @@ public class Event {
     private String name;
     private User eventHost;
     private String description;
-    private String startDate;
-    private String endDate;
+    private Date startDate;
+    private Date endDate;
     private double price;
     private String facility;
     private double facilityGeoLat;
@@ -50,7 +51,7 @@ public class Event {
      * @param geo              Indicates whether geographic location is enabled for the event.
      * @param posterPhotoUrl   The URL of the event poster.
      */
-    public Event(String id, String name, User eventHost, String description, String startDate, String endDate, float price,
+    public Event(String id, String name, User eventHost, String description, Date startDate, Date endDate, float price,
                  String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees,
                  ArrayList<User> waitlist, String QrCode, boolean geo, String posterPhotoUrl) {
         this.id = id;
@@ -123,22 +124,22 @@ public class Event {
      * Gets the start date of the event.
      * @return the start date of the event
      */
-    public String getStartDate() { return startDate; }
+    public Date getStartDate() { return startDate; }
     /**
      * Sets the start date of the event.
      * @param startDate the start date of the event to set
      */
-    public void setStartDate(String startDate) { this.startDate = startDate; }
+    public void setStartDate(Date startDate) { this.startDate = startDate; }
     /**
      * Gets the end date of the event.
      * @return the end date of the event
      */
-    public String getEndDate() { return endDate; }
+    public Date getEndDate() { return endDate; }
     /**
      * Sets the end date of the event.
      * @param endDate the end date of the event to set
      */
-    public void setEndDate(String endDate) { this.endDate = endDate; }
+    public void setEndDate(Date endDate) { this.endDate = endDate; }
     /**
      * Gets the price of the event.
      * @return the price of the event
@@ -283,8 +284,8 @@ public class Event {
             this.eventHost = new User((Map<String, Object>) map.get("eventHost"));
         }
         this.description = (String) map.get("description");
-        this.startDate = (String) map.get("startDate");
-        this.endDate = (String) map.get("endDate");
+        this.startDate = (Date) map.get("startDate");
+        this.endDate = (Date) map.get("endDate");
         this.price = map.get("price") != null ? (double) map.get("price") : 0;
         this.facility = (String) map.get("facility");
         this.facilityGeoLat = map.get("facilityGeoLat") != null ? (double) map.get("facilityGeoLat") : 0.0;

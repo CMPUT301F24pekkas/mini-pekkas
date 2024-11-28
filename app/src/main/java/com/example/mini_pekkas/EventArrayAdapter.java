@@ -11,10 +11,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-// Not complete yet
 /**
  * EventArrayAdapter is a custom ArrayAdapter for displaying a list of Event objects in a ListView or GridView.
  *
@@ -27,18 +27,19 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
     private ArrayList<Event> events;
     /** The context in which this adapter is being used. */
     private Context context;
+
     /**
      * Constructs a new EventArrayAdapter.
      *
      * @param context The context in which the adapter is used.
      * @param events The list of Event objects to display.
      */
-    public EventArrayAdapter(Context context, ArrayList<Event> events){
-
-        super(context, 0 , events);
+    public EventArrayAdapter(Context context, ArrayList<Event> events) {
+        super(context, 0, events);
         this.events = events;
         this.context = context;
     }
+
     /**
      * Provides a view for an adapter view (ListView or GridView).
      *
@@ -71,36 +72,40 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
         // Populate with event data
         eventNameView.setText(event.getName());
         organizerNameView.setText("Organizer: " + event.getEventHost().getName());
-        locationView.setText("This is the location");
+        locationView.setText("This is the location"); // Update with the actual location
         eventDescriptionView.setText(event.getDescription());
-        startDateView.setText(event.getStartDate());
 
+        // Format and set the start date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = dateFormat.format(event.getStartDate());
+        startDateView.setText(formattedDate);
+
+        // Set current waitlist count
         currentWaitView.setText(String.valueOf(event.getWaitlist().size()));
 
-        // Format to double
+        // Format and set the price
         priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
 
         return convertView;
-
-
     }
+
     /**
      * Adds a new Event to the adapter's data set.
      *
      * @param event The Event to add.
      */
-    public void addEvent(Event event){
+    public void addEvent(Event event) {
         events.add(event);
         notifyDataSetChanged();
     }
+
     /**
      * Removes an Event from the adapter's data set at the specified position.
      *
      * @param position The position of the Event to remove.
      */
-    public void deleteEvent(int position){
+    public void deleteEvent(int position) {
         events.remove(position);
         notifyDataSetChanged();
     }
-
 }
