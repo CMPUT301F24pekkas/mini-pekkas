@@ -26,20 +26,28 @@ import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
+import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
 import com.example.mini_pekkas.databinding.FragmentChosenBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrg2Binding;
 import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class EventChooseUsersFragment extends Fragment {
     private FragmentEventOrg2Binding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
-
+    private Firebase firebaseHelper;
+    private NumEntrantsViewModel numEntrantsViewModel;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
         binding = FragmentEventOrg2Binding.inflate(inflater, container, false);
@@ -48,6 +56,9 @@ public class EventChooseUsersFragment extends Fragment {
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+
+        numEntrantsViewModel = new ViewModelProvider(requireActivity()).get(NumEntrantsViewModel.class);
+
         if (event != null) {
             updateEventDetailsUI(event);
         }
@@ -55,10 +66,13 @@ public class EventChooseUsersFragment extends Fragment {
         organizerEventsListViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), this::updateEventDetailsUI);
         //sets the button listeners
         SetButtonListeners();
-        //navigate to re-choose participants
-
-        //populate lists
-
+        firebaseHelper = new Firebase(requireContext());
+        ArrayList<User> usersChosen = getUsersAndSelect();
+        ArrayList<User> usersCancelled = getCancelledUsers(event.getId());
+        ArrayList<User> usersEnrolled = getEnrolledUsers((event.getId()));
+        binding.chosenPartView.setText(Integer.toString(usersChosen.size()));
+        binding.enrolledAmountView.setText(Integer.toString(usersEnrolled.size()));
+        binding.canceledAmountView.setText(Integer.toString(usersCancelled.size()));
         return root;
 
     }
@@ -147,13 +161,109 @@ public class EventChooseUsersFragment extends Fragment {
             Log.d("EventDetailsFragment", "Current event when dialog opens: " +
                     (currentEvent != null ? currentEvent.getName() : "null"));
         });
+        ImageButton waitButton = binding.waitButton;
+        waitButton.setOnClickListener(v-> {
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_choose_participants_to_waitlisted_entrants);
+        });
         Button chosenButton = binding.chosenButton;
         chosenButton.setOnClickListener(v -> {
-
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_choose_participants_to_chosen_entrants);
         });
-        Button enrolledButton = binding.enrolledButton;
-        Button canceledButton = binding.canceledButton;
 
+        Button enrolledButton = binding.enrolledButton;
+        enrolledButton.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_choose_participants_to_enrolled_entrants);
+        });
+
+        Button canceledButton = binding.canceledButton;
+        canceledButton.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_choose_participants_to_cancelled_entrants);
+        });
+
+    }
+    public ArrayList<User> getUsersAndSelect() {
+        ArrayList<User> users = new ArrayList<>();
+        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
+            @Override
+            public void onUserListRetrievalCompleted(ArrayList<User> users) {
+                Log.d("user", "User list retrieval completed" + " size:" + users.size());
+                //add users to waitlistedArrayAdapter
+                for(User user : users) {
+                    users.add(user);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("user", "Error occurred: " + e.getMessage());
+            }
+
+        };
+
+        firebaseHelper.getWaitlistedUsers(Objects.requireNonNull(organizerEventsListViewModel.getSelectedEvent().getValue()).getId(), listener);
+        int numParts = numEntrantsViewModel.getNumber().getValue();
+        if(numParts == -1){
+            Log.e("numParts", "numParts is -1");
+        }
+        //if they selected more people than there are waitlisted, select all
+        if(numParts >= users.size()){
+            return users;
+        }
+        //if they selected less people than there are waitlisted, select randomly
+        else{
+            //copy list
+            ArrayList<User> copy = new ArrayList<>(users);
+            //shuffle and select first n
+            Collections.shuffle(copy);
+            List<User> selectedUserslist = copy.subList(0, numParts);
+            ArrayList<User> selectedUsers = new ArrayList<>(selectedUserslist);
+            Log.d("numParts", "numParts: " + numParts);
+            return selectedUsers;
+        }
+    }
+    private ArrayList<User> getCancelledUsers(String eventId){
+        ArrayList<User> users = new ArrayList<>();
+        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
+            @Override
+            public void onUserListRetrievalCompleted(ArrayList<User> users) {
+                Log.d("user", "User list retrieval completed" + " size:" + users.size());
+                for(User user : users) {
+                    users.add(user);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("user", "Error occurred: " + e.getMessage());
+            }
+
+        };
+        firebaseHelper.getCancelledUsers(eventId, listener);
+        return users;
+    }
+    private ArrayList<User> getEnrolledUsers(String eventId){
+        ArrayList<User> users = new ArrayList<>();
+        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
+            @Override
+            public void onUserListRetrievalCompleted(ArrayList<User> users) {
+                Log.d("user", "User list retrieval completed" + " size:" + users.size());
+                for(User user : users) {
+                    users.add(user);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("user", "Error occurred: " + e.getMessage());
+            }
+
+        };
+        firebaseHelper.getEnrolledUsers(eventId, listener);
+        return users;
     }
     @Override
     public void onDestroyView() {

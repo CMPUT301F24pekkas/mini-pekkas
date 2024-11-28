@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
@@ -44,6 +45,7 @@ public class EventDetailsFragment extends Fragment {
 
     private FragmentEventOrgBinding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
+    private NumEntrantsViewModel numEntrantsViewModel;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
 
@@ -65,6 +67,7 @@ public class EventDetailsFragment extends Fragment {
         // Get selected event from ViewModel
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
+        numEntrantsViewModel = new ViewModelProvider(requireActivity()).get(NumEntrantsViewModel.class);
 
         // Set elements in fragment to selected event
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
@@ -111,6 +114,11 @@ public class EventDetailsFragment extends Fragment {
                 if (fragmentView == null) {
                     return;
                 }
+                EditText EditNumParts = choosePartBinding.editNumParticipants;
+                String numPartsString = EditNumParts.getText().toString();
+                int numParts = Integer.parseInt(numPartsString);
+                numEntrantsViewModel.setNumber(numParts);
+
                 NavController navController = Navigation.findNavController(fragmentView);
                 navController.navigate(R.id.action_event_details_to_choose_participants);
                 dialog.dismiss();
