@@ -1,7 +1,5 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
-import static android.text.TextUtils.replace;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -11,13 +9,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -37,20 +33,18 @@ import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentCreateEventBinding;
 import com.example.mini_pekkas.databinding.FragmentCreateQrBinding;
-import com.example.mini_pekkas.ui.event.user.EventFragment;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import com.example.mini_pekkas.OrganizerEventsListViewModel;
-import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 /**
  * Fragment for creating events within the organizer's UI.
  * Handles input collection for event details, poster image selection, and

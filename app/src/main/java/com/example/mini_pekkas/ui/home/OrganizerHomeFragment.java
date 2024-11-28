@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,16 +16,12 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mini_pekkas.Event;
-import com.example.mini_pekkas.EventArrayAdapter;
 
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentOrganizerHomeBinding;
-import com.example.mini_pekkas.OrganizerEventsListViewModel;
-import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
 
 import java.util.ArrayList;
 
@@ -37,7 +32,6 @@ public class OrganizerHomeFragment extends Fragment {
 
     private FragmentOrganizerHomeBinding binding;
     private LinearLayout EventsContainer;
-    private OrganizerHomeViewModel organizerHomeViewModel;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
     private LiveData<ArrayList<Event>> EventList;
     /**
@@ -49,8 +43,6 @@ public class OrganizerHomeFragment extends Fragment {
      * @return The root view of the fragment.
      */
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        organizerHomeViewModel = new ViewModelProvider(this, new OrganizerHomeViewModelFactory(getActivity()))
-//                .get(OrganizerHomeViewModel.class);
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
 

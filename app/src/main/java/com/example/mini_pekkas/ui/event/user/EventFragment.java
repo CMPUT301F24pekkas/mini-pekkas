@@ -4,14 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.example.mini_pekkas.Firebase;
 
@@ -23,18 +19,12 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.R;
-import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentEventBinding;
 import com.example.mini_pekkas.databinding.FragmentEventLeaveWaitBinding;
+import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Fragment representing an event's details and waitlist functionality.
@@ -43,9 +33,9 @@ import java.util.Objects;
 public class EventFragment extends Fragment {
 
     private FragmentEventBinding binding;
-    private User mockUser;
+    private SharedEventViewModel sharedEventViewModel;
     private EventViewModel eventViewModel;
-    private Firebase firebaseHelper;
+    private HomeEventsListViewModel homeEventsListViewModel;
 
     /**
      * Inflates the fragment's view, sets up the necessary ViewModels and UI elements,
@@ -59,19 +49,20 @@ public class EventFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
-        firebaseHelper = new Firebase(requireContext());
+        Firebase firebaseHelper = new Firebase(requireContext());
+        homeEventsListViewModel = new ViewModelProvider(requireActivity()).get(HomeEventsListViewModel.class);
 
 
         binding = FragmentEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        SharedEventViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
-        sharedViewModel.getQrCodeData().observe(getViewLifecycleOwner(), qrCodeData -> {
+        sharedEventViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
+        sharedEventViewModel.getQrCodeData().observe(getViewLifecycleOwner(), qrCodeData -> {
             if (qrCodeData != null) {
-                fetchEventFromFirebase(qrCodeData, sharedViewModel);
+                fetchEventFromFirebase(qrCodeData, sharedEventViewModel);
             }
         });
-        sharedViewModel.getEventDetails().observe(getViewLifecycleOwner(), event -> {
+        eventViewModel.getEvent().observe(getViewLifecycleOwner(), event -> {
             if (event != null) {
                 binding.eventNameView.setText(event.getName());
                 binding.organizerNameView.setText(event.getEventHost().getName());
@@ -93,13 +84,12 @@ public class EventFragment extends Fragment {
             Button cancelButton = joinWaitBinding.cancelWaitButton;
 
             joinButton.setOnClickListener(view -> {
-                Event event = eventViewModel.getEvent().getValue();
+                Event event = sharedEventViewModel.getEventDetails().getValue();
                 if (event != null) {
-                    String deviceId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-                    leaveWaitList(event, deviceId);
                     Toast.makeText(requireContext(), "Leaving waitlist...", Toast.LENGTH_SHORT).show();
                     NavController navController = NavHostFragment.findNavController(this);
                     navController.navigate(R.id.action_navigation_event_to_navigation_home);
+                    homeEventsListViewModel.deleteEvent(event.getId());
                 } else {
                     Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
                 }

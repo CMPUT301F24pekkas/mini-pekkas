@@ -1,35 +1,23 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
-import com.example.mini_pekkas.OrganizerEventsListViewModel;
-import com.example.mini_pekkas.OrganizerEventsListViewModelFactory;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
+import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
-import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentEditEventBinding;
-import com.example.mini_pekkas.ui.event.user.EventFragment;
 import com.google.firebase.storage.StorageReference;
-
-import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Fragment for editing event details. This fragment allows the Organizer to:
