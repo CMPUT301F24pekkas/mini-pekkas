@@ -106,10 +106,9 @@ public class CameraFragment extends Fragment {
             if (result.getContents() != null) {
                 String scannedData = result.getContents();
                 Log.d("CameraFragment", "Raw QR Code Data: " + scannedData);
-
                 SharedEventViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
                 sharedViewModel.setQrCodeData(scannedData);
-
+                sharedViewModel.setNavigationSource("QR_CODE");
                 NavController navController = NavHostFragment.findNavController(this);
                 navController.navigate(R.id.action_navigation_camera_to_navigation_event);
 

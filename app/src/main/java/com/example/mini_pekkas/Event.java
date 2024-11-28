@@ -284,8 +284,20 @@ public class Event {
             this.eventHost = new User((Map<String, Object>) map.get("eventHost"));
         }
         this.description = (String) map.get("description");
-        this.startDate = (Date) map.get("startDate");
-        this.endDate = (Date) map.get("endDate");
+        Object startDateObject = map.get("startDate");
+        this.startDate = (startDateObject instanceof com.google.firebase.Timestamp)
+                ? ((com.google.firebase.Timestamp) startDateObject).toDate()
+                : (startDateObject instanceof java.util.Date)
+                ? (java.util.Date) startDateObject
+                : null;
+
+        // Parse endDate
+        Object endDateObject = map.get("endDate");
+        this.endDate = (endDateObject instanceof com.google.firebase.Timestamp)
+                ? ((com.google.firebase.Timestamp) endDateObject).toDate()
+                : (endDateObject instanceof java.util.Date)
+                ? (java.util.Date) endDateObject
+                : null;
         this.price = map.get("price") != null ? (double) map.get("price") : 0;
         this.facility = (String) map.get("facility");
         this.facilityGeoLat = map.get("facilityGeoLat") != null ? (double) map.get("facilityGeoLat") : 0.0;

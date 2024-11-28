@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-import com.example.mini_pekkas.Firebase;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -36,6 +35,7 @@ public class EventFragment extends Fragment {
     private SharedEventViewModel sharedEventViewModel;
     private EventViewModel eventViewModel;
     private HomeEventsListViewModel homeEventsListViewModel;
+    private Event event;
 
     /**
      * Inflates the fragment's view, sets up the necessary ViewModels and UI elements,
@@ -48,26 +48,31 @@ public class EventFragment extends Fragment {
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
-        Firebase firebaseHelper = new Firebase(requireContext());
-        homeEventsListViewModel = new ViewModelProvider(requireActivity()).get(HomeEventsListViewModel.class);
-
-
         binding = FragmentEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
+        eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
         sharedEventViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
-        sharedEventViewModel.getQrCodeData().observe(getViewLifecycleOwner(), qrCodeData -> {
-            if (qrCodeData != null) {
-                fetchEventFromFirebase(qrCodeData, sharedEventViewModel);
-            }
-        });
-        eventViewModel.getEvent().observe(getViewLifecycleOwner(), event -> {
-            if (event != null) {
-                binding.eventNameView.setText(event.getName());
-                binding.organizerNameView.setText(event.getEventHost().getName());
-                binding.eventDescriptionView.setText(event.getDescription());
-                binding.locationView.setText(event.getFacility());
+        homeEventsListViewModel = new ViewModelProvider(requireActivity()).get(HomeEventsListViewModel.class);
+
+        sharedEventViewModel.getNavigationSource().observe(getViewLifecycleOwner(), source -> {
+            if ("HOME".equals(source)) {
+                Toast.makeText(requireContext(), "Home Event Accessed", Toast.LENGTH_SHORT).show();
+                Event homeEvent = homeEventsListViewModel.getSelectedEvent().getValue();
+                if (homeEvent != null) {
+                    displayEventDetails(homeEvent);
+                    event = homeEvent;
+                } else {
+                    Toast.makeText(requireContext(), "Home event not found", Toast.LENGTH_SHORT).show();
+                }
+            } else if ("QR_CODE".equals(source)) {
+                Toast.makeText(requireContext(), "QR Event Accessed", Toast.LENGTH_SHORT).show();
+                Event qrCodeEvent = sharedEventViewModel.getEventDetails().getValue();
+                if (qrCodeEvent != null) {
+                    displayEventDetails(qrCodeEvent);
+                    event = qrCodeEvent;
+                } else {
+                    Toast.makeText(requireContext(), "QR code event not found", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -84,7 +89,6 @@ public class EventFragment extends Fragment {
             Button cancelButton = joinWaitBinding.cancelWaitButton;
 
             joinButton.setOnClickListener(view -> {
-                Event event = sharedEventViewModel.getEventDetails().getValue();
                 if (event != null) {
                     Toast.makeText(requireContext(), "Leaving waitlist...", Toast.LENGTH_SHORT).show();
                     NavController navController = NavHostFragment.findNavController(this);
@@ -98,11 +102,25 @@ public class EventFragment extends Fragment {
 
             cancelButton.setOnClickListener(view -> dialog.dismiss());
         });
-
         return root;
-
-
     }
+
+    private void displayEventDetails(Event event) {
+        if (event == null) {
+            Toast.makeText(requireContext(), "Event details are not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String eventName = event.getName() != null ? event.getName() : "Unknown Event";
+        String organizerName = event.getEventHost() != null && event.getEventHost().getName() != null
+                ? event.getEventHost().getName()
+                : "Unknown Organizer";
+
+        binding.eventNameView.setText(eventName);
+        binding.organizerNameView.setText(organizerName);
+        binding.eventDescriptionView.setText(event.getDescription() != null ? event.getDescription() : "No Description");
+        binding.locationView.setText(event.getFacility() != null ? event.getFacility() : "No Facility");
+    }
+
 
     /**
      * Fetches event data from Firebase using the provided QR code data and updates the event details
@@ -126,18 +144,6 @@ public class EventFragment extends Fragment {
                         eventViewModel.setEvent(event);
                     }
                 });
-    }
-
-    /**
-     * Removes the user from the event's waitlist based on the event ID and the device ID.
-     *
-     * @param event The event object from which the user should be removed
-     * @param deviceId The device ID of the user to be removed from the waitlist
-     */
-    public void leaveWaitList(Event event, String deviceId) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("events").document(event.getId())
-                .update("waitlist", FieldValue.arrayRemove(deviceId));
     }
 
 
