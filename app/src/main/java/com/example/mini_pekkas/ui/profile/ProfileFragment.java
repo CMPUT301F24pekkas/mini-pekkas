@@ -228,16 +228,45 @@ public class ProfileFragment extends Fragment {
                 .setTitle("Edit Profile")
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
-                    profileViewModel.setFirstName(firstNameInput.getText().toString());
-                    profileViewModel.setLastName(lastNameInput.getText().toString());
-                    profileViewModel.setEmail(emailInput.getText().toString());
-                    profileViewModel.setPhoneNumber(phoneInput.getText().toString());
+                    String firstName = firstNameInput.getText().toString().trim();
+                    String lastName = lastNameInput.getText().toString().trim();
+                    String email = emailInput.getText().toString().trim();
+                    String phoneNumber = phoneInput.getText().toString().trim();
+
+                    // Validate inputs
+                    if (firstName.isEmpty()) {
+                        Toast.makeText(getActivity(), "First name cannot be empty", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (lastName.isEmpty()) {
+                        Toast.makeText(getActivity(), "Last name cannot be empty", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Toast.makeText(getActivity(), "Please enter a valid email", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!phoneNumber.matches("\\d+")) {
+                        Toast.makeText(getActivity(), "Phone number must contain only digits", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (phoneNumber.length() < 10 || phoneNumber.length() > 15) {
+                        Toast.makeText(getActivity(), "Phone number must be between 10 and 15 digits", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Update profile details in ViewModel
+                    profileViewModel.setFirstName(firstName);
+                    profileViewModel.setLastName(lastName);
+                    profileViewModel.setEmail(email);
+                    profileViewModel.setPhoneNumber(phoneNumber);
                     profileViewModel.updateProfileInFirebase();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()
                 .show();
     }
+
 
     /**
      * Cleans up resources when the view is destroyed.
