@@ -139,12 +139,31 @@ public class EventJoinFragment extends Fragment {
      * @param qrCodeData The QR code data used to fetch the event.
      * @param sharedViewModel The shared view model used for updating the event data.
      */
-    public void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
-        firebaseHelper.getEventByQRCode(qrCodeData, event ->{
-            sharedViewModel.setEventDetails(event);
-            eventViewModel.setEvent(event);
-        });
+    private void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("events")
+                .whereEqualTo("QrCode", qrCodeData)
+                .get()
+                .addOnSuccessListener(task -> {
+                    if (task.getDocuments().isEmpty()) {
+                        Toast.makeText(getContext(), "No Event Found", Toast.LENGTH_SHORT).show();
+                    } else {
+                        DocumentSnapshot document = task.getDocuments().get(0);
+                        Event newEvent = new Event(document.getData());
+
+                        // Prevent redundant updates
+                        Event currentEvent = sharedViewModel.getEventDetails().getValue();
+                        if (currentEvent != null && currentEvent.getId().equals(newEvent.getId())) {
+                            Toast.makeText(requireContext(), "Event already loaded", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        sharedViewModel.setEventDetails(newEvent);
+                        eventViewModel.setEvent(newEvent);
+                    }
+                });
     }
+
 
     /**
      * Shows the dialog for joining the waitlist and allows user to either join or cancel
