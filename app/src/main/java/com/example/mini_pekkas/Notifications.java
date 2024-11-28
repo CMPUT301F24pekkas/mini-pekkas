@@ -28,7 +28,7 @@ public class Notifications {
      * @param fragmentDestination The filename of the Fragment to navigate to.
      */
     public Notifications(String title, String description, Date date, long priority, String fragmentDestination) {
-        this.id = id;
+        //this.id = id;
         this.description = description;
         this.date = date;
         this.priority = priority;
@@ -46,7 +46,7 @@ public class Notifications {
      * @param fragmentDestination The filename of the Fragment to navigate to.
      */
     public Notifications(String title, String description, Timestamp date, long priority, String fragmentDestination) {
-        this.id = id;
+        //this.id = id;
         this.description = description;
         this.date = date.toDate();
         this.priority = priority;
@@ -185,6 +185,18 @@ public class Notifications {
     public String getFragmentDestination() {
         return fragmentDestination;
     }
+
+    /**
+     * Gets the ID of the notification.
+     * @return The ID of the notification.
+     */
+    public String getID() {return id;}
+
+    /**
+     * Sets the ID of the notification.
+     * @param id The new value to be set
+     */
+    public void setID(String id) {this.id = id;}
 }
 
 
