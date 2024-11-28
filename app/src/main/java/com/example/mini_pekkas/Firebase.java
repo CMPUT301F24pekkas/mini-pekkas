@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -37,7 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.2 Redraw new users when people cancel, TODO further testing is needed. Notifications need to be passed around
+ * @version 1.16.3 Made a new collection to store notifications. user-notifications is now a cross table
+ * TODO further testing is needed. Notifications need to be passed around
  */
 public class Firebase {
     private final String deviceID;
@@ -388,21 +388,6 @@ public class Firebase {
                 })
                 .addOnFailureListener(listener::onError);
     }
-    public void addNotification(Notifications notification, DataRetrievalListener listener) {
-        notificationCollection.add(notification.toMap())
-                .addOnSuccessListener(documentReference -> {
-                    // Retrieve the ID of the document and update the notification object
-                    String id = documentReference.getId();
-                    notification.setId(id);
-
-                    // Update the id field in Firestore
-                    documentReference.update("id", id);
-
-                    // Finally call the listener on completion
-                    listener.onRetrievalCompleted(id);
-                })
-                .addOnFailureListener(listener::onError);
-    }
 
     /**
      * Overload of the {@link #addEvent(Event, DataRetrievalListener)} with no listener
@@ -523,31 +508,65 @@ public class Firebase {
                     AtomicInteger notification_count = new AtomicInteger();
 
                     for (DocumentSnapshot document : task.getDocuments()) {
-                        // Remove the user id so Notifications don't store the device id
-                        Map<String, Object> map = Objects.requireNonNull(document.getData());
-                        map.remove("userID");
-                        notifications.add(new Notifications(map));
+                        notificationCollection.whereEqualTo("id", document.get("notificationID")).get()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    if (!documentSnapshot.isEmpty()) {
+                                        // Retrieve the notification
+                                        Notifications notif = new Notifications(Objects.requireNonNull(documentSnapshot.getDocuments().get(0).getData()));
+                                        notifications.add(notif);
 
-                        // Wait for all events to be deleted first
-                        if (notification_count.incrementAndGet() == total_notifications) {
-                            // Sort by newest date first
-                            notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-                            listener.onNotificationListRetrievalCompleted(notifications);
-                        }
+                                        // Wait for all notifications to be fetched first
+                                        if (notification_count.incrementAndGet() == total_notifications) {
+                                            // Sort by newest date first
+                                            notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+                                            listener.onNotificationListRetrievalCompleted(notifications);
+                                        }
+                                    }
+                                })
+                                .addOnFailureListener(listener::onError);
                     }
                 })
                 .addOnFailureListener(listener::onError);
     }
 
     /**
-     * Add a notification to the user-notifications collection
+     * Add a notification to the notifications collection.
+     * This collection is a storage for all notifications.
+     * @param notification a notification object to be added
+     * @param listener Optional DataRetrievalListener listener that is called after the notification is added
+     */
+    public void storeNotification(Notifications notification, DataRetrievalListener listener) {
+        notificationCollection.add(notification.toMap())
+                .addOnSuccessListener(documentReference -> {
+                    // Retrieve the ID of the document and update the notification object
+                    String id = documentReference.getId();
+                    notification.setId(id);
+
+                    // Keep the id copy in firestore for querying
+                    documentReference.update("id", id);
+
+                    // Finally call the listener on completion
+                    listener.onRetrievalCompleted(id);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #storeNotification(Notifications, DataRetrievalListener)} with no listener
+     */
+    public void storeNotification(Notifications notification) {
+        storeNotification(notification, id -> {});
+    }
+
+    /**
+     * Add a notification to the user-notifications collection, effectively sending a notification to a user
      * @param notification a notification object to be added
      * @param listener Optional InitializationListener listener that is called after the notification is added
      */
     public void sendNotification(Notifications notification, String userID, InitializationListener listener) {
         // Set the user id and date field in correct format
-        HashMap<String, Object> map = notification.toMap();
-        map.put("date", notification.getTimestamp());
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("notificationID", notification.getID());
         map.put("userID", userID);
 
         userNotificationsCollection.add(map)
