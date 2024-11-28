@@ -51,7 +51,7 @@ public class AdminBrowseQrCodes extends Fragment {
         recyclerView = binding.imageGridRecyclerView;
 
         // From the list of images, set the view to display all images
-        firebaseHelper.getAllEvents(events ->  {
+        firebaseHelper.searchAllEvents(events ->  {
             recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
             ArrayList<Bitmap> images = new ArrayList<>();
             // For every base64 QR code, convert it to a URI and add it to the list
