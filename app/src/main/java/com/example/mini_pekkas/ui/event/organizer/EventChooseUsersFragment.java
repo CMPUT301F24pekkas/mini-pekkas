@@ -2,6 +2,7 @@ package com.example.mini_pekkas.ui.event.organizer;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -27,6 +28,7 @@ import androidx.navigation.Navigation;
 import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.Notifications;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
@@ -35,6 +37,7 @@ import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
 import com.example.mini_pekkas.databinding.FragmentChosenBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrg2Binding;
 import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;
+import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,12 +70,14 @@ public class EventChooseUsersFragment extends Fragment {
         //sets the button listeners
         SetButtonListeners();
         firebaseHelper = new Firebase(requireContext());
-        ArrayList<User> usersChosen = getUsersAndSelect();
-        ArrayList<User> usersCancelled = getCancelledUsers(event.getId());
-        ArrayList<User> usersEnrolled = getEnrolledUsers((event.getId()));
-        binding.chosenPartView.setText(Integer.toString(usersChosen.size()));
-        binding.enrolledAmountView.setText(Integer.toString(usersEnrolled.size()));
-        binding.canceledAmountView.setText(Integer.toString(usersCancelled.size()));
+        //enroll people in event
+        ArrayList<Notifications> notifications = createDefaultNotifications();
+        firebaseHelper.startEnrollingEvent(event, notifications);
+
+        binding.chosenPartView.setText(Integer.toString(numEntrantsViewModel.getNumber().getValue()));
+        setEnrolledUsers((event.getId()));
+        setCancelledUsers((event.getId()));
+
         return root;
 
     }
@@ -185,55 +190,14 @@ public class EventChooseUsersFragment extends Fragment {
         });
 
     }
-    public ArrayList<User> getUsersAndSelect() {
+
+    private void setCancelledUsers(String eventId){
         ArrayList<User> users = new ArrayList<>();
         Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
                 Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                //add users to waitlistedArrayAdapter
-                for(User user : users) {
-                    users.add(user);
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.d("user", "Error occurred: " + e.getMessage());
-            }
-
-        };
-
-        firebaseHelper.getWaitlistedUsers(Objects.requireNonNull(organizerEventsListViewModel.getSelectedEvent().getValue()).getId(), listener);
-        int numParts = numEntrantsViewModel.getNumber().getValue();
-        if(numParts == -1){
-            Log.e("numParts", "numParts is -1");
-        }
-        //if they selected more people than there are waitlisted, select all
-        if(numParts >= users.size()){
-            return users;
-        }
-        //if they selected less people than there are waitlisted, select randomly
-        else{
-            //copy list
-            ArrayList<User> copy = new ArrayList<>(users);
-            //shuffle and select first n
-            Collections.shuffle(copy);
-            List<User> selectedUserslist = copy.subList(0, numParts);
-            ArrayList<User> selectedUsers = new ArrayList<>(selectedUserslist);
-            Log.d("numParts", "numParts: " + numParts);
-            return selectedUsers;
-        }
-    }
-    private ArrayList<User> getCancelledUsers(String eventId){
-        ArrayList<User> users = new ArrayList<>();
-        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
-            @Override
-            public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                for(User user : users) {
-                    users.add(user);
-                }
+                binding.canceledAmountView.setText(Integer.toString(users.size()));
             }
 
             @Override
@@ -243,17 +207,14 @@ public class EventChooseUsersFragment extends Fragment {
 
         };
         firebaseHelper.getCancelledUsers(eventId, listener);
-        return users;
+
     }
-    private ArrayList<User> getEnrolledUsers(String eventId){
-        ArrayList<User> users = new ArrayList<>();
+    private void setEnrolledUsers(String eventId){
+
         Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                for(User user : users) {
-                    users.add(user);
-                }
+                binding.enrolledAmountView.setText(Integer.toString(users.size()));
             }
 
             @Override
@@ -263,7 +224,20 @@ public class EventChooseUsersFragment extends Fragment {
 
         };
         firebaseHelper.getEnrolledUsers(eventId, listener);
-        return users;
+    }
+    private ArrayList<Notifications> createDefaultNotifications(){
+        Timestamp serverTimestamp = Timestamp.now();
+        ArrayList<Notifications> notifications = new ArrayList<>();
+        Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+        String eventTitle = event.getName();
+        String eventId = event.getId();
+
+        Notifications notification1 = new Notifications("Chosen", "you have been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
+        notifications.add(notification1);
+        Notifications notification2 = new Notifications("Not Chosen", "unfortunately you have not been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
+        notifications.add(notification2);
+        return notifications;
+
     }
     @Override
     public void onDestroyView() {
