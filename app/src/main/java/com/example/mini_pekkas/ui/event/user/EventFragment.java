@@ -56,7 +56,6 @@ public class EventFragment extends Fragment {
 
         sharedEventViewModel.getNavigationSource().observe(getViewLifecycleOwner(), source -> {
             if ("HOME".equals(source)) {
-                Toast.makeText(requireContext(), "Home Event Accessed", Toast.LENGTH_SHORT).show();
                 Event homeEvent = homeEventsListViewModel.getSelectedEvent().getValue();
                 if (homeEvent != null) {
                     displayEventDetails(homeEvent);
@@ -65,7 +64,6 @@ public class EventFragment extends Fragment {
                     Toast.makeText(requireContext(), "Home event not found", Toast.LENGTH_SHORT).show();
                 }
             } else if ("QR_CODE".equals(source)) {
-                Toast.makeText(requireContext(), "QR Event Accessed", Toast.LENGTH_SHORT).show();
                 Event qrCodeEvent = sharedEventViewModel.getEventDetails().getValue();
                 if (qrCodeEvent != null) {
                     displayEventDetails(qrCodeEvent);
@@ -119,31 +117,6 @@ public class EventFragment extends Fragment {
         binding.organizerNameView.setText(organizerName);
         binding.eventDescriptionView.setText(event.getDescription() != null ? event.getDescription() : "No Description");
         binding.locationView.setText(event.getFacility() != null ? event.getFacility() : "No Facility");
-    }
-
-
-    /**
-     * Fetches event data from Firebase using the provided QR code data and updates the event details
-     * in the shared view model and the local event view model.
-     *
-     * @param qrCodeData The data retrieved from scanning the event's QR code
-     * @param sharedViewModel The shared view model used to update the event details
-     */
-    private void fetchEventFromFirebase(String qrCodeData, SharedEventViewModel sharedViewModel) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("events")
-                .whereEqualTo("QrCode", qrCodeData)
-                .get()
-                .addOnSuccessListener(task -> {
-                    if (task.getDocuments().isEmpty()) {
-                        Toast.makeText(getContext(), "No Event Found", Toast.LENGTH_SHORT).show();
-                    } else {
-                        DocumentSnapshot document = task.getDocuments().get(0);
-                        Event event = new Event(document.getData());
-                        sharedViewModel.setEventDetails(event);
-                        eventViewModel.setEvent(event);
-                    }
-                });
     }
 
 
