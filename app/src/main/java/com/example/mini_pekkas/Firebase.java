@@ -984,11 +984,12 @@ public class Firebase {
 
                 // Get the event ID to pull from the event collection
                 String userID = Objects.requireNonNull(document.get("userID")).toString();
-
+                Log.d("EventDebug", "userID: " + userID);
                 // Get the event from the event collection
                 userCollection.whereEqualTo("userID", userID).get()
                         .addOnSuccessListener(documentSnapshot -> {
                             // This should be unique
+                            Log.d("EventDebug", "documentSnapshot size: " + documentSnapshot.size());
                             if (documentSnapshot.size() != 1) {
                                 listener.onError(new Exception("User does not exist"));
                                 return;
@@ -1106,9 +1107,15 @@ public class Firebase {
         // Create and store a default notification if none is provided
         long user_cap = event.getMaxAttendees();        // The max number of attendees to draw
         // TODO waitlist size should be stored in the event object, I will calculate it in firebase for now
-        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("status", "waitlisted").get()
+        userEventsCollection
+                .whereEqualTo("eventID", event.getId().trim())
+                .whereEqualTo("status", "waitlisted").get()
             .addOnSuccessListener(task -> {
                 int waitlist_size = task.size();
+                Log.d("waitDebug", "Query completed");
+                Log.d("waitDebug", "Looking for eventID: " + event.getId());
+                Log.d("waitDebug", "Documents returned: " + task.getDocuments().size());
+                Log.d("waitDebug", "Waitlist size: " + waitlist_size);
                 Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
@@ -1133,6 +1140,7 @@ public class Firebase {
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
+                    Log.d("waitDebug", "User ID: " + userID);
                     // Send a success notification to each user
                     sendNotification(notifications.get(0), userID);
 

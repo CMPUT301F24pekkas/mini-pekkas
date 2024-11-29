@@ -46,8 +46,33 @@
         android:name="com.example.mini_pekkas.ui.event.organizer.EventDetailsFragment"
         tools:layout="@layout/fragment_event_org" />
         <action
+            android:id="@+id/action_event_details_to_waitlisted_entrants"
+            app:destination="@id/navigation_org_waitlisted_entrants" />
+        <action
             android:id="@+id/action_event_details_to_edit_event"
             app:destination="@id/navigation_org_edit_event" />
+        <action
+            android:id="@+id/action_event_details_to_choose_participants"
+            app:destination="@id/navigation_org_event_choose_participants" />
+    <fragment
+        android:id="@+id/navigation_org_event_choose_participants"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EventChooseUsersFragment"
+        tools:layout="@layout/fragment_event_org" />
+        <action
+            android:id="@+id/action_choose_participants_again"
+            app:destination="@id/navigation_org_event_choose_participants" />
+        <action
+            android:id="@+id/action_choose_participants_to_chosen_entrants"
+            app:destination="@id/navigation_org_chosen_entrants" />
+        <action
+            android:id="@+id/action_choose_participants_to_cancelled_entrants"
+            app:destination="@id/navigation_org_cancelled_entrants" />
+        <action
+            android:id="@+id/action_choose_participants_to_enrolled_entrants"
+            app:destination="@id/navigation_org_enrolled_entrants" />
+        <action
+            android:id="@+id/action_choose_participants_to_waitlisted_entrants"
+            app:destination="@id/navigation_org_waitlisted_entrants" />
     <fragment
         android:id="@+id/navigation_org_edit_event"
         android:name="com.example.mini_pekkas.ui.event.organizer.EventEditFragment"
@@ -55,4 +80,22 @@
         <action
             android:id="@+id/action_edit_event_to_event_details"
             app:destination="@id/navigation_org_event_details" />
+    <fragment
+        android:id="@+id/navigation_org_chosen_entrants"
+        android:name="com.example.mini_pekkas.ui.event.organizer.ChosenEntrantsFragment"
+        tools:layout="@layout/fragment_chosen" />
+    <fragment
+        android:id="@+id/navigation_org_cancelled_entrants"
+        android:name="com.example.mini_pekkas.ui.event.organizer.CancelledEntrantsFragment"
+        tools:layout="@layout/fragment_canceled" />
+    <fragment
+        android:id="@+id/navigation_org_waitlisted_entrants"
+        android:name="com.example.mini_pekkas.ui.event.organizer.WaitlistedEntrantsFragment"
+        tools:layout="@layout/fragment_waitlist" />
+    <fragment
+        android:id="@+id/navigation_org_enrolled_entrants"
+        android:name="com.example.mini_pekkas.ui.event.organizer.EnrolledEntrantsFragment"
+        tools:layout="@layout/fragment_enrolled"/>
+
+
 </navigation>

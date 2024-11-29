@@ -45,7 +45,7 @@
             android:textSize="20sp" />
 
         <EditText
-            android:id="@+id/editTextText"
+            android:id="@+id/editNumParticipants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20sp"
@@ -53,7 +53,7 @@
             android:layout_marginEnd="20dp"
             android:ems="10"
             android:hint="Enter amount"
-            android:inputType="text" />
+            android:inputType="number" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -62,7 +62,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/joinWaitButton"
+                android:id="@+id/cancelWaitButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -73,7 +73,7 @@
                 android:text="Cancel" />
 
             <Button
-                android:id="@+id/cancelWaitButton"
+                android:id="@+id/joinWaitButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
