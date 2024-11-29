@@ -75,4 +75,10 @@
         android:layout_height="wrap_content"
         android:hint="Enter Organizer Location" />
 
+    <EditText
+        android:id = "@+id/dialog_facility_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint = "Enter Facility Description" />
+
 </LinearLayout>

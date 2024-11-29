@@ -23,6 +23,7 @@ public class OrganizerProfileViewModel extends ViewModel {
     private final MutableLiveData<String> organizerLocation;
     private final MutableLiveData<String> profilePictureUrl;
     private final MutableLiveData<String> userID;
+    private final MutableLiveData<String> facilityName;
     private final MutableLiveData<String> facilityPictureUrl;
     private final MutableLiveData<String> facilityDescription;
     private final Firebase firebaseHelper;
@@ -41,6 +42,7 @@ public class OrganizerProfileViewModel extends ViewModel {
         organizerLocation = new MutableLiveData<>(); // Initialize organizer location
         profilePictureUrl = new MutableLiveData<>();
         userID = new MutableLiveData<>();
+        facilityName = new MutableLiveData<>();
         facilityPictureUrl = new MutableLiveData<>();
         facilityDescription = new MutableLiveData<>();
         firebaseHelper = new Firebase(context);
@@ -53,6 +55,7 @@ public class OrganizerProfileViewModel extends ViewModel {
         organizerLocation.setValue("Organizer Location");
         profilePictureUrl.setValue("");// Default organizer location
         userID.setValue("");
+        facilityName.setValue("Facility Name");
         facilityPictureUrl.setValue("");
         facilityDescription.setValue("...");
         loadUserProfile();
@@ -76,6 +79,7 @@ public class OrganizerProfileViewModel extends ViewModel {
                     userID.setValue(user.getId());
                 }
             }
+
         });
     }
     /**
@@ -205,4 +209,17 @@ public class OrganizerProfileViewModel extends ViewModel {
     public void setProfilePictureUrl(String url) {
         profilePictureUrl.setValue(url);
     }
+
+    public LiveData<String> getFacilityPictureUrl() { return facilityPictureUrl; }
+
+    public void setFacilityPictureUrl(String url) { facilityPictureUrl.setValue(url); }
+
+    public LiveData<String> getFacilityName() { return facilityName; }
+
+    public void setFacilityName(String name) { facilityName.setValue(name); }
+
+    public LiveData<String> getFacilityDescription() { return facilityDescription; }
+
+    public void setFacilityDescription(String description) { facilityDescription.setValue(description); }
+
 }

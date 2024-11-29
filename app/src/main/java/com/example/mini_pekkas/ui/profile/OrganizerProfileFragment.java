@@ -108,6 +108,14 @@ public class OrganizerProfileFragment extends Fragment {
             }
         });
 
+        organizerProfileViewModel.getFacilityPictureUrl().observe(getViewLifecycleOwner(), url -> {
+            if (url != null && !url.isEmpty()) {
+                Glide.with(this).load(url).into(facilityImage);
+            } else {
+                facilityImage.setImageResource(R.drawable.add_image);
+            }
+        });
+
         // Initialize the image picker
         pickImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
@@ -141,6 +149,7 @@ public class OrganizerProfileFragment extends Fragment {
         // Set click listeners
         profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
         editButton.setOnClickListener(v -> showEditDialog());
+        facilityImageEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
 
         return root;
     }
@@ -225,12 +234,14 @@ public class OrganizerProfileFragment extends Fragment {
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
         EditText organizerLocationInput = dialogView.findViewById(R.id.dialog_organizer_input);
+        EditText facilityDescInput = dialogView.findViewById(R.id.dialog_facility_input);
 
         firstNameInput.setText(organizerProfileViewModel.getFirstName().getValue());
         lastNameInput.setText(organizerProfileViewModel.getLastName().getValue());
         emailInput.setText(organizerProfileViewModel.getEmail().getValue());
         phoneInput.setText(organizerProfileViewModel.getPhoneNumber().getValue());
         organizerLocationInput.setText(organizerProfileViewModel.getOrganizerLocation().getValue());
+        facilityDescInput.setText(organizerProfileViewModel.getFacilityDescription().getValue());
 
         new AlertDialog.Builder(getActivity())
                 .setTitle("Edit Profile")
@@ -241,6 +252,7 @@ public class OrganizerProfileFragment extends Fragment {
                     String email = emailInput.getText().toString().trim();
                     String phoneNumber = phoneInput.getText().toString().trim();
                     String organizerLocation = organizerLocationInput.getText().toString().trim();
+                    String facilityDescription = facilityDescInput.getText().toString().trim();
 
                     // Validate inputs
                     if (firstName.isEmpty()) {
@@ -270,7 +282,10 @@ public class OrganizerProfileFragment extends Fragment {
                     organizerProfileViewModel.setEmail(email);
                     organizerProfileViewModel.setPhoneNumber(phoneNumber);
                     organizerProfileViewModel.setOrganizerLocation(organizerLocation);
+                    organizerProfileViewModel.setFacilityName(organizerLocation);
+                    organizerProfileViewModel.setFacilityDescription(facilityDescription);
                     organizerProfileViewModel.updateProfileInFirebase();
+
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()
