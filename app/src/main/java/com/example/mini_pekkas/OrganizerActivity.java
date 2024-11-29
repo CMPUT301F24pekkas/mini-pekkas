@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
@@ -13,6 +14,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.mini_pekkas.databinding.OrganizerMainBinding;
+import com.example.mini_pekkas.ui.event.organizer.EventChooseUsersFragment;
+import com.example.mini_pekkas.ui.event.organizer.EventDetailsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 /**
  * OrganizerActivity is the main activity for organizers, setting up the navigation controller
@@ -50,15 +53,17 @@ public class OrganizerActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.organizerView, navController);
     }
 
-    /**
-     * Navigates to the home screen for the organizer.
-     *
-     * @return true to indicate that the navigation is handled.
-     */
+
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.organizer_main);
-        navController.navigate(R.id.action_global_navigation_org_home);
-        return true;
+        // Check if the current destination is a EventChooseUsersFragment
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.organizer_main);
+        if (currentFragment instanceof EventChooseUsersFragment) {
+            // Handle the "Up" navigation differently for this fragment
+            navController.popBackStack(R.id.navigation_org_event_details, false); // Go back to eventDetails
+            return true;
+        }
+        return navController.navigateUp();
     }
 }

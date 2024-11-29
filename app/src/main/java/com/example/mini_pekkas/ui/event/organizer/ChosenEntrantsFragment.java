@@ -49,9 +49,8 @@ public class ChosenEntrantsFragment extends Fragment {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
                 Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                for(User user : users) {
-                    ChosenArrayAdapter.addUser(user);
-                }
+                ChosenArrayAdapter.addUsers(users);
+
             }
             @Override
             public void onError(Exception e) {
