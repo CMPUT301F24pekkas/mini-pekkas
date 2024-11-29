@@ -23,6 +23,7 @@ import com.example.mini_pekkas.databinding.FragmentEventJoinBinding;
 import com.example.mini_pekkas.databinding.FragmentEventJoinWaitBinding;
 import com.example.mini_pekkas.databinding.FragmentEventJoinGeoBinding;
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModelFactory;
+import com.google.android.gms.common.api.internal.IStatusCallback;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -154,7 +155,6 @@ public class EventJoinFragment extends Fragment {
                         // Prevent redundant updates
                         Event currentEvent = sharedViewModel.getEventDetails().getValue();
                         if (currentEvent != null && currentEvent.getId().equals(newEvent.getId())) {
-                            Toast.makeText(requireContext(), "Event already loaded", Toast.LENGTH_SHORT).show();
                             return;
                         }
 
