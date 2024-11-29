@@ -86,10 +86,13 @@ public class OrganizerProfileFragment extends Fragment {
         final TextView emailInput = binding.emailInput;
         final TextView phoneInput = binding.phoneInput;
         final TextView profileText = binding.profileText;
-        final TextView organizerLocationInput = binding.organizationInput;
+        final TextView organizerLocationInput = binding.facilityInput;
         final ImageView profileImage = binding.userProfileImage;
         final ImageButton editButton = binding.editButton;
         final ImageButton profileEdit = binding.pfpEdit;
+        final TextView facilityDescription = binding.facilityDescription;
+        final ImageView facilityImage = binding.facilityImage;
+        final ImageButton facilityImageEdit = binding.facilityEditButton;
 
         // Load profile picture or show initial text
         organizerProfileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {
@@ -102,6 +105,14 @@ public class OrganizerProfileFragment extends Fragment {
                     profileText.setText(String.valueOf(name.charAt(0)).toUpperCase());
                     profileText.setVisibility(View.VISIBLE);
                 }
+            }
+        });
+
+        organizerProfileViewModel.getFacilityPictureUrl().observe(getViewLifecycleOwner(), url -> {
+            if (url != null && !url.isEmpty()) {
+                Glide.with(this).load(url).into(facilityImage);
+            } else {
+                facilityImage.setImageResource(R.drawable.add_image);
             }
         });
 
@@ -138,6 +149,7 @@ public class OrganizerProfileFragment extends Fragment {
         // Set click listeners
         profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
         editButton.setOnClickListener(v -> showEditDialog());
+        facilityImageEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
 
         return root;
     }
@@ -222,12 +234,14 @@ public class OrganizerProfileFragment extends Fragment {
         EditText emailInput = dialogView.findViewById(R.id.dialog_email_input);
         EditText phoneInput = dialogView.findViewById(R.id.dialog_phone_input);
         EditText organizerLocationInput = dialogView.findViewById(R.id.dialog_organizer_input);
+        EditText facilityDescInput = dialogView.findViewById(R.id.dialog_facility_input);
 
         firstNameInput.setText(organizerProfileViewModel.getFirstName().getValue());
         lastNameInput.setText(organizerProfileViewModel.getLastName().getValue());
         emailInput.setText(organizerProfileViewModel.getEmail().getValue());
         phoneInput.setText(organizerProfileViewModel.getPhoneNumber().getValue());
         organizerLocationInput.setText(organizerProfileViewModel.getOrganizerLocation().getValue());
+        facilityDescInput.setText(organizerProfileViewModel.getFacilityDescription().getValue());
 
         new AlertDialog.Builder(getActivity())
                 .setTitle("Edit Profile")
@@ -238,6 +252,7 @@ public class OrganizerProfileFragment extends Fragment {
                     String email = emailInput.getText().toString().trim();
                     String phoneNumber = phoneInput.getText().toString().trim();
                     String organizerLocation = organizerLocationInput.getText().toString().trim();
+                    String facilityDescription = facilityDescInput.getText().toString().trim();
 
                     // Validate inputs
                     if (firstName.isEmpty()) {
@@ -267,7 +282,10 @@ public class OrganizerProfileFragment extends Fragment {
                     organizerProfileViewModel.setEmail(email);
                     organizerProfileViewModel.setPhoneNumber(phoneNumber);
                     organizerProfileViewModel.setOrganizerLocation(organizerLocation);
+                    organizerProfileViewModel.setFacilityName(organizerLocation);
+                    organizerProfileViewModel.setFacilityDescription(facilityDescription);
                     organizerProfileViewModel.updateProfileInFirebase();
+
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()

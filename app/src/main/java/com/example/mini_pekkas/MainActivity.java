@@ -2,13 +2,18 @@ package com.example.mini_pekkas;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText facilityInput;
     private Button submitButton;
     private Firebase firebaseHelper;
+
     /**
      * Called when the activity is first created. Initializes Firebase, checks if the user
      * exists in Firebase, and either navigates to the appropriate activity or displays a form for new users.
@@ -42,10 +48,10 @@ public class MainActivity extends AppCompatActivity {
 
         // First check if this user is an admin
         firebaseHelper.isThisUserAdmin(isAdmin -> {
-            if(isAdmin){
+            if (isAdmin) {
                 // User is an admin, show admin activity
-                 Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
-                 startActivity(adminIntent);
+                Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
+                startActivity(adminIntent);
                 finish(); // Close MainActivity
             } else {
                 // User is not an admin
@@ -76,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     /**
      * Initializes the views for the user form and sets the onClickListener for the submit button.
      * This method is only called if the user does not already exist in Firebase.
@@ -95,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     /**
      * Gathers the user input from the form fields, creates a temporary User object,
      * and initializes the user in Firebase. Based on the facility information,
@@ -161,4 +169,28 @@ public class MainActivity extends AppCompatActivity {
             finish(); // Close MainActivity
         });
     }
+
+    // Briefly shows dialog then crashes app
+    /*
+    private void showFacilityDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.fragment_facility_details, null);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+
+        Button uploadPictureButton = dialogView.findViewById(R.id.uploadPictureButton);
+        EditText facilityDescriptionInput = dialogView.findViewById(R.id.facilityDescription);
+        Button submitButton = dialogView.findViewById(R.id.submitButton);
+
+        submitButton.setOnClickListener(v -> {
+            String facilityDescription = facilityDescriptionInput.getText().toString().trim();
+            Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
+            startActivity(organizerIntent);
+            dialog.dismiss();
+        });
+        dialog.show();
+    }*/
 }
