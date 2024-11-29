@@ -78,24 +78,6 @@ public class OrganizerHomeFragment extends Fragment {
         });
         //add the current events in db ONCE
         organizerEventsListViewModel.initializeDataIfNeeded();
-        //Observe the selected event LiveData from the ViewModel
-//        organizerHomeViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), new Observer<Event>() {
-//            /**
-//             * Called when the selected event changes.
-//             *
-//             * @param event The updated event.
-//             */
-//            @Override
-//            public void onChanged(Event event) {
-//                if (event != null) {
-//                    Log.d("OrganizerHomeFragment", "Event updated");
-//                    //displayEventData(event); // Display the event
-//                } else {
-//                    Log.d("OrganizerHomeFragment", "No event available");
-//                    // Handle no event case (e.g., show a message or placeholder)
-//                }
-//            }
-//        });
 
         return root;
     }

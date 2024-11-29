@@ -2,6 +2,8 @@ package com.example.mini_pekkas;
 
 import static android.content.ContentValues.TAG;
 
+import static java.lang.Thread.sleep;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
@@ -36,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.9 created leaveEvent, delete the user-event entry to remove all connection to event
+ * @version 1.16.9.1 fecking white space causing bad query. Fixed getUsersByEventStatus
  * TODO further testing is needed.
  * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
@@ -967,7 +969,7 @@ public class Firebase {
     private void getUsersInEventByStatus(String status, String eventID, UserListRetrievalListener listener) {
         Query query = userEventsCollection.whereEqualTo("eventID", eventID);
         if (!status.equals("all")) {
-            query.whereEqualTo("status", status);
+            query = query.whereEqualTo("status", status);
         }
         query.get().addOnSuccessListener(task -> {
             // Check if no documents were found
@@ -984,11 +986,12 @@ public class Firebase {
 
                 // Get the event ID to pull from the event collection
                 String userID = Objects.requireNonNull(document.get("userID")).toString();
-
+                Log.d("EventDebug", "userID: " + userID);
                 // Get the event from the event collection
-                userCollection.whereEqualTo("userID ", userID).get()
+                userCollection.whereEqualTo("userID", userID).get()
                         .addOnSuccessListener(documentSnapshot -> {
                             // This should be unique
+                            Log.d("EventDebug", "documentSnapshot size: " + documentSnapshot.size());
                             if (documentSnapshot.size() != 1) {
                                 listener.onError(new Exception("User does not exist"));
                                 return;
@@ -1106,10 +1109,18 @@ public class Firebase {
         // Create and store a default notification if none is provided
         long user_cap = event.getMaxAttendees();        // The max number of attendees to draw
         // TODO waitlist size should be stored in the event object, I will calculate it in firebase for now
-        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("status", "waitlisted").get()
+        userEventsCollection
+                .whereEqualTo("eventID", event.getId().trim())
+                .whereEqualTo("status", "waitlisted").get()
             .addOnSuccessListener(task -> {
                 int waitlist_size = task.size();
+
                 Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
+                try {
+                    sleep(0,100);  // 100 nano s delay to prevent race condition
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
                 if (waitlist_size > user_cap) {
@@ -1133,6 +1144,7 @@ public class Firebase {
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
+                    Log.d("waitDebug", "User ID: " + userID);
                     // Send a success notification to each user
                     sendNotification(notifications.get(0), userID);
 
