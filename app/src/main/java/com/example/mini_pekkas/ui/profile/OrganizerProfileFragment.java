@@ -86,10 +86,13 @@ public class OrganizerProfileFragment extends Fragment {
         final TextView emailInput = binding.emailInput;
         final TextView phoneInput = binding.phoneInput;
         final TextView profileText = binding.profileText;
-        final TextView organizerLocationInput = binding.organizationInput;
+        final TextView organizerLocationInput = binding.facilityInput;
         final ImageView profileImage = binding.userProfileImage;
         final ImageButton editButton = binding.editButton;
         final ImageButton profileEdit = binding.pfpEdit;
+        final TextView facilityDescription = binding.facilityDescription;
+        final ImageView facilityImage = binding.facilityImage;
+        final ImageButton facilityImageEdit = binding.facilityEditButton;
 
         // Load profile picture or show initial text
         organizerProfileViewModel.getProfilePictureUrl().observe(getViewLifecycleOwner(), url -> {

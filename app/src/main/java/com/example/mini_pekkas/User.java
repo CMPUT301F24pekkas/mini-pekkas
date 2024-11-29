@@ -29,6 +29,9 @@ public class User {
         this.id = (String) map.get("userID");
     }
 
+    /**
+     * Default constructor for creating an empty User object.
+     */
     public User() {
     }
 

@@ -23,6 +23,8 @@ public class OrganizerProfileViewModel extends ViewModel {
     private final MutableLiveData<String> organizerLocation;
     private final MutableLiveData<String> profilePictureUrl;
     private final MutableLiveData<String> userID;
+    private final MutableLiveData<String> facilityPictureUrl;
+    private final MutableLiveData<String> facilityDescription;
     private final Firebase firebaseHelper;
     /**
      * Constructor that initializes the ViewModel, sets default profile values,
@@ -39,6 +41,8 @@ public class OrganizerProfileViewModel extends ViewModel {
         organizerLocation = new MutableLiveData<>(); // Initialize organizer location
         profilePictureUrl = new MutableLiveData<>();
         userID = new MutableLiveData<>();
+        facilityPictureUrl = new MutableLiveData<>();
+        facilityDescription = new MutableLiveData<>();
         firebaseHelper = new Firebase(context);
 
         // Set default values for these fields
@@ -49,6 +53,8 @@ public class OrganizerProfileViewModel extends ViewModel {
         organizerLocation.setValue("Organizer Location");
         profilePictureUrl.setValue("");// Default organizer location
         userID.setValue("");
+        facilityPictureUrl.setValue("");
+        facilityDescription.setValue("...");
         loadUserProfile();
     }
     /**
