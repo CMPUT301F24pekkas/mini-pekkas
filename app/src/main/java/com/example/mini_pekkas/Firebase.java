@@ -2,6 +2,8 @@ package com.example.mini_pekkas;
 
 import static android.content.ContentValues.TAG;
 
+import static java.lang.Thread.sleep;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
@@ -1089,11 +1091,13 @@ public class Firebase {
                 .whereEqualTo("status", "waitlisted").get()
             .addOnSuccessListener(task -> {
                 int waitlist_size = task.size();
-                Log.d("waitDebug", "Query completed");
-                Log.d("waitDebug", "Looking for eventID: " + event.getId());
-                Log.d("waitDebug", "Documents returned: " + task.getDocuments().size());
-                Log.d("waitDebug", "Waitlist size: " + waitlist_size);
+
                 Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
+                try {
+                    sleep(0,100);  // 100 nano s delay to prevent race condition
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
                 if (waitlist_size > user_cap) {
