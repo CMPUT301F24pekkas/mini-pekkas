@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.9 created leaveEvent, delete the user-event entry to remove all connection to event
+ * @version 1.16.9.1 fecking white space causing bad query. Fixed getUsersByEventStatus
  * TODO further testing is needed.
  * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
@@ -967,7 +967,7 @@ public class Firebase {
     private void getUsersInEventByStatus(String status, String eventID, UserListRetrievalListener listener) {
         Query query = userEventsCollection.whereEqualTo("eventID", eventID);
         if (!status.equals("all")) {
-            query.whereEqualTo("status", status);
+            query = query.whereEqualTo("status", status);
         }
         query.get().addOnSuccessListener(task -> {
             // Check if no documents were found
@@ -986,7 +986,7 @@ public class Firebase {
                 String userID = Objects.requireNonNull(document.get("userID")).toString();
 
                 // Get the event from the event collection
-                userCollection.whereEqualTo("userID ", userID).get()
+                userCollection.whereEqualTo("userID", userID).get()
                         .addOnSuccessListener(documentSnapshot -> {
                             // This should be unique
                             if (documentSnapshot.size() != 1) {
