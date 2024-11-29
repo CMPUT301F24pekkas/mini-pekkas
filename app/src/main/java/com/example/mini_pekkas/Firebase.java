@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.8 getUserbyEventStatus bug fix in queries other than status=all
+ * @version 1.16.9 created leaveEvent, delete the user-event entry to remove all connection to event
  * TODO further testing is needed.
  * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
@@ -770,6 +770,29 @@ public class Firebase {
         cancelEvent(event, () -> {});
     }
 
+    /**
+     * Leave the waitlist by deleting the user-event entry. Remove all interaction with event
+     * @param event an event object to leave from
+     * @param listener Optional InitializationListener listener that is called after the event is waitlisted
+     */
+    public void leaveEvent(Event event, InitializationListener listener) {
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", deviceID).get()
+                .addOnSuccessListener(task -> {
+                    // Delete the entry
+                    task.getDocuments().get(0).getReference().delete()
+                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnFailureListener(listener::onError);
+                })
+                .addOnFailureListener(listener::onError);
+    }
+
+    /**
+     * Overload of the {@link #leaveEvent(Event, InitializationListener)} with no listener
+     * @param event an event object to leave from
+     */
+    public void leaveEvent(Event event) {
+        leaveEvent(event, () -> {});
+    }
     /**
      * Get the current status of the user in the event
      * @param event an event object to get the status of
