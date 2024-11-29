@@ -34,7 +34,7 @@
         tools:src="@tools:sample/backgrounds/scenic" />
 
     <ImageButton
-        android:id="@+id/imageButton"
+        android:id="@+id/editEventPictureButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="157dp"
