@@ -148,6 +148,6 @@ public class HomeEventsListViewModel extends ViewModel {
 
     }
     public void removeEventFromDb(Event event) {
-        firebaseHelper.cancelEvent(event);
+        firebaseHelper.leaveEvent(event);
     }
 }
