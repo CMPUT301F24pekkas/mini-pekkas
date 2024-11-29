@@ -49,9 +49,8 @@ public class WaitlistedEntrantsFragment extends Fragment {
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
                 Log.d("user", "User list retrieval completed" + " size:" + users.size());
                 //add users to waitlistedArrayAdapter
-                for(User user : users) {
-                    waitlistedArrayAdapter.addUser(user);
-                }
+                waitlistedArrayAdapter.addUsers(users);
+
             }
 
             @Override

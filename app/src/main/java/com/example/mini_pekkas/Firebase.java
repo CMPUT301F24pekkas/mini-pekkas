@@ -986,12 +986,12 @@ public class Firebase {
 
                 // Get the event ID to pull from the event collection
                 String userID = Objects.requireNonNull(document.get("userID")).toString();
-                Log.d("EventDebug", "userID: " + userID);
+                Log.d("waitDebug", "status = " + status + ", eventID: " + eventID + ", userID: " + userID);
                 // Get the event from the event collection
                 userCollection.whereEqualTo("userID", userID).get()
                         .addOnSuccessListener(documentSnapshot -> {
                             // This should be unique
-                            Log.d("EventDebug", "documentSnapshot size: " + documentSnapshot.size());
+                            Log.d("waitDebug", "documentSnapshot size: " + documentSnapshot.size());
                             if (documentSnapshot.size() != 1) {
                                 listener.onError(new Exception("User does not exist"));
                                 return;
