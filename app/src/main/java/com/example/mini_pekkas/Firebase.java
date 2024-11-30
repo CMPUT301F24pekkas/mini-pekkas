@@ -38,9 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.17.0 Fixed getUsersByEventStatus race condition (thanks cmput 371)
- * TODO further testing is needed.
- * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
+ * @version 1.17.1 Fixed other potential race condition. Replacing requireNonNull to document.toObject for smarter conversion
  */
 public class Firebase {
     private final String deviceID;
@@ -266,7 +264,7 @@ public class Firebase {
      * @return the user document as a User object. Throws an error if the user does not exist
      */
     public User getThisUser() {
-        return new User(Objects.requireNonNull(userDocument.getData()));
+        return userDocument.toObject(User.class);
     }
 
     /**
@@ -311,21 +309,15 @@ public class Firebase {
         // TODO abstract these operations in one super function
         userEventsCollection.whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
-                    int total_user = task.size();
-                    AtomicInteger deleted_user = new AtomicInteger();
+                    // Use an array list to store the documents to be deleted.
+                    ArrayList<Task> tasks = new ArrayList<>();
                     // Delete all documents that match the query
                     for (DocumentSnapshot document : task.getDocuments()) {
-                        document.getReference().delete()
-                                .addOnFailureListener(listener::onError);
-
-                        // Wait for all documents to be deleted first
-                        if (deleted_user.incrementAndGet() == total_user) {
-                            listener.onInitialized();
-                        }
-                        if (deleted_user.get() != total_user) {
-                            listener.onError(new Exception("Failed to delete all user events"));
-                        }
+                        tasks.add(document.getReference().delete());
                     }
+                    Tasks.whenAllSuccess(tasks)
+                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
 
@@ -354,7 +346,7 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the user is deleted
      */
     public void deleteThisUser(InitializationListener listener) {
-        deleteUser(new User(Objects.requireNonNull(userDocument.getData())), listener);
+        deleteUser(getThisUser(), listener);
     }
 
     /**
@@ -417,19 +409,16 @@ public class Firebase {
         // Delete all event document from the user-events collection
         userEventsCollection.whereEqualTo("eventID", eventID).get()
                 .addOnSuccessListener(task -> {
-                    // Counter for the number of documents deleted
-                    int total_events = task.size();
-                    AtomicInteger deleted_events = new AtomicInteger();
+                    // Use an array list to store the documents to be deleted.
+                    ArrayList<Task> tasks = new ArrayList<>();
 
                     for (DocumentSnapshot document : task.getDocuments()) {
-                        document.getReference().delete()
-                                .addOnFailureListener(listener::onError);
-
-                        // Wait for all events to be deleted first
-                        if (deleted_events.incrementAndGet() == total_events) {
-                            listener.onInitialized();
-                        }
+                        tasks.add(document.getReference().delete());
                     }
+                    // Wait for all documents to be deleted first
+                    Tasks.whenAllSuccess(tasks)
+                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
     }
@@ -473,7 +462,7 @@ public class Firebase {
                         listener.onError(new Exception("Event does not exist"));
                     } else {
                         // Else return the event object
-                        Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
+                        Event event = documentSnapshot.toObject(Event.class);
                         listener.onEventRetrievalCompleted(event);
                     }
                 })
@@ -505,29 +494,23 @@ public class Firebase {
                         listener.onNotificationListRetrievalCompleted(new ArrayList<>());
                         return;
                     }
-
                     ArrayList<Notifications> notifications = new ArrayList<>();
-                    int total_notifications = task.size();
-                    AtomicInteger notification_count = new AtomicInteger();
+                    ArrayList<Task> tasks = new ArrayList<>();
 
                     for (DocumentSnapshot document : task.getDocuments()) {
-                        notificationCollection.whereEqualTo("id", document.get("notificationID")).get()
+                        tasks.add(notificationCollection.whereEqualTo("id", document.get("notificationID")).get()
                                 .addOnSuccessListener(documentSnapshot -> {
                                     if (!documentSnapshot.isEmpty()) {
                                         // Retrieve the notification
-                                        Notifications notif = new Notifications(Objects.requireNonNull(documentSnapshot.getDocuments().get(0).getData()));
-                                        notifications.add(notif);
-
-                                        // Wait for all notifications to be fetched first
-                                        if (notification_count.incrementAndGet() == total_notifications) {
-                                            // Sort by newest date first
-                                            notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-                                            listener.onNotificationListRetrievalCompleted(notifications);
-                                        }
+                                        Notifications notif = documentSnapshot.getDocuments().get(0).toObject(Notifications.class);
+                                        if (notif != null) notifications.add(notif);
                                     }
-                                })
-                                .addOnFailureListener(listener::onError);
+                                }));
                     }
+
+                    Tasks.whenAllSuccess(tasks)
+                            .addOnSuccessListener(aVoid -> listener.onNotificationListRetrievalCompleted(notifications))
+                            .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
     }
@@ -644,20 +627,16 @@ public class Firebase {
     private void deleteAllNotification(User user, InitializationListener listener) {
         userNotificationsCollection.whereEqualTo("userID", user.getId()).get()
                 .addOnSuccessListener(task -> {
-                    int total_notifications = task.size();
-                    AtomicInteger deleted_notifications = new AtomicInteger();
+                    ArrayList<Task> tasks = new ArrayList<>();
 
                     // Fetch all notification documents and delete it
                     for (DocumentSnapshot document : task.getDocuments()) {
-                        document.getReference().delete()
-                                .addOnFailureListener(listener::onError);
-                        if (deleted_notifications.incrementAndGet() == total_notifications) {
-                            listener.onInitialized();
-                        }
+                        tasks.add(document.getReference().delete());
                     }
-                    if (deleted_notifications.get() != total_notifications) {
-                        listener.onError(new Exception("Failed to retrieve all notifications"));
-                    }
+
+                    Tasks.whenAllSuccess(tasks)
+                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
     }
@@ -832,8 +811,7 @@ public class Firebase {
                     }
 
                     ArrayList<Event> events = new ArrayList<>(); // Get the array of events the user is waitlisted in
-                    int totalEvents = task.size(); // Total events to retrieve
-                    AtomicInteger retrievedEvents = new AtomicInteger(); // Counter for retrieved events
+                    ArrayList<Task> tasks = new ArrayList<>();
 
                     for (DocumentSnapshot document : task.getDocuments()) {
 
@@ -841,27 +819,20 @@ public class Firebase {
                         String eventID = Objects.requireNonNull(document.get("eventID")).toString();
 
                         // Get the event from the event collection
-                        eventCollection.document(eventID).get()
+                        tasks.add(eventCollection.document(eventID).get()
                                 .addOnSuccessListener(documentSnapshot -> {
                                     if (documentSnapshot == null) {
                                         listener.onError(new Exception("Event does not exist"));
-                                        return;
+                                    } else {
+                                        // Create the new event object and store it in the array
+                                        Event event = documentSnapshot.toObject(Event.class);
+                                        events.add(event);
                                     }
-
-                                    // Create the new event object and store it in the array
-                                    Event event = new Event(Objects.requireNonNull(documentSnapshot.getData()));
-                                    events.add(event);
-
-                                    // Increment and check if we have retrieved all events
-                                    if (retrievedEvents.incrementAndGet() == totalEvents){
-                                        listener.onEventListRetrievalCompleted(events);
-                                    }
-                                })
-                                .addOnFailureListener(listener::onError);
+                                }));
                     }
-                    if (retrievedEvents.get() != totalEvents){
-                        listener.onError(new Exception("Not all events were retrieved"));
-                    }
+                    Tasks.whenAllSuccess(tasks)
+                            .addOnSuccessListener(aVoid -> listener.onEventListRetrievalCompleted(events))
+                            .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
     }
@@ -884,7 +855,7 @@ public class Firebase {
                      } else {
                          // Fetch the event details from the document
                          DocumentSnapshot document = task.getDocuments().get(0);
-                         Event event = new Event(Objects.requireNonNull(document.getData()));
+                         Event event = document.toObject(Event.class);
                          listener.onEventRetrievalCompleted(event);
                      }
                  })
@@ -986,23 +957,20 @@ public class Firebase {
 
                 // Get the event ID to pull from the event collection
                 String userID = Objects.requireNonNull(document.get("userID")).toString();
-                Log.d("waitDebug", "status = " + status + ", eventID: " + eventID + ", userID: " + userID);
                 // Get the event from the event collection
                 tasks.add(userCollection.whereEqualTo("userID", userID).get()
-                        .addOnSuccessListener(documentSnapshot -> {
+                        .addOnSuccessListener(querySnapshot -> {
                             // This should be unique
-                            Log.d("waitDebug", "documentSnapshot size: " + documentSnapshot.size());
-                            if (documentSnapshot.size() != 1) {
+                            if (querySnapshot.size() != 1) {
                                 listener.onError(new Exception("User does not exist"));
-                                return;
+                            } else {
+                                // Create the new event object and store it in the array
+                                User user = querySnapshot.getDocuments().get(0).toObject(User.class);
+                                users.add(user);
                             }
-
-                            // Create the new event object and store it in the array
-                            User user = new User(Objects.requireNonNull(documentSnapshot.getDocuments().get(0).getData()));
-                            users.add(user);
-                        })
-                        .addOnFailureListener(listener::onError));
+                        }));
             }
+
             Tasks.whenAllSuccess(tasks)     // Await for all task to succeed first
                     .addOnSuccessListener(aVoid -> listener.onUserListRetrievalCompleted(users))
                     .addOnFailureListener(listener::onError);
@@ -1151,8 +1119,9 @@ public class Firebase {
                             getWaitlistedUsers(event.getId(), users -> {
                                 for (User user : users) {
                                     sendNotification(notifications.get(1), user.getId(), () -> {});     // Send the not selected notification
-                                    listener.onInitialized();
                                 }
+
+                                listener.onInitialized();
                             });
                         }
                     });
@@ -1515,7 +1484,7 @@ public class Firebase {
             // Create new array of event objects
             ArrayList<Event> events = new ArrayList<>();
             for (DocumentSnapshot document : results) {
-                Event event = new Event(Objects.requireNonNull(document.getData()));
+                Event event = document.toObject(Event.class);
                 events.add(event);
             }
             listener.onEventListRetrievalCompleted(events);
@@ -1539,7 +1508,7 @@ public class Firebase {
             // Create new array of event objects
             ArrayList<User> users = new ArrayList<>();
             for (DocumentSnapshot document : results) {
-                User user = new User(Objects.requireNonNull(document.getData()));
+                User user = document.toObject(User.class);
                 users.add(user);
             }
             listener.onUserListRetrievalCompleted(users);
@@ -1547,6 +1516,7 @@ public class Firebase {
     }
 
     /**
+     * TODO need to replace with facility object
      * Searches for facilities in the database, returns an array of facilities (strings)
      * @param query the query to search for
      * @param listener the listener that is called when the search is complete. Returns an ArrayList of facilities
@@ -1600,6 +1570,7 @@ public class Firebase {
     }
 
     /**
+     * TODO need to update to use facility object instead of name
      * Deletes all events associated with a facility
      * Delete the facility of the organizer, demoting to a user
      * @param facility the facility to delete events from
