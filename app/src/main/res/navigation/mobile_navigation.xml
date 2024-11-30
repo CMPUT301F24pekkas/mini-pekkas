@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_navigation_home_to_navigation_event"
             app:destination="@id/navigation_event" />
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_event3"
+            app:destination="@id/navigation_event3" />
     </fragment>
 
     <fragment
@@ -30,6 +33,11 @@
             app:destination="@id/navigation_home" />
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_event3"
+        android:name="com.example.mini_pekkas.ui.event.user.EventFragment"
+        android:label="@string/title_event"
+        tools:layout="@layout/fragment_event_chosen" />
     <fragment
         android:id="@+id/navigation_event2"
         android:name="com.example.mini_pekkas.ui.event.user.EventJoinFragment"
