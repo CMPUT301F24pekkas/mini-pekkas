@@ -145,6 +145,7 @@ public class OrganizerProfileFragment extends Fragment {
         organizerProfileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         organizerProfileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
         organizerProfileViewModel.getOrganizerLocation().observe(getViewLifecycleOwner(), organizerLocationInput::setText);
+        organizerProfileViewModel.getFacilityDescription().observe(getViewLifecycleOwner(), facilityDescription::setText);
 
         // Set click listeners
         profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
@@ -282,7 +283,6 @@ public class OrganizerProfileFragment extends Fragment {
                     organizerProfileViewModel.setEmail(email);
                     organizerProfileViewModel.setPhoneNumber(phoneNumber);
                     organizerProfileViewModel.setOrganizerLocation(organizerLocation);
-                    organizerProfileViewModel.setFacilityName(organizerLocation);
                     organizerProfileViewModel.setFacilityDescription(facilityDescription);
                     organizerProfileViewModel.updateProfileInFirebase();
 
