@@ -10,6 +10,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -34,7 +35,6 @@ public class NotificationWorker extends Worker implements SendNotificationInterf
     @NonNull
     @Override
     public Result doWork() {
-
         // Initialize your snapshot listener here
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         //MyFirebaseMessagingService();
@@ -42,24 +42,24 @@ public class NotificationWorker extends Worker implements SendNotificationInterf
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(QuerySnapshot querySnapshot, FirebaseFirestoreException e) {
-                        Log.d("FirebaseMessagingService", "onEvent called");
-                        if (e != null) {
-                            // Handle error
+                        if (e != null) {    // Handle error
                             Log.e("FirebaseMessagingService", "Error getting notification documents: ", e);
                             return;
                         }
 
-                        Log.d("FirebaseMessagingService", "Snapshot listener called id = " + deviceID);
-
                         for (DocumentChange dc : querySnapshot.getDocumentChanges()) {
-                            // Check if the document if newly added, not null, and if the document snapshot contains the deviceID
-                            if (dc.getType() == DocumentChange.Type.ADDED && Objects.equals(dc.getDocument().getString("userID"), deviceID)) {
+                            // Check if the document if newly added, not read, and if the document snapshot contains the deviceID (notification belongs to user)
+                            if (dc.getType() == DocumentChange.Type.ADDED && Boolean.FALSE.equals(dc.getDocument().getBoolean("read")) && Objects.equals(dc.getDocument().getString("userID"), deviceID)) {
                                 db.collection("notifications").whereEqualTo("id", dc.getDocument().getString("notificationID")).get()
                                         .addOnSuccessListener(task -> {
                                             if (!task.isEmpty()) {
-                                                Notifications notification = task.getDocuments().get(0).toObject(Notifications.class);
-                                                Log.d("FirebaseMessagingService", "Notification title: " + notification.getTitle());
-                                                sendNotification(notification.getTitle(), notification.getDescription(), getApplicationContext(), notificationManager);
+                                                Log.d("NotificationWorker", "New notification received, size = " + task.size());
+                                                for (DocumentSnapshot document : task.getDocuments()) {
+                                                    //  Display new notifications and mark it as read
+                                                    Notifications notification = document.toObject(Notifications.class);
+                                                    sendNotification(notification.getTitle(), notification.getDescription(), getApplicationContext(), notificationManager);
+                                                    dc.getDocument().getReference().update("read", true);
+                                                }
                                             }
                                         });
                             }

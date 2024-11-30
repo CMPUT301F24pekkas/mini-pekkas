@@ -586,6 +586,7 @@ public class Firebase {
             HashMap<String, Object> map = new HashMap<>();
             map.put("notificationID", id);
             map.put("userID", userID);
+            map.put("read", false);
 
             // Call the listener on successful add
             userNotificationsCollection.add(map)

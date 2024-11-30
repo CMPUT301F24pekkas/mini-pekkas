@@ -18,6 +18,13 @@ import com.example.mini_pekkas.R;
  * The SendNotificationInterface interface defines a default method for sending system notifications.
  */
 public interface SendNotificationInterface {
+    /**
+     * Create a notification on the device.
+     * @param title The title of the notification
+     * @param message The message of the notification
+     * @param context the context of the application
+     * @param notificationManager the notification manager
+     */
     default void sendNotification(String title, String message, Context context, NotificationManager notificationManager) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -46,6 +53,7 @@ public interface SendNotificationInterface {
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        // Generate a random ID and send it to the notification manager
+        notificationManager.notify((int) System.currentTimeMillis(), notificationBuilder.build());
     }
 }
