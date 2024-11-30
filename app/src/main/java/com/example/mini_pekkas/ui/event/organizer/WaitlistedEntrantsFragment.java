@@ -35,7 +35,7 @@ public class WaitlistedEntrantsFragment extends Fragment {
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
         Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
-
+        Log.d("user", "Current event id: " + currentEvent.getId());
         //make ArrayAdapter
 
         waitlistedArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
