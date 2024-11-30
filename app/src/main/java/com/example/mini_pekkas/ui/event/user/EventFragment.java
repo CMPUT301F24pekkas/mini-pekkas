@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentEventBinding;
 import com.example.mini_pekkas.databinding.FragmentEventLeaveWaitBinding;
@@ -24,6 +26,8 @@ import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Objects;
 
 /**
  * Fragment representing an event's details and waitlist functionality.
@@ -36,6 +40,7 @@ public class EventFragment extends Fragment {
     private EventViewModel eventViewModel;
     private HomeEventsListViewModel homeEventsListViewModel;
     private Event event;
+    private Firebase firebaseHelper;
 
     /**
      * Inflates the fragment's view, sets up the necessary ViewModels and UI elements,
@@ -50,24 +55,25 @@ public class EventFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentEventBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        firebaseHelper = new Firebase(requireContext());
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
         sharedEventViewModel = new ViewModelProvider(requireActivity()).get(SharedEventViewModel.class);
         homeEventsListViewModel = new ViewModelProvider(requireActivity()).get(HomeEventsListViewModel.class);
-
         sharedEventViewModel.getNavigationSource().observe(getViewLifecycleOwner(), source -> {
             if ("HOME".equals(source)) {
                 Event homeEvent = homeEventsListViewModel.getSelectedEvent().getValue();
                 if (homeEvent != null) {
-                    displayEventDetails(homeEvent);
                     event = homeEvent;
+
+                    fetchEventStatus();
                 } else {
                     Toast.makeText(requireContext(), "Home event not found", Toast.LENGTH_SHORT).show();
                 }
             } else if ("QR_CODE".equals(source)) {
                 Event qrCodeEvent = sharedEventViewModel.getEventDetails().getValue();
                 if (qrCodeEvent != null) {
-                    displayEventDetails(qrCodeEvent);
                     event = qrCodeEvent;
+                    fetchEventStatus();
                 } else {
                     Toast.makeText(requireContext(), "QR code event not found", Toast.LENGTH_SHORT).show();
                 }
@@ -102,6 +108,22 @@ public class EventFragment extends Fragment {
         });
         return root;
     }
+
+    private void fetchEventStatus() {
+        firebaseHelper.getStatusInEvent(event, new Firebase.DataRetrievalListener() {
+            @Override
+            public void onRetrievalCompleted(String status) {
+                Log.d("FirebaseHelper", "Status retrieved: " + status);
+                if (Objects.equals(status, "waitlisted")){
+                    displayEventDetails(event);
+                } else if (Objects.equals(status, "pending")){
+                    NavController navController = NavHostFragment.findNavController(EventFragment.this);
+                    navController.navigate(R.id.action_navigation_home_to_navigation_event3);
+                }
+            }
+        });
+    }
+
 
     private void displayEventDetails(Event event) {
         if (event == null) {
