@@ -13,6 +13,8 @@ public class User {
     private String facility;
     private String profilePhotoUrl;
     private String id;
+    private String facilityPhotoUrl;
+    private String facilityDesc;
 
     /**
      * Constructs a User object from a map of attributes.
@@ -27,6 +29,8 @@ public class User {
         this.facility = (String) map.get("facility");
         this.profilePhotoUrl = (String) map.get("profilePhoto");
         this.id = (String) map.get("userID");
+        this.facilityPhotoUrl = (String) map.get("facilityPhoto");
+        this.facilityDesc = (String) map.get("facilityDesc");
     }
 
     /**
@@ -45,7 +49,7 @@ public class User {
      * @param facility  The user's associated facility.
      * @param id        The user's ID. (Should only be used in firebase)
      */
-    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl, String id) {
+    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl, String id, String facilityPhotoUrl, String facilityDesc) {
         this.name = name;
         this.lastname = lastname;
         this.email = email;
@@ -53,6 +57,8 @@ public class User {
         this.facility = facility;
         this.profilePhotoUrl = profilePhotoUrl;
         this.id = id;
+        this.facilityPhotoUrl = facilityPhotoUrl;
+        this.facilityDesc = facilityDesc;
     }
 
     /**
@@ -162,6 +168,21 @@ public class User {
         this.id = id;
     }
 
+    public String getFacilityPhotoUrl() {
+        return facilityPhotoUrl;
+    }
+
+    public void setFacilityPhotoUrl(String facilityPhotoUrl) {
+        this.facilityPhotoUrl = facilityPhotoUrl;
+    }
+
+    public String getFacilityDesc() {
+        return facilityDesc;
+    }
+
+    public void setFacilityDesc(String facilityDesc) {
+        this.facilityDesc = facilityDesc;
+    }
 
     /**
      * Converts the User object into a Map of attributes.
@@ -177,6 +198,7 @@ public class User {
         map.put("facility", facility);
         map.put("profilePhoto", profilePhotoUrl);
         map.put("userID", id);
+        map.put("facilityDesc", facilityDesc);
         return map;
     }
 }
