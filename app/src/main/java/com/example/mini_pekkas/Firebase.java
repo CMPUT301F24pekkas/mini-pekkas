@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.example.mini_pekkas.notification.Notifications;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;

@@ -34,7 +34,7 @@
         <activity android:name=".AdminActivity" android:exported="true" />
 
         <service
-            android:name="com.example.mini_pekkas.FBNotifications"
+            android:name="com.example.mini_pekkas.notification.FBNotifications"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

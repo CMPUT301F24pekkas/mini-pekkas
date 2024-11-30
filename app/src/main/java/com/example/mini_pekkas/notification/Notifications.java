@@ -1,4 +1,4 @@
-package com.example.mini_pekkas;
+package com.example.mini_pekkas.notification;
 
 import com.google.firebase.Timestamp;
 
