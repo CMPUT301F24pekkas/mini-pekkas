@@ -32,6 +32,8 @@ import com.example.mini_pekkas.databinding.FragmentOrganizerProfileBinding;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.w3c.dom.Text;
+
 /**
  * Fragment representing the organizer's profile view, allowing users to view and edit
  * their personal details, profile picture, and other information.
@@ -90,6 +92,7 @@ public class OrganizerProfileFragment extends Fragment {
         final ImageView profileImage = binding.userProfileImage;
         final ImageButton editButton = binding.editButton;
         final ImageButton profileEdit = binding.pfpEdit;
+        final TextView facilityName = binding.facilityTitle;
         final TextView facilityDescription = binding.facilityDescription;
         final ImageView facilityImage = binding.facilityImage;
         final ImageButton facilityImageEdit = binding.facilityEditButton;
@@ -145,7 +148,9 @@ public class OrganizerProfileFragment extends Fragment {
         organizerProfileViewModel.getEmail().observe(getViewLifecycleOwner(), emailInput::setText);
         organizerProfileViewModel.getPhoneNumber().observe(getViewLifecycleOwner(), phoneInput::setText);
         organizerProfileViewModel.getOrganizerLocation().observe(getViewLifecycleOwner(), organizerLocationInput::setText);
+        organizerProfileViewModel.getOrganizerLocation().observe(getViewLifecycleOwner(), facilityName::setText);
         organizerProfileViewModel.getFacilityDescription().observe(getViewLifecycleOwner(), facilityDescription::setText);
+
 
         // Set click listeners
         profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
