@@ -24,6 +24,8 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> pfpText;
     private final MutableLiveData<String> profilePictureUrl;
     private final MutableLiveData<String> userID;
+    private final MutableLiveData<String> facilityPictureUrl;
+    private final MutableLiveData<String> facilityDescription;
     private final Firebase firebaseHelper;
     /**
      * Initializes a new ProfileViewModel instance with default profile values and
@@ -41,6 +43,8 @@ public class ProfileViewModel extends ViewModel {
         pfpText = new MutableLiveData<>();
         profilePictureUrl = new MutableLiveData<>();
         userID = new MutableLiveData<>();
+        facilityPictureUrl = new MutableLiveData<>();
+        facilityDescription = new MutableLiveData<>();
 
         firebaseHelper = new Firebase(context);
 
@@ -52,6 +56,8 @@ public class ProfileViewModel extends ViewModel {
         phoneNumber.setValue("123-456-7890");
         profilePictureUrl.setValue("");
         userID.setValue("");
+        facilityPictureUrl.setValue("");
+        facilityDescription.setValue("...");
 
         loadUserProfile();
     }
@@ -71,6 +77,8 @@ public class ProfileViewModel extends ViewModel {
                     phoneNumber.setValue(user.getPhone());
                     profilePictureUrl.setValue(user.getProfilePhotoUrl());
                     userID.setValue(user.getId());
+                    facilityPictureUrl.setValue(user.getFacilityPhotoUrl());
+                    facilityDescription.setValue(user.getFacilityDesc());
                 }
             }
         });
@@ -86,7 +94,9 @@ public class ProfileViewModel extends ViewModel {
                 phoneNumber.getValue(),
                 organizerLocation.getValue(),
                 profilePictureUrl.getValue(),
-                userID.getValue()
+                userID.getValue(),
+                facilityPictureUrl.getValue(),
+                facilityDescription.getValue()
         );
 
         firebaseHelper.updateThisUser(updatedUser);
@@ -190,4 +200,13 @@ public class ProfileViewModel extends ViewModel {
     public void setProfilePictureUrl(String url) {
         profilePictureUrl.setValue(url);
     }
+
+    public LiveData<String> getFacilityPictureUrl() { return facilityPictureUrl; }
+
+    public void setFacilityPictureUrl(String url) { facilityPictureUrl.setValue(url); }
+
+    public LiveData<String> getFacilityDescription() { return facilityDescription; }
+
+    public void setFacilityDescription(String description) { facilityDescription.setValue(description); }
 }
+
