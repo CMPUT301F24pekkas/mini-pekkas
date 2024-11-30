@@ -1,19 +1,20 @@
 package com.example.mini_pekkas;
+import android.Manifest;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
-import androidx.appcompat.app.AlertDialog;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.mini_pekkas.databinding.ActivityMainBinding;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,36 @@ public class MainActivity extends AppCompatActivity {
     private Button submitButton;
     private Firebase firebaseHelper;
 
+
+    // Declare the launcher at the top of your Activity/Fragment:
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // FCM SDK (and your app) can post notifications.
+
+                } else {
+                    // TODO: Inform user that that your app will not show notifications.
+                }
+            });
+
+    private void askNotificationPermission() {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                // FCM SDK (and your app) can post notifications.
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                // TODO: display an educational UI explaining to the user the features that will be enabled
+                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+                //       If the user selects "No thanks," allow the user to continue without notifications.
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
+
     /**
      * Called when the activity is first created. Initializes Firebase, checks if the user
      * exists in Firebase, and either navigates to the appropriate activity or displays a form for new users.
@@ -45,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firebase helper
         firebaseHelper = new Firebase(this);
+        askNotificationPermission();    // Ask for notification permission
 
         // First check if this user is an admin
         firebaseHelper.isThisUserAdmin(isAdmin -> {
@@ -170,27 +202,4 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Briefly shows dialog then crashes app
-    /*
-    private void showFacilityDialog() {
-        View dialogView = getLayoutInflater().inflate(R.layout.fragment_facility_details, null);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(false)
-                .create();
-
-
-        Button uploadPictureButton = dialogView.findViewById(R.id.uploadPictureButton);
-        EditText facilityDescriptionInput = dialogView.findViewById(R.id.facilityDescription);
-        Button submitButton = dialogView.findViewById(R.id.submitButton);
-
-        submitButton.setOnClickListener(v -> {
-            String facilityDescription = facilityDescriptionInput.getText().toString().trim();
-            Intent organizerIntent = new Intent(MainActivity.this, OrganizerActivity.class);
-            startActivity(organizerIntent);
-            dialog.dismiss();
-        });
-        dialog.show();
-    }*/
 }

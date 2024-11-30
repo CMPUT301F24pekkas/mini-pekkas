@@ -553,7 +553,7 @@ public class Firebase {
                                         .addOnSuccessListener(documentReference -> {
                                             // Retrieve the ID of the document and update the notification object
                                             String id = documentReference.getId();
-                                            notification.setId(id);
+                                            notification.setID(id);
 
                                             // Keep the id copy in firestore for querying
                                             documentReference.update("id", id);

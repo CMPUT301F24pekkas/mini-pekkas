@@ -75,9 +75,11 @@ dependencies {
     // Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
     // https://firebase.google.com/docs/android/setup#available-libraries
+    implementation("com.google.firebase:firebase-analytics")
+
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-messaging")    // TODO may need to add analytics for messaging (notification)
+    implementation("com.google.firebase:firebase-messaging")
 
     // for the qr code
     implementation("com.journeyapps:zxing-android-embedded:4.3.0") {
@@ -89,6 +91,7 @@ dependencies {
 
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
-    
+
+    implementation("androidx.work:work-runtime:2.10.0") // For background tasks/scheduling
 }
 

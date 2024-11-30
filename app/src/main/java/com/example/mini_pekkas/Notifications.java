@@ -87,6 +87,12 @@ public class Notifications {
     }
 
     /**
+     * Constructor for creating an empty Notification object.
+     * Needed for firebase document conversion
+     */
+    public Notifications(){};
+
+    /**
      * Gets the description of the notification.
      *
      * @return The description of the notification.
@@ -103,7 +109,6 @@ public class Notifications {
     public Date getDate() {
         return date;
     }
-    public String getId() {return id; }
 
     /**
      * Gets the Firebase Timestamp of the notification.
@@ -151,7 +156,7 @@ public class Notifications {
     public void setDate(Date date) {
         this.date = date;
     }
-    public void setId(String id) {this.id = id;}
+
     /**
      * Sets the priority level of the notification.
      *
