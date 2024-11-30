@@ -1123,7 +1123,8 @@ public class Firebase {
                 }
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
-                if (waitlist_size > user_cap) {
+
+                if (waitlist_size > user_cap && user_cap != -1) {
                     Random random = new Random();
                     while (randomIntegers.size() < user_cap) { // Keep generating until we have 'numIntegers' unique integers
                         randomIntegers.add(random.nextInt(waitlist_size));
@@ -1134,11 +1135,10 @@ public class Firebase {
                         randomIntegers.add(i);
                     }
                 }
-
                 // Now we sample X users (Or all users if we're under capacity
                 List<String> selectedUsersID = new ArrayList<>();
                 Iterator<Integer> iterator = randomIntegers.iterator();
-                for (int i = 0; i < waitlist_size && i < user_cap; i++) {
+                for (int i = 0; i < waitlist_size && (i < user_cap || user_cap == -1); i++) {
                     selectedUsersID.add(Objects.requireNonNull(task.getDocuments().get(iterator.next()).get("userID")).toString());
                 }
 
