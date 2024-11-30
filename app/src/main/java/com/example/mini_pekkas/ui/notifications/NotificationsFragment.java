@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.mini_pekkas.Notifications;
+import com.example.mini_pekkas.notification.Notifications;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentNotificationsBinding;
 import com.example.mini_pekkas.ui.event.user.EventFragment;

@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
-import com.example.mini_pekkas.Notifications;
+import com.example.mini_pekkas.notification.Notifications;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentCreateNotificationBinding;
 

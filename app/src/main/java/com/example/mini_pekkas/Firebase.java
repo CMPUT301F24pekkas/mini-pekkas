@@ -2,12 +2,15 @@ package com.example.mini_pekkas;
 
 import static android.content.ContentValues.TAG;
 
+import static java.lang.Thread.sleep;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.example.mini_pekkas.notification.Notifications;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
@@ -551,7 +554,7 @@ public class Firebase {
                                         .addOnSuccessListener(documentReference -> {
                                             // Retrieve the ID of the document and update the notification object
                                             String id = documentReference.getId();
-                                            notification.setId(id);
+                                            notification.setID(id);
 
                                             // Keep the id copy in firestore for querying
                                             documentReference.update("id", id);
@@ -583,6 +586,7 @@ public class Firebase {
             HashMap<String, Object> map = new HashMap<>();
             map.put("notificationID", id);
             map.put("userID", userID);
+            map.put("read", false);
 
             // Call the listener on successful add
             userNotificationsCollection.add(map)
@@ -984,11 +988,12 @@ public class Firebase {
 
                 // Get the event ID to pull from the event collection
                 String userID = Objects.requireNonNull(document.get("userID")).toString();
-
+                Log.d("waitDebug", "status = " + status + ", eventID: " + eventID + ", userID: " + userID);
                 // Get the event from the event collection
                 userCollection.whereEqualTo("userID", userID).get()
                         .addOnSuccessListener(documentSnapshot -> {
                             // This should be unique
+                            Log.d("waitDebug", "documentSnapshot size: " + documentSnapshot.size());
                             if (documentSnapshot.size() != 1) {
                                 listener.onError(new Exception("User does not exist"));
                                 return;
@@ -1106,13 +1111,22 @@ public class Firebase {
         // Create and store a default notification if none is provided
         long user_cap = event.getMaxAttendees();        // The max number of attendees to draw
         // TODO waitlist size should be stored in the event object, I will calculate it in firebase for now
-        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("status", "waitlisted").get()
+        userEventsCollection
+                .whereEqualTo("eventID", event.getId().trim())
+                .whereEqualTo("status", "waitlisted").get()
             .addOnSuccessListener(task -> {
                 int waitlist_size = task.size();
+
                 Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
+                try {
+                    sleep(0,100);  // 100 nano s delay to prevent race condition
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
-                if (waitlist_size > user_cap) {
+
+                if (waitlist_size > user_cap && user_cap != -1) {
                     Random random = new Random();
                     while (randomIntegers.size() < user_cap) { // Keep generating until we have 'numIntegers' unique integers
                         randomIntegers.add(random.nextInt(waitlist_size));
@@ -1123,16 +1137,16 @@ public class Firebase {
                         randomIntegers.add(i);
                     }
                 }
-
                 // Now we sample X users (Or all users if we're under capacity
                 List<String> selectedUsersID = new ArrayList<>();
                 Iterator<Integer> iterator = randomIntegers.iterator();
-                for (int i = 0; i < waitlist_size && i < user_cap; i++) {
+                for (int i = 0; i < waitlist_size && (i < user_cap || user_cap == -1); i++) {
                     selectedUsersID.add(Objects.requireNonNull(task.getDocuments().get(iterator.next()).get("userID")).toString());
                 }
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
+                    Log.d("waitDebug", "User ID: " + userID);
                     // Send a success notification to each user
                     sendNotification(notifications.get(0), userID);
 

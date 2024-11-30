@@ -13,4 +13,5 @@
     <string name="search_qr_codes">Browse QR HashData</string>
     <string name="search_profiles">Browse Profiles</string>
     <string name="add_event">Add Event</string>
+    <string name="default_notification_channel_id">not_default_channel</string>
 </resources>
