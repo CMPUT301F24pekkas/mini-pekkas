@@ -1,7 +1,6 @@
 package com.example.mini_pekkas;
 
 import static android.content.ContentValues.TAG;
-
 import static java.lang.Thread.sleep;
 
 import android.annotation.SuppressLint;
@@ -39,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.16.9.1 fecking white space causing bad query. Fixed getUsersByEventStatus
+ * @version 1.17.0 Fixed getUsersByEventStatus race condition (thanks cmput 371)
  * TODO further testing is needed.
  * TODO document.toObject(X.class); is actually smarter than new X(X.toMap), a full rewrite may causes problems but may also be worth doing
  */
@@ -980,9 +979,8 @@ public class Firebase {
                 return;
             }
 
-            ArrayList<User> users = new ArrayList<>(); // Get the array of events the user is waitlisted in
-            int totalUser = task.size(); // Total events to retrieve
-            AtomicInteger retrievedUsers = new AtomicInteger(); // Counter for retrieved events
+            ArrayList<User> users = new ArrayList<>();  // Get the array of events the user is waitlisted in
+            ArrayList<Task> tasks = new ArrayList<>();  // Use an array of Tasks to ensure all users are retrieved
 
             for (DocumentSnapshot document : task.getDocuments()) {
 
@@ -990,7 +988,7 @@ public class Firebase {
                 String userID = Objects.requireNonNull(document.get("userID")).toString();
                 Log.d("waitDebug", "status = " + status + ", eventID: " + eventID + ", userID: " + userID);
                 // Get the event from the event collection
-                userCollection.whereEqualTo("userID", userID).get()
+                tasks.add(userCollection.whereEqualTo("userID", userID).get()
                         .addOnSuccessListener(documentSnapshot -> {
                             // This should be unique
                             Log.d("waitDebug", "documentSnapshot size: " + documentSnapshot.size());
@@ -1002,19 +1000,13 @@ public class Firebase {
                             // Create the new event object and store it in the array
                             User user = new User(Objects.requireNonNull(documentSnapshot.getDocuments().get(0).getData()));
                             users.add(user);
-
-                            // Increment and check if we have retrieved all events
-                            if (retrievedUsers.incrementAndGet() == totalUser){
-                                listener.onUserListRetrievalCompleted(users);
-                            }
                         })
-                        .addOnFailureListener(listener::onError);
+                        .addOnFailureListener(listener::onError));
             }
-            if (retrievedUsers.get() != totalUser){
-                listener.onError(new Exception("Not all users were retrieved"));
-            }
-        })
-                .addOnFailureListener(listener::onError);
+            Tasks.whenAllSuccess(tasks)     // Await for all task to succeed first
+                    .addOnSuccessListener(aVoid -> listener.onUserListRetrievalCompleted(users))
+                    .addOnFailureListener(listener::onError);
+        }).addOnFailureListener(listener::onError);
     }
 
     /**
