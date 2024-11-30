@@ -2,12 +2,10 @@ package com.example.mini_pekkas.ui.event.organizer;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Notification;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,21 +26,16 @@ import androidx.navigation.Navigation;
 import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
-import com.example.mini_pekkas.Notifications;
+import com.example.mini_pekkas.notification.Notifications;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
-import com.example.mini_pekkas.databinding.FragmentChosenBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrg2Binding;
-import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;
 import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 public class EventChooseUsersFragment extends Fragment {
     private FragmentEventOrg2Binding binding;

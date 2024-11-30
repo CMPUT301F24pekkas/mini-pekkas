@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.example.mini_pekkas.notification.Notifications;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
@@ -553,7 +554,7 @@ public class Firebase {
                                         .addOnSuccessListener(documentReference -> {
                                             // Retrieve the ID of the document and update the notification object
                                             String id = documentReference.getId();
-                                            notification.setId(id);
+                                            notification.setID(id);
 
                                             // Keep the id copy in firestore for querying
                                             documentReference.update("id", id);
@@ -585,6 +586,7 @@ public class Firebase {
             HashMap<String, Object> map = new HashMap<>();
             map.put("notificationID", id);
             map.put("userID", userID);
+            map.put("read", false);
 
             // Call the listener on successful add
             userNotificationsCollection.add(map)
