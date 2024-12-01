@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.17.2 Now stores location when waitlisting if needed. getUserLocations fetches all geolocations
+ * @version 1.17.3 didAcceptEvent now takes in multiple notfications
  */
 public class Firebase {
     private final String deviceID;
@@ -1141,24 +1141,26 @@ public class Firebase {
      * Call when this user accepts or rejects an event. Updates the user-event collection
      * @param didAccept true if this user accepted (enrolled), false if user rejected (cancelled)
      * @param eventID the event ID to update
-     * @param notification the notification to send to either the user accepting, or a new user getting enrolled.
-     *                     (not a cancellation notification) Make sure to send the right notification on either condition
+     * @param notifications the notifications to send to either the user accepting, or a new user getting enrolled.
+     *                     if didAccept is true, notification[0] is an acceptance message sent to the user
+     *                     if didAccept is false, notification[0] is an new selected message sent to another user. notification[1] is a rejection message sent to the current user
      * @param listener Optional InitializationListener listener that is called after the event is updated
      */
-    public void userAcceptEvent(boolean didAccept, String eventID, Notifications notification, InitializationListener listener) {
+    public void userAcceptEvent(boolean didAccept, String eventID, ArrayList<Notifications> notifications, InitializationListener listener) {
         setNewStatus(didAccept ? "enrolled" : "cancelled", deviceID, eventID, listener);
         if(didAccept) {
-            sendNotification(notification, deviceID);   // Send a notification of success
+            sendNotification(notifications.get(0), deviceID);   // Send a notification of success
         } else {
-            redrawUserInEvent(eventID, notification, listener);   // Draw new user on rejection. Notify
+            sendNotification(notifications.get(1), deviceID);   // Send a notification of rejection
+            redrawUserInEvent(eventID, notifications.get(0), listener);   // Draw new user on rejection. Notify selection
         }
     }
 
     /**
-     * Overload of the {@link #userAcceptEvent(boolean, String, Notifications, InitializationListener)} with no listener
+     * Overload of the {@link #userAcceptEvent(boolean, String, ArrayList, InitializationListener)} with no listener
      */
-    public void userAcceptEvent(boolean didAccept, String eventID, Notifications notification) {
-        userAcceptEvent(didAccept, eventID, notification, () -> {});
+    public void userAcceptEvent(boolean didAccept, String eventID, ArrayList<Notifications> notifications) {
+        userAcceptEvent(didAccept, eventID, notifications, () -> {});
     }
 
     /*
@@ -1242,7 +1244,7 @@ public class Firebase {
     }
 
     /**
-     * This function is called whenever a user cancels an event from {@link #userAcceptEvent(boolean, String, Notifications, InitializationListener)}
+     * This function is called whenever a user cancels an event from {@link #userAcceptEvent(boolean, String, ArrayList, InitializationListener)}
      * Redraw a new user from the pool of events (from waitlist into pending)
      */
     private void redrawUserInEvent(String eventID, Notifications notification, InitializationListener listener) {
