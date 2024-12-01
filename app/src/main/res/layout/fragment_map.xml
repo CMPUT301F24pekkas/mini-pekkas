@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Use a FrameLayout (or other container) to display the location data or map elements -->
+    <FrameLayout
+        android:id="@+id/location_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white" /> <!-- You can customize the background -->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
