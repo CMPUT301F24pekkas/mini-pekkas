@@ -327,8 +327,9 @@ public class Firebase {
         } catch (Exception e) {
             listener.onError(e);
         }
+
         // Delete all documents from the user-events collection
-        userEventsCollection.whereEqualTo("userID", deviceID).get()
+        userEventsCollection.whereEqualTo("userID", user.getUserID()).get()
                 .addOnSuccessListener(task -> {
                     // Use an array list to store the documents to be deleted.
                     if (!task.isEmpty()) {
