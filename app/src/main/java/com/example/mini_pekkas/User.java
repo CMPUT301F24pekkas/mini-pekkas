@@ -1,18 +1,22 @@
 package com.example.mini_pekkas;
 
+import com.google.firebase.database.PropertyName;
+
 import java.util.HashMap;
 import java.util.Map;
 /**
  * Represents a User with personal details such name, lastname, email, phone, and facility.
  */
 public class User {
+    @PropertyName("userID")
+    private String userID;
+
     private String name;
     private String lastname;
     private String email;
     private String phone;
     private String facility;
     private String profilePhotoUrl;
-    private String id;
     private String facilityPhotoUrl;
     private String facilityDesc;
 
@@ -28,7 +32,7 @@ public class User {
         this.phone = (String) map.get("phone");
         this.facility = (String) map.get("facility");
         this.profilePhotoUrl = (String) map.get("profilePhoto");
-        this.id = (String) map.get("userID");
+        this.userID = (String) map.get("userID");
         this.facilityPhotoUrl = (String) map.get("facilityPhoto");
         this.facilityDesc = (String) map.get("facilityDesc");
     }
@@ -47,16 +51,16 @@ public class User {
      * @param email     The user's email address.
      * @param phone     The user's phone number.
      * @param facility  The user's associated facility.
-     * @param id        The user's ID. (Should only be used in firebase)
+     * @param userID        The user's ID. (Should only be used in firebase)
      */
-    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl, String id, String facilityPhotoUrl, String facilityDesc) {
+    public User(String name, String lastname, String email, String phone, String facility, String profilePhotoUrl, String userID, String facilityPhotoUrl, String facilityDesc) {
         this.name = name;
         this.lastname = lastname;
         this.email = email;
         this.phone = phone;
         this.facility = facility;
         this.profilePhotoUrl = profilePhotoUrl;
-        this.id = id;
+        this.userID = userID;
         this.facilityPhotoUrl = facilityPhotoUrl;
         this.facilityDesc = facilityDesc;
     }
@@ -160,12 +164,12 @@ public class User {
         this.profilePhotoUrl = profilePhotoUrl;
     }
 
-    public String getId() {
-        return id;
+    public String getUserID() {
+        return userID;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     public String getFacilityPhotoUrl() {
@@ -197,8 +201,9 @@ public class User {
         map.put("phone", phone);
         map.put("facility", facility);
         map.put("profilePhoto", profilePhotoUrl);
-        map.put("userID", id);
+        map.put("userID", userID);
         map.put("facilityDesc", facilityDesc);
+        map.put("facilityPhoto", facilityPhotoUrl);
         return map;
     }
 }

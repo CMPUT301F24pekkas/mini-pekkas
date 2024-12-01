@@ -76,7 +76,7 @@ public class ProfileViewModel extends ViewModel {
                     email.setValue(user.getEmail());
                     phoneNumber.setValue(user.getPhone());
                     profilePictureUrl.setValue(user.getProfilePhotoUrl());
-                    userID.setValue(user.getId());
+                    userID.setValue(user.getUserID());
                     facilityPictureUrl.setValue(user.getFacilityPhotoUrl());
                     facilityDescription.setValue(user.getFacilityDesc());
                 }

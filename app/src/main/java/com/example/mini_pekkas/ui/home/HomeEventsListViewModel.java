@@ -97,8 +97,6 @@ public class HomeEventsListViewModel extends ViewModel {
         ArrayList<Event> currentEventList = EventList.getValue();
         for(int i = 0; i < currentEventList.size(); i++){
             if (Objects.equals(currentEventList.get(i).getId(), eventId)){
-                Event event = currentEventList.get(i);
-                removeEventFromDb(event);
                 currentEventList.remove(i);
                 break;
             }

@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -23,7 +24,6 @@ import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.17.1 Fixed other potential race condition. Replacing requireNonNull to document.toObject for smarter conversion
+ * @version 1.17.2 Now stores location when waitlisting if needed. getUserLocations fetches all geolocations
  */
 public class Firebase {
     private final String deviceID;
@@ -164,6 +164,16 @@ public class Firebase {
     }
 
     /**
+     * Interface for functions that retrieve an array of facilities
+     */
+    public interface FacilityListRetrievalListener {
+        void onFacilityListRetrievalCompleted(ArrayList<Facility> facilities);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting facilities: ", e);
+        }
+    }
+
+    /**
      * Interface for functions that retrieve the notifications for this use
      */
     public interface NotificationListRetrievalListener {
@@ -187,6 +197,14 @@ public class Firebase {
     public interface ImageListRetrievalListener {
         void onImageListRetrievalCompleted(ArrayList<Uri> images);
         default void onError(Exception e) {Log.e(TAG, "Error getting images: ", e);}
+    }
+
+    /**
+     * Interface for functions that return list of locations in GeoPoint format
+     */
+    public interface GeoPointListRetrievalListener {
+        void onGeoPointListRetrievalCompleted(ArrayList<GeoPoint> locations);
+        default void onError(Exception e) {Log.e(TAG, "Error getting locations: ", e);}
     }
 
     /**
@@ -250,7 +268,7 @@ public class Firebase {
      * @param listener An InitializationListener listener that is called after the user is initialized
      */
     public void InitializeThisUser(User user, InitializationListener listener) {
-        user.setId(deviceID);
+        user.setUserID(deviceID);
         userCollection.add(user.toMap())
                 .addOnSuccessListener(v -> {
                     // Re fetch the user document. Listener call will now have a valid user document
@@ -264,7 +282,8 @@ public class Firebase {
      * @return the user document as a User object. Throws an error if the user does not exist
      */
     public User getThisUser() {
-        return userDocument.toObject(User.class);
+        return new User(Objects.requireNonNull(userDocument.getData()));
+        //        return userDocument.toObject(User.class);
     }
 
     /**
@@ -273,7 +292,7 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the user is updated
      */
     public void updateThisUser(User user, InitializationListener listener) {
-        userCollection.whereEqualTo("userID", user.getId()).get()
+        userCollection.whereEqualTo("userID", user.getUserID()).get()
             .addOnSuccessListener(task -> {
                 if (task.isEmpty()) {
                     listener.onError(new Exception("User not found"));
@@ -302,44 +321,49 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the user is deleted
      */
     public void deleteUser(User user, InitializationListener listener) {
-        deleteProfilePicture(user);
-        deleteAllNotification(user);
-
+        try {
+            deleteProfilePicture(user);
+            deleteAllNotification(user);
+        } catch (Exception e) {
+            listener.onError(e);
+        }
         // Delete all documents from the user-events collection
-        // TODO abstract these operations in one super function
         userEventsCollection.whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Use an array list to store the documents to be deleted.
-                    ArrayList<Task> tasks = new ArrayList<>();
-                    // Delete all documents that match the query
-                    for (DocumentSnapshot document : task.getDocuments()) {
-                        tasks.add(document.getReference().delete());
+                    if (!task.isEmpty()) {
+                        // Delete all documents that match the query
+                        for (DocumentSnapshot document : task.getDocuments()) {
+                            document.getReference().delete()
+                                    .addOnFailureListener(listener::onError);
+                        }
                     }
-                    Tasks.whenAllSuccess(tasks)
-                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                }).addOnFailureListener(listener::onError);
+
+        // After deleting event entries, delete the user itself
+        userCollection.whereEqualTo("userID", user.getUserID()).get()
+                .addOnSuccessListener(userTask -> {
+                    if (userTask.size() != 1) {
+                        listener.onError(new Exception("User not found"));
+                        return;
+                    }
+                    // Delete the user document
+                    userTask.getDocuments().get(0).getReference().delete()
+                            .addOnSuccessListener(bVoid -> {
+                                userDocument = null;        // Clear the user document
+                                listener.onInitialized();
+                            })
                             .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
-
-        userCollection.whereEqualTo("userID", user.getId()).get()
-            .addOnSuccessListener(task -> {
-                if (task.size() != 1) {
-                    listener.onError(new Exception("User not found"));
-                    return;
-                }
-
-                // Delete the user document
-                task.getDocuments().get(0).getReference().delete()
-                        .addOnSuccessListener(aVoid -> {
-                            userDocument = null;        // Clear the user document
-                            listener.onInitialized();
-                        })
-                        .addOnFailureListener(listener::onError);
-            })
-            .addOnFailureListener(listener::onError);
     }
 
-
+    /**
+     * Overload of the {@link #deleteUser(User, InitializationListener)} with no listener
+     */
+    public void deleteUser(User user) {
+        deleteUser(user, () -> {});
+    }
     /**
      * Deletes this user, essentially starting with a clean slate
      * also deletes related documents in user-events collection
@@ -509,7 +533,10 @@ public class Firebase {
                     }
 
                     Tasks.whenAllSuccess(tasks)
-                            .addOnSuccessListener(aVoid -> listener.onNotificationListRetrievalCompleted(notifications))
+                            .addOnSuccessListener(aVoid -> {
+                                notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));   // Sort the notifications by newest date
+                                listener.onNotificationListRetrievalCompleted(notifications);
+                            })
                             .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
@@ -625,7 +652,7 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the notifications are deleted
      */
     private void deleteAllNotification(User user, InitializationListener listener) {
-        userNotificationsCollection.whereEqualTo("userID", user.getId()).get()
+        userNotificationsCollection.whereEqualTo("userID", user.getUserID()).get()
                 .addOnSuccessListener(task -> {
                     ArrayList<Task> tasks = new ArrayList<>();
 
@@ -663,6 +690,7 @@ public class Firebase {
         map.put("eventID", event.getId());
         map.put("userID", deviceID);
         map.put("status", "organized");
+        map.put("geopoint", null);  // Dont track organizer location
 
         userEventsCollection.add(map)
                 .addOnSuccessListener(aVoid -> listener.onInitialized())
@@ -679,25 +707,63 @@ public class Firebase {
     /**
      * Waitlist this user into the event. Creates a new entry in the user-events collection
      * @param event an event object to be waitlisted into
+     * @param geoPoint Optional location object if the user is located
      * @param listener Optional InitializationListener listener that is called after the event is waitlisted
      */
-    public void waitlistEvent(Event event, InitializationListener listener) {
-        // Set waitlist to an empty array of user references
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("eventID", event.getId());
-        map.put("userID", deviceID);
-        map.put("status", "waitlisted");
+    public void waitlistEvent(Event event, GeoPoint geoPoint, InitializationListener listener) {
+        userEventsCollection
+                .whereEqualTo("eventID", event.getId())
+                .whereEqualTo("userID", deviceID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // Document exists, update the status to "waitlisted"
+                        DocumentSnapshot existingDocument = querySnapshot.getDocuments().get(0);
+                        userEventsCollection.document(existingDocument.getId())
+                                .update("status", "waitlisted")
+                                .addOnSuccessListener(aVoid -> {
+                                    if (listener != null) {
+                                        listener.onInitialized();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (listener != null) {
+                                        listener.onError(e);
+                                    }
+                                });
+                    } else {    // Document does not exist, create a new one
+                        HashMap<String, Object> map = new HashMap<>();
+                        map.put("eventID", event.getId());
+                        map.put("userID", deviceID);
+                        map.put("status", "waitlisted");
+                        map.put("geopoint", geoPoint);
 
-        userEventsCollection.add(map)
-                .addOnSuccessListener(aVoid -> listener.onInitialized())
-                .addOnFailureListener(listener::onError);
+                        userEventsCollection.add(map)
+                                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                                .addOnFailureListener(listener::onError);
+                    }
+                });
     }
 
     /**
-     * Overload of the {@link #waitlistEvent(Event, InitializationListener)} with no listener
+     * Overload of the {@link #waitlistEvent(Event, GeoPoint, InitializationListener)} with no location
+     */
+    public void waitlistEvent(Event event, InitializationListener listener) {
+        waitlistEvent(event, null, listener);
+    }
+
+    /**
+     * Overload of the {@link #waitlistEvent(Event, GeoPoint, InitializationListener)} with no listener
+     */
+    public void waitlistEvent(Event event, GeoPoint geoPoint) {
+        waitlistEvent(event, geoPoint, () -> {});
+    }
+
+    /**
+     * Overload of the {@link #waitlistEvent(Event, InitializationListener)} with no location and listener
      */
     public void waitlistEvent(Event event) {
-        waitlistEvent(event, () -> {});
+        waitlistEvent(event, null, () -> {});
     }
 
     /**
@@ -775,21 +841,32 @@ public class Firebase {
     public void leaveEvent(Event event) {
         leaveEvent(event, () -> {});
     }
+
     /**
-     * Get the current status of the user in the event
-     * @param event an event object to get the status of
-     * @param listener A DataRetrievalListener listener that returns the status of the user in the event
+     * Get the current status of the user in the event.
+     * @param event An event object to get the status of.
+     * @param listener A DataRetrievalListener listener that returns the status of the user in the event.
      */
     public void getStatusInEvent(Event event, DataRetrievalListener listener) {
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
-                    // Get the one document that matches the query
-                    DocumentSnapshot document = task.getDocuments().get(0);
-                    // Return the status as a string: waitlisted, enrolled, cancelled
-                    listener.onRetrievalCompleted(Objects.requireNonNull(document.get("status")).toString());
+                    // Check if there are any documents in the query result
+                    if (!task.getDocuments().isEmpty()) {
+                        DocumentSnapshot document = task.getDocuments().get(0);
+                        String status = document.getString("status");
+                        // Call the listener with the retrieved status or "unknown" if the status is null
+                        listener.onRetrievalCompleted(status != null ? status : "unknown");
+                    } else {
+                        // No documents found; call listener with a default "unknown" status
+                        listener.onRetrievalCompleted("unknown");
+                    }
                 })
-                .addOnFailureListener(listener::onError);
+                .addOnFailureListener(e -> {
+                    // Pass the error to the listener
+                    listener.onError(e);
+                });
     }
+
 
     /**
      * Gets an ArrayList of events this user is in, specified by the status
@@ -1032,6 +1109,35 @@ public class Firebase {
     }
 
     /**
+     * Retrieve the location of all users in an event. The GeoPoint contains the lat and long of the user
+     * @param eventID the event ID to query
+     * @param status  the status to filter the query by. Set to {all} to retrieve all user statuses
+     *                see {@link #getUsersInEventByStatus(String, String, UserListRetrievalListener)} for possible values
+     * @param listener a GeoPointListRetrievalListener that returns an ArrayList of GeoPoints
+     */
+    public void getUserLocations(String eventID, String status, GeoPointListRetrievalListener listener) {
+        Query query = userEventsCollection.whereEqualTo("eventID", eventID);
+        if (!status.equals("all")) {
+            query = query.whereEqualTo("status", status);
+        }
+        // Apply filters and run query
+        query.get()
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onGeoPointListRetrievalCompleted(new ArrayList<>());
+                    } else {
+                        ArrayList<GeoPoint> locations = new ArrayList<>();
+                        for (DocumentSnapshot document : task.getDocuments()) {
+                            if (document.get("geopoint") != null) {     // Ensure there is a geopoint present
+                                GeoPoint geoPoint = document.getGeoPoint("geopoint");
+                                locations.add(geoPoint);
+                            }
+                        }
+                        listener.onGeoPointListRetrievalCompleted(locations);   // Pass the list of locations
+                    }
+                }).addOnFailureListener(listener::onError);
+    }
+    /**
      * Call when this user accepts or rejects an event. Updates the user-event collection
      * @param didAccept true if this user accepted (enrolled), false if user rejected (cancelled)
      * @param eventID the event ID to update
@@ -1106,7 +1212,6 @@ public class Firebase {
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
-                    Log.d("waitDebug", "User ID: " + userID);
                     // Send a success notification to each user
                     sendNotification(notifications.get(0), userID);
 
@@ -1118,7 +1223,7 @@ public class Firebase {
                             // Fetch the rest of the users who were not selected
                             getWaitlistedUsers(event.getId(), users -> {
                                 for (User user : users) {
-                                    sendNotification(notifications.get(1), user.getId(), () -> {});     // Send the not selected notification
+                                    sendNotification(notifications.get(1), user.getUserID(), () -> {});     // Send the not selected notification
                                 }
 
                                 listener.onInitialized();
@@ -1164,13 +1269,13 @@ public class Firebase {
     public void eventExpiredCleanup(String eventID, Notifications notification, InitializationListener listener) {
         getPendingUsers(eventID, users -> {
             for (User user : users) {
-                sendNotification(notification, user.getId());
-                setNewStatus("cancelled", user.getId(), eventID, () -> {});
+                sendNotification(notification, user.getUserID());
+                setNewStatus("cancelled", user.getUserID(), eventID, () -> {});
             }
         });
         getWaitlistedUsers(eventID, users -> {
             for (User user : users) {
-                sendNotification(notification, user.getId());
+                sendNotification(notification, user.getUserID());
             }
             // delete the event-user entry from the database
             userEventsCollection.whereEqualTo("eventID", eventID).whereEqualTo("userID", deviceID).whereEqualTo("status", "waitlisted").get()
@@ -1356,7 +1461,7 @@ public class Firebase {
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
     public void getPosterPicture(Event event, ImageRetrievalListener listener) {
-        profilePictureReference.child(event.getPosterPhotoUrl()).getDownloadUrl()
+        posterPictureReference.child(event.getPosterPhotoUrl()).getDownloadUrl()
                 .addOnSuccessListener(listener::onImageRetrievalCompleted)
                 .addOnFailureListener(listener::onError);
     }
@@ -1493,6 +1598,7 @@ public class Firebase {
 
     /**
      * Searches for users in the database, returns an array of users
+     * TODO need to filter out duplicate results
      * @param query the query to search for
      * @param listener the listener that is called when the search is complete. Returns an ArrayList of users
      */
@@ -1505,13 +1611,15 @@ public class Firebase {
 
 
         waitForQueryCompletion(tasks, (results) -> {
-            // Create new array of event objects
-            ArrayList<User> users = new ArrayList<>();
+            // Create new unique hashset of users
+            HashSet<User> users = new HashSet<>();
             for (DocumentSnapshot document : results) {
                 User user = document.toObject(User.class);
                 users.add(user);
             }
-            listener.onUserListRetrievalCompleted(users);
+            // Remove duplicate files
+            ArrayList<User> userArray = new ArrayList<>(users);
+            listener.onUserListRetrievalCompleted(userArray);
         });
     }
 
@@ -1521,19 +1629,23 @@ public class Firebase {
      * @param query the query to search for
      * @param listener the listener that is called when the search is complete. Returns an ArrayList of facilities
      */
-    public void searchForFacilities(String query, DataListRetrievalListener listener) {
+    public void searchForFacilities(String query, FacilityListRetrievalListener listener) {
         // Search by name, lastname, and email
         ArrayList<Task> tasks = new ArrayList<>();
         tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility", query + "\uf8ff").get());
 
         waitForQueryCompletion(tasks, (results) -> {
             // Create new array of event objects
-            ArrayList<String> facilities = new ArrayList<>();
+            ArrayList<Facility> facilities = new ArrayList<>();
             for (DocumentSnapshot document : results) {
-                System.out.println(document.get("facility"));
-                facilities.add(Objects.requireNonNull(document.get("facility")).toString());
+                // If an attribute doesn't exist, set it to null
+                String facilityName = (document.get("facility") == null) ? null : document.getString("facility");
+                String description = (document.get("facilityDesc") == null) ? null : document.getString("facilityDesc");
+                String facilityPhotoUrl = (document.get("facilityPhotoUrl") == null) ? null : document.getString("facilityPhotoUrl");
+                Facility facility = new Facility(facilityName, description, facilityPhotoUrl);
+                facilities.add(facility);
             }
-            listener.onListRetrievalCompleted(facilities);
+            listener.onFacilityListRetrievalCompleted(facilities);
         });
     }
 
@@ -1570,50 +1682,33 @@ public class Firebase {
     }
 
     /**
-     * TODO need to update to use facility object instead of name
      * Deletes all events associated with a facility
      * Delete the facility of the organizer, demoting to a user
      * @param facility the facility to delete events from
      */
-    public void deleteByFacility(String facility, InitializationListener listener) {
-        eventCollection.whereEqualTo("facility", facility).get()
+    public void deleteByFacility(Facility facility, InitializationListener listener) {
+        // Delete all associated event
+        eventCollection.whereEqualTo("facility", facility.getName()).get()
                 .addOnSuccessListener(tasks -> {
                     if (!tasks.isEmpty()) {
-                        listener.onError(new Exception("No event with facility found"));
-                    } else {
-                        // get the event id, delete the user-events, then delete the facility
                         for (DocumentSnapshot document : tasks.getDocuments()) {
                             String eventID = (String) document.get("id");
-
-                            // delete the userEvent entries
-                            userEventsCollection.whereEqualTo("eventID", eventID).get()
-                                    .addOnSuccessListener(userEvents -> {
-                                        for (DocumentSnapshot userEvent : userEvents.getDocuments()) {
-                                            userEventsCollection.document(userEvent.getId()).delete()
-                                                    .addOnFailureListener(listener::onError);
-                                        }
-                                    });
-
-                            // Delete the event itself
-                            assert eventID != null;
-                            eventCollection.document(eventID).delete()
-                                    .addOnFailureListener(listener::onError);
+                            // Get and delete the event
+                            getEvent(eventID, event -> {
+                                deleteEvent(event);
+                            });
                         }
                     }
-
-                    // Then remove the facility from the user
-                    userCollection.whereEqualTo("facility", facility).get()
-                            .addOnSuccessListener(user -> {
-                                if (user.isEmpty()) {
-                                    listener.onError(new Exception("No user found with facility " + facility));
-                                } else {
-                                    user.getDocuments().get(0).getReference().set("facility", null);
-                                    listener.onInitialized();
-                                }
-                })
-                .addOnFailureListener(listener::onError);
-        })
-        .addOnFailureListener(listener::onError);
+                }).addOnFailureListener(listener::onError);
+        // Ban (Delete) the user (one to one) relationship
+        userCollection.whereEqualTo("facility", facility.getName()).get()
+                .addOnSuccessListener(user -> {
+                    if (!user.isEmpty()) {
+                        // user.getDocuments().get(0).getReference().set("facility", null);
+                        User userObject = user.getDocuments().get(0).toObject(User.class);
+                        deleteUser(userObject, listener);
+                    }
+                }).addOnFailureListener(listener::onError);
     }
 
     /**
@@ -1653,29 +1748,6 @@ public class Firebase {
                 .addOnFailureListener(listener::onError);
 
     }
-    /**
-     * Checks if the user is already waitlisted or enrolled for the event.
-     *
-     * @param eventId  The ID of the event.
-     * @param callback The callback to handle the result (true if joined, false otherwise).
-     */
-    public void checkUserJoined(String eventId, UserJoinCheckCallback callback) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("user-events")
-                .whereEqualTo("userID", deviceID)
-                .whereEqualTo("eventID", eventId)
-                .whereIn("status", Arrays.asList("waitlisted", "enrolled"))
-                .get()
-                .addOnSuccessListener(task -> {
-                    boolean hasJoined = !task.getDocuments().isEmpty();
-                    callback.onCheckComplete(hasJoined);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("EventJoinFragment", "Error checking user status: " + e.getMessage());
-                    callback.onCheckComplete(false);
-                });
-    }
-
 
 }
 

@@ -28,8 +28,20 @@
         <action
             android:id="@+id/action_navigation_event_to_navigation_home"
             app:destination="@id/navigation_home" />
+        <action
+            android:id="@+id/action_navigation_event_to_navigation_event3"
+            app:destination="@id/navigation_event3" />
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_event3"
+        android:name="com.example.mini_pekkas.ui.event.user.EventAcceptFragment"
+        android:label="@string/title_event"
+        tools:layout="@layout/fragment_event_chosen" >
+        <action
+            android:id="@+id/action_navigation_event3_to_navigation_home"
+            app:destination="@id/navigation_home" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_event2"
         android:name="com.example.mini_pekkas.ui.event.user.EventJoinFragment"
@@ -38,6 +50,9 @@
         <action
             android:id="@+id/action_navigation_event2_to_navigation_event"
             app:destination="@id/navigation_event" />
+        <action
+            android:id="@+id/action_navigation_event2_to_navigation_event3"
+            app:destination="@id/navigation_event3" />
     </fragment>
     <fragment
         android:id="@+id/navigation_notifications"
