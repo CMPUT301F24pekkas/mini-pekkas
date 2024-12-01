@@ -44,6 +44,7 @@ public class OrganizerProfileFragment extends Fragment {
     private OrganizerProfileViewModel organizerProfileViewModel;
     private ActivityResultLauncher<Intent> pickImageLauncher;
     private StorageReference profileImageRef;
+    private boolean isFacilityPicture = false;
 
     /**
      * Called when the fragment is created. Initializes the profile image reference in Firebase
@@ -153,9 +154,15 @@ public class OrganizerProfileFragment extends Fragment {
 
 
         // Set click listeners
-        profileEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
+        profileEdit.setOnClickListener(v -> {
+            isFacilityPicture = false; // For profile picture
+            showProfilePictureOptionsDialog();
+        });
         editButton.setOnClickListener(v -> showEditDialog());
-        facilityImageEdit.setOnClickListener(v -> showProfilePictureOptionsDialog());
+        facilityImageEdit.setOnClickListener(v -> {
+            isFacilityPicture = true;
+            showFacilityPictureOptionsDialog();
+        });
 
         return root;
     }
@@ -186,6 +193,29 @@ public class OrganizerProfileFragment extends Fragment {
         dialog.show();
     }
 
+    private void showFacilityPictureOptionsDialog() {
+        View popupView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_facility_pfp_edit, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(popupView);
+        AlertDialog dialog = builder.create();
+
+        Button chooseNewPictureButton = popupView.findViewById(R.id.choose_facility_picture_button);
+        Button deletePicureButton = popupView.findViewById(R.id.delete_facility_picture_button);
+
+        chooseNewPictureButton.setOnClickListener(v -> {
+            openGallery();
+            dialog.dismiss();
+        });
+
+        deletePicureButton.setOnClickListener(v -> {
+            deleteFacilityPicture();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
     /**
      * Opens the device's gallery for selecting a new profile picture.
      */
@@ -193,6 +223,8 @@ public class OrganizerProfileFragment extends Fragment {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         pickImageLauncher.launch(intent);
     }
+
+
 
     /**
      * Deletes the current profile picture, resets the profile image to a placeholder, and updates Firebase.
@@ -209,24 +241,39 @@ public class OrganizerProfileFragment extends Fragment {
         Toast.makeText(getActivity(), "Profile picture deleted", Toast.LENGTH_SHORT).show();
     }
 
+    private void deleteFacilityPicture() {
+        organizerProfileViewModel.setFacilityPictureUrl("");
+        organizerProfileViewModel.updateProfileInFirebase();
+        binding.facilityImage.setImageResource(R.drawable.add_image);
+        Toast.makeText(getActivity(), "Facility picture deleted", Toast.LENGTH_SHORT).show();
+    }
+
     /**
-     * Uploads a new profile image to Firebase Storage and updates the ViewModel with the image's URL.
+     * Uploads a new image to Firebase Storage and updates the ViewModel with the image's URL.
      *
      * @param imageUri URI of the selected image to upload.
      */
     private void uploadImageToFirebase(Uri imageUri) {
-        StorageReference imageRef = profileImageRef.child(System.currentTimeMillis() + ".jpg");
+        String path = isFacilityPicture ? "facility-pictures" : "profile-pictures";
+        StorageReference imageRef = FirebaseStorage.getInstance().getReference(path)
+                .child(System.currentTimeMillis() + ".jpg");
 
         imageRef.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                     String downloadUrl = uri.toString();
-                    organizerProfileViewModel.setProfilePictureUrl(downloadUrl);
+                    if (isFacilityPicture) {
+                        organizerProfileViewModel.setFacilityPictureUrl(downloadUrl);
+                        Glide.with(this).load(downloadUrl).into(binding.facilityImage);
+                    } else {
+                        organizerProfileViewModel.setProfilePictureUrl(downloadUrl);
+                        Glide.with(this).load(downloadUrl).into(binding.userProfileImage);
+                    }
                     organizerProfileViewModel.updateProfileInFirebase();
-                    Glide.with(this).load(downloadUrl).into(binding.userProfileImage);
                 }).addOnFailureListener(e ->
                         Toast.makeText(getActivity(), "Failed to upload image", Toast.LENGTH_SHORT).show()
                 ));
     }
+
 
     /**
      * Displays a dialog to edit organizer profile details including name, email, phone number, and location.
