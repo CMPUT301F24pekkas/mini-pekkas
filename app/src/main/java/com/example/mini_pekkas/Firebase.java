@@ -23,7 +23,6 @@ import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -265,6 +264,7 @@ public class Firebase {
      */
     public User getThisUser() {
         return new User(Objects.requireNonNull(userDocument.getData()));
+        //        return userDocument.toObject(User.class);
     }
 
     /**
@@ -1388,7 +1388,7 @@ public class Firebase {
      * @param listener the listener that is called when the image is retrieved. Returns the image as a Uri
      */
     public void getPosterPicture(Event event, ImageRetrievalListener listener) {
-        profilePictureReference.child(event.getPosterPhotoUrl()).getDownloadUrl()
+        posterPictureReference.child(event.getPosterPhotoUrl()).getDownloadUrl()
                 .addOnSuccessListener(listener::onImageRetrievalCompleted)
                 .addOnFailureListener(listener::onError);
     }
@@ -1525,6 +1525,7 @@ public class Firebase {
 
     /**
      * Searches for users in the database, returns an array of users
+     * TODO need to filter out duplicate results
      * @param query the query to search for
      * @param listener the listener that is called when the search is complete. Returns an ArrayList of users
      */
