@@ -203,6 +203,7 @@ public class User {
         map.put("profilePhoto", profilePhotoUrl);
         map.put("userID", userID);
         map.put("facilityDesc", facilityDesc);
+        map.put("facilityPhoto", facilityPhotoUrl);
         return map;
     }
 }

@@ -164,6 +164,16 @@ public class Firebase {
     }
 
     /**
+     * Interface for functions that retrieve an array of facilities
+     */
+    public interface FacilityListRetrievalListener {
+        void onFacilityListRetrievalCompleted(ArrayList<Facility> facilities);
+        default void onError(Exception e) {
+            Log.e(TAG, "Error getting facilities: ", e);
+        }
+    }
+
+    /**
      * Interface for functions that retrieve the notifications for this use
      */
     public interface NotificationListRetrievalListener {
@@ -353,7 +363,12 @@ public class Firebase {
 
     }
 
-
+    /**
+     * Overload of the {@link #deleteUser(User, InitializationListener)} with no listener
+     */
+    public void deleteUser(User user) {
+        deleteUser(user, () -> {});
+    }
     /**
      * Deletes this user, essentially starting with a clean slate
      * also deletes related documents in user-events collection
@@ -1619,19 +1634,23 @@ public class Firebase {
      * @param query the query to search for
      * @param listener the listener that is called when the search is complete. Returns an ArrayList of facilities
      */
-    public void searchForFacilities(String query, DataListRetrievalListener listener) {
+    public void searchForFacilities(String query, FacilityListRetrievalListener listener) {
         // Search by name, lastname, and email
         ArrayList<Task> tasks = new ArrayList<>();
         tasks.add(userCollection.whereGreaterThanOrEqualTo("facility", query).whereLessThanOrEqualTo("facility", query + "\uf8ff").get());
 
         waitForQueryCompletion(tasks, (results) -> {
             // Create new array of event objects
-            ArrayList<String> facilities = new ArrayList<>();
+            ArrayList<Facility> facilities = new ArrayList<>();
             for (DocumentSnapshot document : results) {
-                System.out.println(document.get("facility"));
-                facilities.add(Objects.requireNonNull(document.get("facility")).toString());
+                // If an attribute doesn't exist, set it to null
+                String facilityName = (document.get("facility") == null) ? null : document.get("facility").toString();
+                String description = (document.get("facilityDesc") == null) ? null : document.get("description").toString();
+                String facilityPhotoUrl = (document.get("facilityPhotoUrl") == null) ? null : document.get("facilityPhotoUrl").toString();
+                Facility facility = new Facility(facilityName, description, facilityPhotoUrl);
+                facilities.add(facility);
             }
-            listener.onListRetrievalCompleted(facilities);
+            listener.onFacilityListRetrievalCompleted(facilities);
         });
     }
 
@@ -1673,8 +1692,8 @@ public class Firebase {
      * Delete the facility of the organizer, demoting to a user
      * @param facility the facility to delete events from
      */
-    public void deleteByFacility(String facility, InitializationListener listener) {
-        eventCollection.whereEqualTo("facility", facility).get()
+    public void deleteByFacility(Facility facility, InitializationListener listener) {
+        eventCollection.whereEqualTo("facility", facility.getName()).get()
                 .addOnSuccessListener(tasks -> {
                     if (!tasks.isEmpty()) {
                         listener.onError(new Exception("No event with facility found"));
@@ -1682,36 +1701,26 @@ public class Firebase {
                         // get the event id, delete the user-events, then delete the facility
                         for (DocumentSnapshot document : tasks.getDocuments()) {
                             String eventID = (String) document.get("id");
+                            // Get and delete the event
+                            getEvent(eventID, event -> {
+                                deleteEvent(event, () -> {
+                                    // Then delete/ban the user
+                                    userCollection.whereEqualTo("facility", facility).get()
+                                            .addOnSuccessListener(user -> {
+                                                if (user.isEmpty()) {
+                                                    listener.onError(new Exception("No user found with facility " + facility));
+                                                } else {
+                                                    // user.getDocuments().get(0).getReference().set("facility", null);
+                                                    deleteUser(user.getDocuments().get(0).toObject(User.class), listener);
+                                                }
+                                            })
+                                            .addOnFailureListener(listener::onError);
+                                });
+                            });
 
-                            // delete the userEvent entries
-                            userEventsCollection.whereEqualTo("eventID", eventID).get()
-                                    .addOnSuccessListener(userEvents -> {
-                                        for (DocumentSnapshot userEvent : userEvents.getDocuments()) {
-                                            userEventsCollection.document(userEvent.getId()).delete()
-                                                    .addOnFailureListener(listener::onError);
-                                        }
-                                    });
-
-                            // Delete the event itself
-                            assert eventID != null;
-                            eventCollection.document(eventID).delete()
-                                    .addOnFailureListener(listener::onError);
                         }
                     }
-
-                    // Then remove the facility from the user
-                    userCollection.whereEqualTo("facility", facility).get()
-                            .addOnSuccessListener(user -> {
-                                if (user.isEmpty()) {
-                                    listener.onError(new Exception("No user found with facility " + facility));
-                                } else {
-                                    user.getDocuments().get(0).getReference().set("facility", null);
-                                    listener.onInitialized();
-                                }
-                })
-                .addOnFailureListener(listener::onError);
-        })
-        .addOnFailureListener(listener::onError);
+        }).addOnFailureListener(listener::onError);
     }
 
     /**

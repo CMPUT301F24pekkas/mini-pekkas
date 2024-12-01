@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -16,8 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.mini_pekkas.Facility;
+import com.example.mini_pekkas.FacilityArrayAdapter;
 import com.example.mini_pekkas.Firebase;
-import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentAdminBrowseFacilitiesBinding;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class AdminBrowseFacilities extends Fragment {
     private FragmentAdminBrowseFacilitiesBinding binding; // Declare binding variable
     private Firebase firebaseHelper;
     private ListView listView;
-    private ArrayList<String> facilityNames;
+    private ArrayList<Facility> facilities;
 
     /**
      * Called to initialize the fragment's view hierarchy.
@@ -53,33 +53,33 @@ public class AdminBrowseFacilities extends Fragment {
 
         // Set the listView adapter
         listView = binding.adminFacilityListView;
-        facilityNames = new ArrayList<String>();
-        ArrayAdapter<String> facilityArrayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, facilityNames);
-        listView.setAdapter(facilityArrayAdapter);    // TODO need to add option to pass in event list fragment instead
+        facilities = new ArrayList<Facility>();
+        FacilityArrayAdapter facilityArrayAdapter = new FacilityArrayAdapter(requireContext(), facilities);
+        listView.setAdapter(facilityArrayAdapter);
 
         listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id) -> {
 
-            String selectedFacility = facilityNames.get(position);
+            Facility selectedFacility = facilities.get(position);
 
 
             new AlertDialog.Builder(requireContext())
-                    .setTitle("Delete User")
-                    .setMessage("Are you sure you want to delete this user?")
+                    .setTitle("Delete Facility")
+                    .setMessage("Are you sure you want to delete this facility?")
                     .setPositiveButton("Yes", (DialogInterface dialog, int which) -> {
                         // Call deleteUser on confirmation
                         firebaseHelper.deleteByFacility(selectedFacility, new Firebase.InitializationListener() {
                             @Override
                             public void onInitialized() {
                                 // Remove the user from the list and notify the adapter
-                                facilityNames.remove(selectedFacility);
+                                facilities.remove(selectedFacility);
                                 facilityArrayAdapter.notifyDataSetChanged();
-                                Toast.makeText(requireContext(), "User deleted successfully", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), "Facility deleted successfully", Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onError(Exception e) {
                                 // Handle errors
-                                Toast.makeText(requireContext(), "Failed to delete user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), "Failed to delete facility: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     })
@@ -103,9 +103,6 @@ public class AdminBrowseFacilities extends Fragment {
                     // Set the value of eventList to events
                     facilityArrayAdapter.clear();
                     facilityArrayAdapter.addAll(facilities);
-
-                    // TODO Need better format than string
-                    // Also query doesn't return anything
 
                     // Notify the dataset change to update
                     facilityArrayAdapter.notifyDataSetChanged();
