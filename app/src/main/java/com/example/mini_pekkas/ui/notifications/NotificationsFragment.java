@@ -1,8 +1,12 @@
 package com.example.mini_pekkas.ui.notifications;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,6 +124,21 @@ public class NotificationsFragment extends Fragment {
         optOutButton.setOnClickListener(v -> {
             listView.setVisibility(View.INVISIBLE);
             saveOptOutPreference(true);  // Save opt-out preference
+
+            // Remove notification permission on device
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // API level 26 and above
+                Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, "com.example.mini_pekkas");
+                startActivity(intent);
+            } else { // API level below 26
+                // For older versions, you might need to open the app's settings page
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", "com.example.mini_pekkas", null);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+
+
             dialog.dismiss();
         });
 

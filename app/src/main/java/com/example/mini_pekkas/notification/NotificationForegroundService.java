@@ -7,12 +7,14 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.mini_pekkas.MainActivity;
 import com.example.mini_pekkas.R;
@@ -44,9 +46,13 @@ public class NotificationForegroundService extends Service implements SendNotifi
         deviceID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        createNotificationChannel();    // For the initial notification listener
-        startForeground((int) System.currentTimeMillis(), createNotification()); // Random id for first notification
-        startFirestoreListener();
+        // Only start the service if the notification permission is granted
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED) {
+            createNotificationChannel();    // For the initial notification listener
+            startForeground((int) System.currentTimeMillis(), createNotification()); // Random id for first notification
+            startFirestoreListener();
+        }
     }
 
     // ... (other methods for notification channel, notification creation, and Firestore listener) ...
@@ -89,6 +95,7 @@ public class NotificationForegroundService extends Service implements SendNotifi
                 .setContentText("Running in the background for notifications")
                 .setSmallIcon(R.drawable.baseline_notifications_24) // Replace with your icon
                 .setContentIntent(pendingIntent)
+                .setSound(null)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         return builder.build();
