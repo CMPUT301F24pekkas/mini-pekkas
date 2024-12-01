@@ -1113,8 +1113,10 @@ public class Firebase {
                     } else {
                         ArrayList<GeoPoint> locations = new ArrayList<>();
                         for (DocumentSnapshot document : task.getDocuments()) {
-                               GeoPoint geoPoint = document.getGeoPoint("geopoint");
+                            if (document.get("geopoint") != null) {     // Ensure there is a geopoint present
+                                GeoPoint geoPoint = document.getGeoPoint("geopoint");
                                 locations.add(geoPoint);
+                            }
                         }
                         listener.onGeoPointListRetrievalCompleted(locations);   // Pass the list of locations
                     }
