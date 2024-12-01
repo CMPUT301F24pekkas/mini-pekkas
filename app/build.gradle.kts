@@ -93,5 +93,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
     implementation("androidx.work:work-runtime:2.8.1") // For background tasks/scheduling
+    implementation("com.google.android.gms:play-services-maps:18.1.0") // For google maps
 }
 
