@@ -258,7 +258,7 @@ public class Firebase {
      * @param listener An InitializationListener listener that is called after the user is initialized
      */
     public void InitializeThisUser(User user, InitializationListener listener) {
-        user.setId(deviceID);
+        user.setUserID(deviceID);
         userCollection.add(user.toMap())
                 .addOnSuccessListener(v -> {
                     // Re fetch the user document. Listener call will now have a valid user document
@@ -282,7 +282,7 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the user is updated
      */
     public void updateThisUser(User user, InitializationListener listener) {
-        userCollection.whereEqualTo("userID", user.getId()).get()
+        userCollection.whereEqualTo("userID", user.getUserID()).get()
             .addOnSuccessListener(task -> {
                 if (task.isEmpty()) {
                     listener.onError(new Exception("User not found"));
@@ -311,9 +311,12 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the user is deleted
      */
     public void deleteUser(User user, InitializationListener listener) {
-        deleteProfilePicture(user);
-        deleteAllNotification(user);
-
+        try {
+            deleteProfilePicture(user);
+            deleteAllNotification(user);
+        } catch (Exception e) {
+            listener.onError(e);
+        }
         // Delete all documents from the user-events collection
         // TODO abstract these operations in one super function
         userEventsCollection.whereEqualTo("userID", deviceID).get()
@@ -325,27 +328,29 @@ public class Firebase {
                         tasks.add(document.getReference().delete());
                     }
                     Tasks.whenAllSuccess(tasks)
-                            .addOnSuccessListener(aVoid -> listener.onInitialized())
+                            .addOnSuccessListener(aVoid -> {
+                                // After deleting event entries, then delete the user itself
+                                userCollection.whereEqualTo("userID", user.getUserID()).get()
+                                        .addOnSuccessListener(userTask -> {
+                                            if (userTask.size() != 1) {
+                                                listener.onError(new Exception("User not found"));
+                                                return;
+                                            }
+                                            // Delete the user document
+                                            userTask.getDocuments().get(0).getReference().delete()
+                                                    .addOnSuccessListener(bVoid -> {
+                                                        userDocument = null;        // Clear the user document
+                                                        listener.onInitialized();
+                                                    })
+                                                    .addOnFailureListener(listener::onError);
+                                        })
+                                        .addOnFailureListener(listener::onError);
+                            })
                             .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
 
-        userCollection.whereEqualTo("userID", user.getId()).get()
-            .addOnSuccessListener(task -> {
-                if (task.size() != 1) {
-                    listener.onError(new Exception("User not found"));
-                    return;
-                }
 
-                // Delete the user document
-                task.getDocuments().get(0).getReference().delete()
-                        .addOnSuccessListener(aVoid -> {
-                            userDocument = null;        // Clear the user document
-                            listener.onInitialized();
-                        })
-                        .addOnFailureListener(listener::onError);
-            })
-            .addOnFailureListener(listener::onError);
     }
 
 
@@ -637,7 +642,7 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the notifications are deleted
      */
     private void deleteAllNotification(User user, InitializationListener listener) {
-        userNotificationsCollection.whereEqualTo("userID", user.getId()).get()
+        userNotificationsCollection.whereEqualTo("userID", user.getUserID()).get()
                 .addOnSuccessListener(task -> {
                     ArrayList<Task> tasks = new ArrayList<>();
 
@@ -1197,7 +1202,6 @@ public class Firebase {
 
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
-                    Log.d("waitDebug", "User ID: " + userID);
                     // Send a success notification to each user
                     sendNotification(notifications.get(0), userID);
 
@@ -1209,7 +1213,7 @@ public class Firebase {
                             // Fetch the rest of the users who were not selected
                             getWaitlistedUsers(event.getId(), users -> {
                                 for (User user : users) {
-                                    sendNotification(notifications.get(1), user.getId(), () -> {});     // Send the not selected notification
+                                    sendNotification(notifications.get(1), user.getUserID(), () -> {});     // Send the not selected notification
                                 }
 
                                 listener.onInitialized();
@@ -1255,13 +1259,13 @@ public class Firebase {
     public void eventExpiredCleanup(String eventID, Notifications notification, InitializationListener listener) {
         getPendingUsers(eventID, users -> {
             for (User user : users) {
-                sendNotification(notification, user.getId());
-                setNewStatus("cancelled", user.getId(), eventID, () -> {});
+                sendNotification(notification, user.getUserID());
+                setNewStatus("cancelled", user.getUserID(), eventID, () -> {});
             }
         });
         getWaitlistedUsers(eventID, users -> {
             for (User user : users) {
-                sendNotification(notification, user.getId());
+                sendNotification(notification, user.getUserID());
             }
             // delete the event-user entry from the database
             userEventsCollection.whereEqualTo("eventID", eventID).whereEqualTo("userID", deviceID).whereEqualTo("status", "waitlisted").get()
@@ -1597,13 +1601,15 @@ public class Firebase {
 
 
         waitForQueryCompletion(tasks, (results) -> {
-            // Create new array of event objects
-            ArrayList<User> users = new ArrayList<>();
+            // Create new unique hashset of users
+            HashSet<User> users = new HashSet<>();
             for (DocumentSnapshot document : results) {
                 User user = document.toObject(User.class);
                 users.add(user);
             }
-            listener.onUserListRetrievalCompleted(users);
+            // Remove duplicate files
+            ArrayList<User> userArray = new ArrayList<>(users);
+            listener.onUserListRetrievalCompleted(userArray);
         });
     }
 

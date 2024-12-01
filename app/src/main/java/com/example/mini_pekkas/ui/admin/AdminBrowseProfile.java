@@ -1,8 +1,11 @@
 package com.example.mini_pekkas.ui.admin;
 
+import static android.content.ContentValues.TAG;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +62,8 @@ public class AdminBrowseProfile extends Fragment {
         listView.setOnItemLongClickListener((AdapterView<?> parent, View view, int position, long id) -> {
 
             User selectedUser = userList.get(position);
-
+            Log.d(TAG, "Selected user: " + selectedUser.getName());
+            Log.d(TAG, "Selected user ID: " + selectedUser.getUserID());
 
             new AlertDialog.Builder(requireContext())
                     .setTitle("Delete User")
@@ -77,8 +81,10 @@ public class AdminBrowseProfile extends Fragment {
 
                             @Override
                             public void onError(Exception e) {
-                                // Handle errors
-                                Toast.makeText(requireContext(), "Failed to delete user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                // Handle errors, Ignore no profile picture error
+                                if (e.getMessage() != "No profile picture to delete") {
+                                    Toast.makeText(requireContext(), "Failed to delete user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
                     })

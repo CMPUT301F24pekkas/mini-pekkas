@@ -1,18 +1,22 @@
 package com.example.mini_pekkas;
 
+import com.google.firebase.database.PropertyName;
+
 import java.util.HashMap;
 import java.util.Map;
 /**
  * Represents a User with personal details such name, lastname, email, phone, and facility.
  */
 public class User {
+    @PropertyName("userID")
+    private String userID;
+
     private String name;
     private String lastname;
     private String email;
     private String phone;
     private String facility;
     private String profilePhotoUrl;
-    private String userID;
     private String facilityPhotoUrl;
     private String facilityDesc;
 
@@ -160,11 +164,11 @@ public class User {
         this.profilePhotoUrl = profilePhotoUrl;
     }
 
-    public String getId() {
+    public String getUserID() {
         return userID;
     }
 
-    public void setId(String userID) {
+    public void setUserID(String userID) {
         this.userID = userID;
     }
 
