@@ -14,6 +14,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Objects;
@@ -24,21 +25,34 @@ import java.util.Objects;
  */
 public class NotificationWorker extends Worker implements SendNotificationInterface{
     private String deviceID;
+    private FirebaseFirestore db;
     private final NotificationManager notificationManager;
+    private ListenerRegistration snapshotListenerRegistration;  // The snapshot listener used for fetching notifications
 
     public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        db = FirebaseFirestore.getInstance();
+
+        startFirestoreListener();   // Add the listener
     }
 
     @NonNull
     @Override
     public Result doWork() {
-        // Initialize your snapshot listener here
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        //MyFirebaseMessagingService();
-        db.collection("user-notifications")
+        return Result.retry();  // Reschedule the task
+    }
+
+    /**
+     * Creates the snapshot listener for notifications. Removes the previous listener if it exists.
+     */
+    private void startFirestoreListener() {
+        if (snapshotListenerRegistration != null) {
+            snapshotListenerRegistration.remove();
+        }
+
+        snapshotListenerRegistration = db.collection("user-notifications")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(QuerySnapshot querySnapshot, FirebaseFirestoreException e) {
@@ -66,7 +80,5 @@ public class NotificationWorker extends Worker implements SendNotificationInterf
                         }
                     }
                 });
-
-        return Result.success();
     }
 }

@@ -15,7 +15,11 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.example.mini_pekkas.databinding.UserMainBinding;
@@ -24,6 +28,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 /**
  * UserActivity is the main activity for Users, setting up the navigation controller
  * and Navigation Bar for user-specific activities. This activity initializes and configures the navigation components and handles
@@ -140,10 +146,18 @@ public class UserActivity extends AppCompatActivity {
                     PackageManager.PERMISSION_GRANTED) {
                 // FCM SDK (and your app) can post notifications.
                 // Initialize the notification listener
-                OneTimeWorkRequest notificationWorkRequest =
-                        new OneTimeWorkRequest.Builder(NotificationWorker.class)
+                PeriodicWorkRequest notificationWorkRequest =
+                        new PeriodicWorkRequest.Builder(NotificationWorker.class, 10, TimeUnit.SECONDS)
+                                .setConstraints(new Constraints.Builder()
+                                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                                        .build())
                                 .build();
-                WorkManager.getInstance(this).enqueue(notificationWorkRequest);
+
+                WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                        "notification_worker",
+                        ExistingPeriodicWorkPolicy.KEEP,
+                        notificationWorkRequest);
+
             } else if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
                 // TODO: display an educational UI explaining to the user the features that will be enabled
                 //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
