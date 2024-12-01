@@ -264,7 +264,7 @@ public class Firebase {
      * @return the user document as a User object. Throws an error if the user does not exist
      */
     public User getThisUser() {
-        return userDocument.toObject(User.class);
+        return new User(Objects.requireNonNull(userDocument.getData()));
     }
 
     /**
@@ -682,15 +682,37 @@ public class Firebase {
      * @param listener Optional InitializationListener listener that is called after the event is waitlisted
      */
     public void waitlistEvent(Event event, InitializationListener listener) {
-        // Set waitlist to an empty array of user references
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("eventID", event.getId());
-        map.put("userID", deviceID);
-        map.put("status", "waitlisted");
+        userEventsCollection
+                .whereEqualTo("eventID", event.getId())
+                .whereEqualTo("userID", deviceID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // Document exists, update the status to "waitlisted"
+                        DocumentSnapshot existingDocument = querySnapshot.getDocuments().get(0);
+                        userEventsCollection.document(existingDocument.getId())
+                                .update("status", "waitlisted")
+                                .addOnSuccessListener(aVoid -> {
+                                    if (listener != null) {
+                                        listener.onInitialized();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (listener != null) {
+                                        listener.onError(e);
+                                    }
+                                });
+                    } else {
+                        HashMap<String, Object> map = new HashMap<>();
+                        map.put("eventID", event.getId());
+                        map.put("userID", deviceID);
+                        map.put("status", "waitlisted");
 
-        userEventsCollection.add(map)
-                .addOnSuccessListener(aVoid -> listener.onInitialized())
-                .addOnFailureListener(listener::onError);
+                        userEventsCollection.add(map)
+                                .addOnSuccessListener(aVoid -> listener.onInitialized())
+                                .addOnFailureListener(listener::onError);
+                    }
+                });
     }
 
     /**
@@ -776,20 +798,30 @@ public class Firebase {
         leaveEvent(event, () -> {});
     }
     /**
-     * Get the current status of the user in the event
-     * @param event an event object to get the status of
-     * @param listener A DataRetrievalListener listener that returns the status of the user in the event
+     * Get the current status of the user in the event.
+     * @param event An event object to get the status of.
+     * @param listener A DataRetrievalListener listener that returns the status of the user in the event.
      */
     public void getStatusInEvent(Event event, DataRetrievalListener listener) {
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
-                    // Get the one document that matches the query
-                    DocumentSnapshot document = task.getDocuments().get(0);
-                    // Return the status as a string: waitlisted, enrolled, cancelled
-                    listener.onRetrievalCompleted(Objects.requireNonNull(document.get("status")).toString());
+                    // Check if there are any documents in the query result
+                    if (!task.getDocuments().isEmpty()) {
+                        DocumentSnapshot document = task.getDocuments().get(0);
+                        String status = document.getString("status");
+                        // Call the listener with the retrieved status or "unknown" if the status is null
+                        listener.onRetrievalCompleted(status != null ? status : "unknown");
+                    } else {
+                        // No documents found; call listener with a default "unknown" status
+                        listener.onRetrievalCompleted("unknown");
+                    }
                 })
-                .addOnFailureListener(listener::onError);
+                .addOnFailureListener(e -> {
+                    // Pass the error to the listener
+                    listener.onError(e);
+                });
     }
+
 
     /**
      * Gets an ArrayList of events this user is in, specified by the status
@@ -1653,29 +1685,6 @@ public class Firebase {
                 .addOnFailureListener(listener::onError);
 
     }
-    /**
-     * Checks if the user is already waitlisted or enrolled for the event.
-     *
-     * @param eventId  The ID of the event.
-     * @param callback The callback to handle the result (true if joined, false otherwise).
-     */
-    public void checkUserJoined(String eventId, UserJoinCheckCallback callback) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("user-events")
-                .whereEqualTo("userID", deviceID)
-                .whereEqualTo("eventID", eventId)
-                .whereIn("status", Arrays.asList("waitlisted", "enrolled"))
-                .get()
-                .addOnSuccessListener(task -> {
-                    boolean hasJoined = !task.getDocuments().isEmpty();
-                    callback.onCheckComplete(hasJoined);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("EventJoinFragment", "Error checking user status: " + e.getMessage());
-                    callback.onCheckComplete(false);
-                });
-    }
-
 
 }
 

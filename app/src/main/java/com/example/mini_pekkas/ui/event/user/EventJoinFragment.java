@@ -2,7 +2,6 @@ package com.example.mini_pekkas.ui.event.user;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,16 +17,16 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
-import com.example.mini_pekkas.UserJoinCheckCallback;
 import com.example.mini_pekkas.databinding.FragmentEventJoinBinding;
 import com.example.mini_pekkas.databinding.FragmentEventJoinWaitBinding;
 import com.example.mini_pekkas.databinding.FragmentEventJoinGeoBinding;
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModelFactory;
-import com.google.android.gms.common.api.internal.IStatusCallback;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
+
+import java.util.Objects;
 
 
 /**
@@ -71,12 +70,15 @@ public class EventJoinFragment extends Fragment {
         });
         sharedEventViewModel.getEventDetails().observe(getViewLifecycleOwner(), event -> {
             if (event != null) {
-                firebaseHelper.checkUserJoined(event.getId(), new UserJoinCheckCallback() {
+                firebaseHelper.getStatusInEvent(event, new Firebase.DataRetrievalListener() {
                     @Override
-                    public void onCheckComplete(boolean hasJoined) {
-                        if (hasJoined) {
+                    public void onRetrievalCompleted(String status) {
+                        if (Objects.equals(status, "waitlisted")){
                             NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
                             navController.navigate(R.id.action_navigation_event2_to_navigation_event);
+                        } else if (Objects.equals(status, "pending") || Objects.equals(status, "enrolled")){
+                            NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
+                            navController.navigate(R.id.action_navigation_event2_to_navigation_event3);
                         }
                     }
                 });
