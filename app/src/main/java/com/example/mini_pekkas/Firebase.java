@@ -328,39 +328,34 @@ public class Firebase {
             listener.onError(e);
         }
         // Delete all documents from the user-events collection
-        // TODO abstract these operations in one super function
         userEventsCollection.whereEqualTo("userID", deviceID).get()
                 .addOnSuccessListener(task -> {
                     // Use an array list to store the documents to be deleted.
-                    ArrayList<Task> tasks = new ArrayList<>();
-                    // Delete all documents that match the query
-                    for (DocumentSnapshot document : task.getDocuments()) {
-                        tasks.add(document.getReference().delete());
+                    if (!task.isEmpty()) {
+                        // Delete all documents that match the query
+                        for (DocumentSnapshot document : task.getDocuments()) {
+                            document.getReference().delete()
+                                    .addOnFailureListener(listener::onError);
+                        }
                     }
-                    Tasks.whenAllSuccess(tasks)
-                            .addOnSuccessListener(aVoid -> {
-                                // After deleting event entries, then delete the user itself
-                                userCollection.whereEqualTo("userID", user.getUserID()).get()
-                                        .addOnSuccessListener(userTask -> {
-                                            if (userTask.size() != 1) {
-                                                listener.onError(new Exception("User not found"));
-                                                return;
-                                            }
-                                            // Delete the user document
-                                            userTask.getDocuments().get(0).getReference().delete()
-                                                    .addOnSuccessListener(bVoid -> {
-                                                        userDocument = null;        // Clear the user document
-                                                        listener.onInitialized();
-                                                    })
-                                                    .addOnFailureListener(listener::onError);
-                                        })
-                                        .addOnFailureListener(listener::onError);
+                }).addOnFailureListener(listener::onError);
+
+        // After deleting event entries, delete the user itself
+        userCollection.whereEqualTo("userID", user.getUserID()).get()
+                .addOnSuccessListener(userTask -> {
+                    if (userTask.size() != 1) {
+                        listener.onError(new Exception("User not found"));
+                        return;
+                    }
+                    // Delete the user document
+                    userTask.getDocuments().get(0).getReference().delete()
+                            .addOnSuccessListener(bVoid -> {
+                                userDocument = null;        // Clear the user document
+                                listener.onInitialized();
                             })
                             .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);
-
-
     }
 
     /**
@@ -1644,9 +1639,9 @@ public class Firebase {
             ArrayList<Facility> facilities = new ArrayList<>();
             for (DocumentSnapshot document : results) {
                 // If an attribute doesn't exist, set it to null
-                String facilityName = (document.get("facility") == null) ? null : document.get("facility").toString();
-                String description = (document.get("facilityDesc") == null) ? null : document.get("description").toString();
-                String facilityPhotoUrl = (document.get("facilityPhotoUrl") == null) ? null : document.get("facilityPhotoUrl").toString();
+                String facilityName = (document.get("facility") == null) ? null : document.getString("facility");
+                String description = (document.get("facilityDesc") == null) ? null : document.getString("facilityDesc");
+                String facilityPhotoUrl = (document.get("facilityPhotoUrl") == null) ? null : document.getString("facilityPhotoUrl");
                 Facility facility = new Facility(facilityName, description, facilityPhotoUrl);
                 facilities.add(facility);
             }
@@ -1687,40 +1682,33 @@ public class Firebase {
     }
 
     /**
-     * TODO need to update to use facility object instead of name
      * Deletes all events associated with a facility
      * Delete the facility of the organizer, demoting to a user
      * @param facility the facility to delete events from
      */
     public void deleteByFacility(Facility facility, InitializationListener listener) {
+        // Delete all associated event
         eventCollection.whereEqualTo("facility", facility.getName()).get()
                 .addOnSuccessListener(tasks -> {
                     if (!tasks.isEmpty()) {
-                        listener.onError(new Exception("No event with facility found"));
-                    } else {
-                        // get the event id, delete the user-events, then delete the facility
                         for (DocumentSnapshot document : tasks.getDocuments()) {
                             String eventID = (String) document.get("id");
                             // Get and delete the event
                             getEvent(eventID, event -> {
-                                deleteEvent(event, () -> {
-                                    // Then delete/ban the user
-                                    userCollection.whereEqualTo("facility", facility).get()
-                                            .addOnSuccessListener(user -> {
-                                                if (user.isEmpty()) {
-                                                    listener.onError(new Exception("No user found with facility " + facility));
-                                                } else {
-                                                    // user.getDocuments().get(0).getReference().set("facility", null);
-                                                    deleteUser(user.getDocuments().get(0).toObject(User.class), listener);
-                                                }
-                                            })
-                                            .addOnFailureListener(listener::onError);
-                                });
+                                deleteEvent(event);
                             });
-
                         }
                     }
-        }).addOnFailureListener(listener::onError);
+                }).addOnFailureListener(listener::onError);
+        // Ban (Delete) the user (one to one) relationship
+        userCollection.whereEqualTo("facility", facility.getName()).get()
+                .addOnSuccessListener(user -> {
+                    if (!user.isEmpty()) {
+                        // user.getDocuments().get(0).getReference().set("facility", null);
+                        User userObject = user.getDocuments().get(0).toObject(User.class);
+                        deleteUser(userObject, listener);
+                    }
+                }).addOnFailureListener(listener::onError);
     }
 
     /**

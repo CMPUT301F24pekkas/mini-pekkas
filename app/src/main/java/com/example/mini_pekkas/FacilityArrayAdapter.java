@@ -1,6 +1,7 @@
 package com.example.mini_pekkas;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +36,7 @@ public class FacilityArrayAdapter extends ArrayAdapter<Facility> {
      * @param facilities The list of Facility objects to display.
      */
     public FacilityArrayAdapter(Context context, ArrayList<Facility> facilities) {
-        super(context, 0);
+        super(context, 0, facilities);
         this.facilities = facilities;
         this.context = context;
     }
@@ -64,7 +65,8 @@ public class FacilityArrayAdapter extends ArrayAdapter<Facility> {
 
         // Populate with facility data
         facilityTitleView.setText(facility.getName());
-        facilityDescriptionView.setText(facility.getDescription());
+        Log.d("FacilityArrayAdapter", "Facility description: " + facility.getName() + facility.getDescription());
+        facilityDescriptionView.setText(facility.getDescription() == null ? "No Description" : facility.getDescription());
 
         if (facility.getFacilityPhotoUrl()!= null && !facility.getFacilityPhotoUrl().isEmpty()) {
             Glide.with(context).load(facility.getFacilityPhotoUrl()).into(facilityImageView);
