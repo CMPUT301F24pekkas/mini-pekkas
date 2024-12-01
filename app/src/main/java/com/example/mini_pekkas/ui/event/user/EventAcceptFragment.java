@@ -20,22 +20,18 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
-import com.example.mini_pekkas.databinding.FragmentEventBinding;
+import com.example.mini_pekkas.databinding.FragmentEventChosenBinding;
 import com.example.mini_pekkas.databinding.FragmentEventLeaveWaitBinding;
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.Objects;
 
 /**
  * Fragment representing an event's details and waitlist functionality.
  * Allows users to join or leave the event's waitlist.
  */
-public class EventFragment extends Fragment {
+public class EventAcceptFragment extends Fragment {
 
-    private FragmentEventBinding binding;
+    private FragmentEventChosenBinding binding;
     private SharedEventViewModel sharedEventViewModel;
     private EventViewModel eventViewModel;
     private HomeEventsListViewModel homeEventsListViewModel;
@@ -53,7 +49,8 @@ public class EventFragment extends Fragment {
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentEventBinding.inflate(inflater, container, false);
+        Log.d("FirebaseHelper", "in the eventacceptfragment");
+        binding = FragmentEventChosenBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         firebaseHelper = new Firebase(requireContext());
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
@@ -64,8 +61,7 @@ public class EventFragment extends Fragment {
                 Event homeEvent = homeEventsListViewModel.getSelectedEvent().getValue();
                 if (homeEvent != null) {
                     event = homeEvent;
-
-                    fetchEventStatus();
+                    displayEventDetails(event);
                 } else {
                     Toast.makeText(requireContext(), "Home event not found", Toast.LENGTH_SHORT).show();
                 }
@@ -73,55 +69,53 @@ public class EventFragment extends Fragment {
                 Event qrCodeEvent = sharedEventViewModel.getEventDetails().getValue();
                 if (qrCodeEvent != null) {
                     event = qrCodeEvent;
-                    fetchEventStatus();
+                    displayEventDetails(event);
                 } else {
                     Toast.makeText(requireContext(), "QR code event not found", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        Button joinWaitlistButton = binding.leaveWaitButton;
-        joinWaitlistButton.setOnClickListener(v -> {
-            FragmentEventLeaveWaitBinding joinWaitBinding = FragmentEventLeaveWaitBinding.inflate(LayoutInflater.from(getContext()));
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setView(joinWaitBinding.getRoot());
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-            Button joinButton = joinWaitBinding.leaveWaitConfirmButton;
-            Button cancelButton = joinWaitBinding.cancelWaitButton;
-
-            joinButton.setOnClickListener(view -> {
-                if (event != null) {
-                    Toast.makeText(requireContext(), "Leaving waitlist...", Toast.LENGTH_SHORT).show();
-                    NavController navController = NavHostFragment.findNavController(this);
-                    navController.navigate(R.id.action_navigation_event_to_navigation_home);
-                    homeEventsListViewModel.deleteEvent(event.getId());
-                    firebaseHelper.cancelEvent(event);
-                } else {
-                    Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
-                }
-                dialog.dismiss();
-            });
-
-            cancelButton.setOnClickListener(view -> dialog.dismiss());
-        });
-        return root;
-    }
-
-    private void fetchEventStatus() {
-        firebaseHelper.getStatusInEvent(event, new Firebase.DataRetrievalListener() {
+        Button acceptButton = binding.acceptButton;
+        Button declineButton = binding.declineButton;
+        acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRetrievalCompleted(String status) {
-                if (Objects.equals(status, "waitlisted")){
-                    displayEventDetails(event);
-                } else if (Objects.equals(status, "pending") || Objects.equals(status, "enrolled")){
-                    NavController navController = NavHostFragment.findNavController(EventFragment.this);
-                    navController.navigate(R.id.action_navigation_event_to_navigation_event3);
-                }
+            public void onClick(View v) {
+                firebaseHelper.enrollEvent(event);
+                Toast.makeText(requireContext(), "Event Enrolled!", Toast.LENGTH_SHORT).show();
             }
         });
+        declineButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentEventLeaveWaitBinding joinWaitBinding = FragmentEventLeaveWaitBinding.inflate(LayoutInflater.from(getContext()));
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                joinWaitBinding.textView33.setText("Are you sure you want to decline this event? Your spot could be taken by another person.");
+                builder.setView(joinWaitBinding.getRoot());
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                Button joinButton = joinWaitBinding.leaveWaitConfirmButton;
+                Button cancelButton = joinWaitBinding.cancelWaitButton;
+
+                joinButton.setOnClickListener(view -> {
+                    if (event != null) {
+                        Toast.makeText(requireContext(), "Event Declined", Toast.LENGTH_SHORT).show();
+                        NavController navController = NavHostFragment.findNavController(EventAcceptFragment.this);
+                        navController.navigate(R.id.action_navigation_event3_to_navigation_home);
+                        homeEventsListViewModel.deleteEvent(event.getId());
+                        firebaseHelper.cancelEvent(event);
+                    } else {
+                        Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
+                    }
+                    dialog.dismiss();
+                });
+
+                cancelButton.setOnClickListener(view -> dialog.dismiss());
+            }
+        });
+        return root;
     }
 
 
