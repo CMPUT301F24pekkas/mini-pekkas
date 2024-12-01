@@ -509,7 +509,10 @@ public class Firebase {
                     }
 
                     Tasks.whenAllSuccess(tasks)
-                            .addOnSuccessListener(aVoid -> listener.onNotificationListRetrievalCompleted(notifications))
+                            .addOnSuccessListener(aVoid -> {
+                                notifications.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));   // Sort the notifications by newest date
+                                listener.onNotificationListRetrievalCompleted(notifications);
+                            })
                             .addOnFailureListener(listener::onError);
                 })
                 .addOnFailureListener(listener::onError);

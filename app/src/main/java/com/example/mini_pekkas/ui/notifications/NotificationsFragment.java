@@ -1,12 +1,15 @@
 package com.example.mini_pekkas.ui.notifications;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -16,12 +19,13 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.mini_pekkas.notification.Notifications;
+import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentNotificationsBinding;
+import com.example.mini_pekkas.notification.Notifications;
+import com.example.mini_pekkas.notification.NotificationsArrayAdapter;
 import com.example.mini_pekkas.ui.event.user.EventFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,27 +65,27 @@ public class NotificationsFragment extends Fragment {
             listView.setVisibility(View.INVISIBLE);
         }
 
-        // Dummy data for testing
-        ArrayList<String> notificationList = new ArrayList<>();
-        notificationList.add("Header (Category) (Date)\nSupporting line text lorem ipsum dolor sit amet.");
-        notificationList.add("Header (Category) (Date)\nSupporting line text lorem ipsum dolor sit amet.");
-        notificationList.add("Header (Category) (Date)\nSupporting line text lorem ipsum dolor sit amet.");
+        // Fetch the user's notifications from firebase
+        Firebase firebaseHelper = new Firebase(getContext());
+        firebaseHelper.getThisUserNotifications(notifications -> {
+            // Copy the notifications list to a local variable
+            notificationList = notifications;
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                getContext(),
-                android.R.layout.simple_list_item_1,
-                notificationList
-        );
-        listView.setAdapter(adapter);
+            // Set the adapter for the ListView
+            NotificationsArrayAdapter adapter = new NotificationsArrayAdapter(getContext(), R.layout.list_notification, notificationList);
+            listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            navigateToFragment(position);
-        });
+            // TODO Set the item click listener
+            // Disabled until we figure out how to navigate to a different fragment
+//            listView.setOnItemClickListener((parent, view, position, id) -> {
+//                navigateToFragment(position);
+//            });
 
-        // Observe new notifications
-        notificationsViewModel.getNotification().observe(getViewLifecycleOwner(), text -> {
-            notificationList.add(text);
-            adapter.notifyDataSetChanged();
+            // Observe new notifications
+            notificationsViewModel.getNotification().observe(getViewLifecycleOwner(), text -> {
+                //notificationList.add(text);
+                adapter.notifyDataSetChanged();
+            });
         });
 
         // Handle opt-out button click
@@ -120,6 +124,21 @@ public class NotificationsFragment extends Fragment {
         optOutButton.setOnClickListener(v -> {
             listView.setVisibility(View.INVISIBLE);
             saveOptOutPreference(true);  // Save opt-out preference
+
+            // Remove notification permission on device
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // API level 26 and above
+                Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, "com.example.mini_pekkas");
+                startActivity(intent);
+            } else { // API level below 26
+                // For older versions, you might need to open the app's settings page
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", "com.example.mini_pekkas", null);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+
+
             dialog.dismiss();
         });
 

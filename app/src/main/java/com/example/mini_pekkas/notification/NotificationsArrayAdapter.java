@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.example.mini_pekkas.R;
 
+import java.text.DateFormat;
 import java.util.List;
 
 /**
@@ -47,15 +48,15 @@ public class NotificationsArrayAdapter extends ArrayAdapter<Notifications>{
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(resource, parent, false);
         }
-        TextView titleTextView = convertView.findViewById(R.id.notificationTitle);
-        TextView descriptionTextView = convertView.findViewById(R.id.notificationDescription);
-        TextView dateTextView = convertView.findViewById(R.id.notificationDate);
-        TextView priorityTextView = convertView.findViewById(R.id.notificationPriority);
+        TextView titleTextView = convertView.findViewById(R.id.header_text);
+        TextView descriptionTextView = convertView.findViewById(R.id.supporting_text);
+        TextView dateTextView = convertView.findViewById(R.id.header_date);
 
         titleTextView.setText(notifications.getTitle());
         descriptionTextView.setText(notifications.getDescription());
-        dateTextView.setText(notifications.getDate().toString());
-        priorityTextView.setText(String.valueOf(notifications.getPriority()));
+        // User date format to display date
+        String dateString = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(notifications.getDate());
+        dateTextView.setText(dateString);
 
         return convertView;
     }

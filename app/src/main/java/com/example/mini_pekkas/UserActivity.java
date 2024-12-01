@@ -1,6 +1,7 @@
 package com.example.mini_pekkas;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,15 +16,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 
 import com.example.mini_pekkas.databinding.UserMainBinding;
-import com.example.mini_pekkas.notification.NotificationWorker;
+import com.example.mini_pekkas.notification.NotificationForegroundService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * UserActivity is the main activity for Users, setting up the navigation controller
  * and Navigation Bar for user-specific activities. This activity initializes and configures the navigation components and handles
@@ -118,12 +118,10 @@ public class UserActivity extends AppCompatActivity {
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
-                    // FCM SDK (and your app) can post notifications.
                     // Initialize the notification listener
-                    OneTimeWorkRequest notificationWorkRequest =
-                            new OneTimeWorkRequest.Builder(NotificationWorker.class)
-                                    .build();
-                    WorkManager.getInstance(this).enqueue(notificationWorkRequest);
+                    Intent serviceIntent = new Intent(this, NotificationForegroundService.class);
+                    ContextCompat.startForegroundService(this, serviceIntent);
+
                 } else {
                     // Inform user that that your app will not show notifications. Make a toast
                     Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show();
@@ -138,12 +136,9 @@ public class UserActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) ==
                     PackageManager.PERMISSION_GRANTED) {
-                // FCM SDK (and your app) can post notifications.
                 // Initialize the notification listener
-                OneTimeWorkRequest notificationWorkRequest =
-                        new OneTimeWorkRequest.Builder(NotificationWorker.class)
-                                .build();
-                WorkManager.getInstance(this).enqueue(notificationWorkRequest);
+                Intent serviceIntent = new Intent(this, NotificationForegroundService.class);
+                ContextCompat.startForegroundService(this, serviceIntent);
             } else if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
                 // TODO: display an educational UI explaining to the user the features that will be enabled
                 //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
