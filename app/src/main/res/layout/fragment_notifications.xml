@@ -8,8 +8,8 @@
 
     <ListView
         android:id="@+id/text_notifications"
-        android:layout_width="394dp"
-        android:layout_height="711dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"

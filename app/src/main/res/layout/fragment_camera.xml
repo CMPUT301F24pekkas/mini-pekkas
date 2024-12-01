@@ -9,9 +9,10 @@
 
     <TextView
         android:id="@+id/textCamera"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Tap the button to open the camera"
+        app:layout_constraintWidth_percent="0.8"
+        android:text="Use the camera to scan a QR code and join an event!"
         android:textSize="18sp"
         android:textAlignment="center"
         app:layout_constraintTop_toTopOf="parent"
@@ -24,6 +25,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Open Camera"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="12dp"
+        android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/textCamera"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

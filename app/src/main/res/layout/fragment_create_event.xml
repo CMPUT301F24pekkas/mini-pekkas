@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="56dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
             android:text="Create New Event"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textSize="34sp"
+            app:layout_constraintBottom_toTopOf="@+id/addEventPicture"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/addEventPicture"
-            android:layout_width="358dp"
-            android:layout_height="93dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="7dp"
@@ -40,10 +42,11 @@
 
         <EditText
             android:id="@+id/createEventEditText"
-            android:layout_width="363dp"
-            android:layout_height="49dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingVertical="12dp"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/rounded_edittext"
@@ -57,8 +60,9 @@
 
         <EditText
             android:id="@+id/createEventLocationEditText"
-            android:layout_width="363dp"
-            android:layout_height="49dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingVertical="12dp"
             android:layout_marginStart="24dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="24dp"
@@ -74,14 +78,15 @@
 
         <EditText
             android:id="@+id/editStartDate"
-            android:layout_width="160dp"
-            android:layout_height="48dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/editdate"
             android:ems="10"
-            android:hint="Select Start Date"
+            android:hint="Start Date"
             android:inputType="date"
             android:textAlignment="center"
             app:layout_constraintBottom_toTopOf="@+id/editEndDate"
@@ -91,14 +96,15 @@
 
         <EditText
             android:id="@+id/editEndDate"
-            android:layout_width="160dp"
-            android:layout_height="48dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
             android:layout_marginStart="24dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="10dp"
             android:background="@drawable/editdate"
             android:ems="10"
-            android:hint="Select End Date"
+            android:hint="End Date"
             android:inputType="date"
             android:textAlignment="center"
             app:layout_constraintEnd_toStartOf="@+id/editEndTime"
@@ -107,15 +113,16 @@
 
         <EditText
             android:id="@+id/editStartTime"
-            android:layout_width="160dp"
-            android:layout_height="48dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
             android:layout_marginStart="15dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/editdate"
             android:ems="10"
-            android:hint="Select Start Time"
+            android:hint="Start Time"
             android:inputType="time"
             android:textAlignment="center"
             app:layout_constraintBottom_toTopOf="@+id/editEndTime"
@@ -125,14 +132,15 @@
 
         <EditText
             android:id="@+id/editEndTime"
-            android:layout_width="160dp"
-            android:layout_height="48dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
             android:layout_marginStart="15dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="24dp"
             android:background="@drawable/editdate"
             android:ems="10"
-            android:hint="Select End Time"
+            android:hint="End Time"
             android:inputType="time"
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
@@ -177,92 +185,110 @@
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="81dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="50dp"
-            android:layout_marginEnd="306dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="2dp"
             android:text="Description"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@+id/editDescription"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/geoCheckBox" />
+            app:layout_constraintTop_toBottomOf="@+id/geoCheckBox" />
+
+        <EditText
+            android:id="@+id/editDescription"
+            android:layout_width="0dp"
+            android:layout_height="90dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/rounded_edittext"
+            android:ems="10"
+            android:gravity="top|start"
+            android:hint="Give a short description of your event!"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/textView4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
-            android:layout_height="22dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginEnd="338dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
             android:layout_marginBottom="2dp"
             android:text="Details"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@+id/editDetails"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editDescription" />
 
         <EditText
-            android:id="@+id/editDescription"
-            android:layout_width="350dp"
-            android:layout_height="93dp"
+            android:id="@+id/editDetails"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
-            android:layout_marginEnd="37dp"
-            android:background="@drawable/rounded_edittext"
-            android:ems="10"
-            android:gravity="top|start"
-            android:hint="Give a short description of your event!"
-            android:inputType="text"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/geoCheckBox" />
-
-        <EditText
-            android:id="@+id/editDetails"
-            android:layout_width="351dp"
-            android:layout_height="64dp"
-            android:layout_marginStart="23dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="37dp"
+            android:layout_marginEnd="24dp"
             android:layout_marginBottom="3dp"
             android:background="@drawable/rounded_edittext"
             android:ems="10"
             android:gravity="top|start"
             android:hint="Write down any extra details!"
-            android:inputType="text"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
             android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/addEventButton"
+            app:layout_constraintBottom_toTopOf="@+id/buttonLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editDescription" />
 
-        <Button
-            android:id="@+id/addEventButton"
-            android:layout_width="88dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="37dp"
-            android:text="Add"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/cancelEventButton"
-            app:layout_constraintTop_toBottomOf="@+id/editDetails" />
-
-        <Button
-            android:id="@+id/cancelEventButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/buttonLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="200dp"
-            android:layout_marginTop="10dp"
-            android:text="Cancel"
-            app:layout_constraintEnd_toStartOf="@+id/addEventButton"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="18dp"
+            android:gravity="end"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editDetails" />
+            app:layout_constraintTop_toBottomOf="@+id/editDetails">
+
+            <Button
+                android:id="@+id/addEventButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:text="Add"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/cancelEventButton"
+                app:layout_constraintTop_toBottomOf="@+id/editDetails" />
+
+            <Button
+                android:id="@+id/cancelEventButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                app:layout_constraintEnd_toStartOf="@+id/addEventButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editDetails" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
