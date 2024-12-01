@@ -264,7 +264,7 @@ public class Firebase {
      * @return the user document as a User object. Throws an error if the user does not exist
      */
     public User getThisUser() {
-        return userDocument.toObject(User.class);
+        return new User(Objects.requireNonNull(userDocument.getData()));
     }
 
     /**
