@@ -50,7 +50,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        profileImageRef = FirebaseStorage.getInstance().getReference("profile_pictures");
+        profileImageRef = FirebaseStorage.getInstance().getReference("profile-pictures");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
