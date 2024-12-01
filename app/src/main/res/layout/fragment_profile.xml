@@ -8,7 +8,7 @@
 
     <ImageView
         android:id="@+id/profile_image"
-        android:layout_width="101dp"
+        android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="36dp"
@@ -131,15 +131,19 @@
 
     <ImageButton
         android:id="@+id/edit_button"
-        android:layout_width="83dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/edit_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/phone_input"
-        app:layout_constraintVertical_bias="0.76" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/phone_input"
+        app:layout_constraintVertical_bias="0.19999999" />
 
     <ImageButton
         android:id="@+id/pfp_edit"

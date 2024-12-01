@@ -73,7 +73,7 @@ public class OrganizerProfileViewModel extends ViewModel {
                     phoneNumber.setValue(user.getPhone());
                     organizerLocation.setValue((user.getFacility()));
                     profilePictureUrl.setValue(user.getProfilePhotoUrl());
-                    userID.setValue(user.getId());
+                    userID.setValue(user.getUserID());
                     facilityPictureUrl.setValue(user.getFacilityPhotoUrl());
                     facilityDescription.setValue(user.getFacilityDesc());
                 }
