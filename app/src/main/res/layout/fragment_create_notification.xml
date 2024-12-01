@@ -14,20 +14,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Notification Title"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         android:layout_marginBottom="8dp" />
 
     <EditText
         android:id="@+id/etNotificationTitle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:hint="Enter title"
-        android:inputType="text"
-        android:background="@android:color/transparent"
+        android:gravity="top|start"
+
+        android:inputType="textMultiLine"
+        android:scrollbars="vertical"
+        android:background="@drawable/rounded_edittext"
         android:padding="10dp"
-        android:backgroundTint="@android:color/darker_gray"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="20dp" />
 
     <!-- Message Input -->
     <TextView
@@ -35,19 +37,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Notification Message"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         android:layout_marginBottom="8dp" />
 
     <EditText
         android:id="@+id/etNotificationMessage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="120dp"
         android:hint="Enter message"
+        android:gravity="top|start"
         android:inputType="textMultiLine"
-        android:background="@android:color/transparent"
+        android:scrollbars="vertical"
+        android:background="@drawable/rounded_edittext"
         android:padding="10dp"
-        android:backgroundTint="@android:color/darker_gray"
         android:layout_marginBottom="16dp" />
 
     <!-- Priority Selection -->
@@ -70,8 +73,10 @@
     <!-- Submit Button -->
     <Button
         android:id="@+id/btnSubmitNotification"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_gravity="center"
         android:text="Create Notification"
         android:textColor="@android:color/white"
         android:backgroundTint="@android:color/holo_blue_light"
