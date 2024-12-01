@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.17.1 Fixed other potential race condition. Replacing requireNonNull to document.toObject for smarter conversion
+ * @version 1.17.2 Now stores location when waitlisting if needed. getUserLocations fetches all geolocations
  */
 public class Firebase {
     private final String deviceID;
@@ -186,6 +187,14 @@ public class Firebase {
     public interface ImageListRetrievalListener {
         void onImageListRetrievalCompleted(ArrayList<Uri> images);
         default void onError(Exception e) {Log.e(TAG, "Error getting images: ", e);}
+    }
+
+    /**
+     * Interface for functions that return list of locations in GeoPoint format
+     */
+    public interface GeoPointListRetrievalListener {
+        void onGeoPointListRetrievalCompleted(ArrayList<GeoPoint> locations);
+        default void onError(Exception e) {Log.e(TAG, "Error getting locations: ", e);}
     }
 
     /**
@@ -666,6 +675,7 @@ public class Firebase {
         map.put("eventID", event.getId());
         map.put("userID", deviceID);
         map.put("status", "organized");
+        map.put("geopoint", null);  // Dont track organizer location
 
         userEventsCollection.add(map)
                 .addOnSuccessListener(aVoid -> listener.onInitialized())
@@ -682,9 +692,10 @@ public class Firebase {
     /**
      * Waitlist this user into the event. Creates a new entry in the user-events collection
      * @param event an event object to be waitlisted into
+     * @param geoPoint Optional location object if the user is located
      * @param listener Optional InitializationListener listener that is called after the event is waitlisted
      */
-    public void waitlistEvent(Event event, InitializationListener listener) {
+    public void waitlistEvent(Event event, GeoPoint geoPoint, InitializationListener listener) {
         userEventsCollection
                 .whereEqualTo("eventID", event.getId())
                 .whereEqualTo("userID", deviceID)
@@ -705,11 +716,12 @@ public class Firebase {
                                         listener.onError(e);
                                     }
                                 });
-                    } else {
+                    } else {    // Document does not exist, create a new one
                         HashMap<String, Object> map = new HashMap<>();
                         map.put("eventID", event.getId());
                         map.put("userID", deviceID);
                         map.put("status", "waitlisted");
+                        map.put("geopoint", geoPoint);
 
                         userEventsCollection.add(map)
                                 .addOnSuccessListener(aVoid -> listener.onInitialized())
@@ -719,10 +731,24 @@ public class Firebase {
     }
 
     /**
-     * Overload of the {@link #waitlistEvent(Event, InitializationListener)} with no listener
+     * Overload of the {@link #waitlistEvent(Event, GeoPoint, InitializationListener)} with no location
+     */
+    public void waitlistEvent(Event event, InitializationListener listener) {
+        waitlistEvent(event, null, listener);
+    }
+
+    /**
+     * Overload of the {@link #waitlistEvent(Event, GeoPoint, InitializationListener)} with no listener
+     */
+    public void waitlistEvent(Event event, GeoPoint geoPoint) {
+        waitlistEvent(event, geoPoint, () -> {});
+    }
+
+    /**
+     * Overload of the {@link #waitlistEvent(Event, InitializationListener)} with no location and listener
      */
     public void waitlistEvent(Event event) {
-        waitlistEvent(event, () -> {});
+        waitlistEvent(event, null, () -> {});
     }
 
     /**
@@ -800,6 +826,7 @@ public class Firebase {
     public void leaveEvent(Event event) {
         leaveEvent(event, () -> {});
     }
+
     /**
      * Get the current status of the user in the event.
      * @param event An event object to get the status of.
@@ -1066,6 +1093,33 @@ public class Firebase {
         getUsersInEventByStatus("all", eventID, listener);
     }
 
+    /**
+     * Retrieve the location of all users in an event. The GeoPoint contains the lat and long of the user
+     * @param eventID the event ID to query
+     * @param status  the status to filter the query by. Set to {all} to retrieve all user statuses
+     *                see {@link #getUsersInEventByStatus(String, String, UserListRetrievalListener)} for possible values
+     * @param listener a GeoPointListRetrievalListener that returns an ArrayList of GeoPoints
+     */
+    public void getUserLocations(String eventID, String status, GeoPointListRetrievalListener listener) {
+        Query query = userEventsCollection.whereEqualTo("eventID", eventID);
+        if (!status.equals("all")) {
+            query = query.whereEqualTo("status", status);
+        }
+        // Apply filters and run query
+        query.get()
+                .addOnSuccessListener(task -> {
+                    if (task.isEmpty()) {
+                        listener.onGeoPointListRetrievalCompleted(new ArrayList<>());
+                    } else {
+                        ArrayList<GeoPoint> locations = new ArrayList<>();
+                        for (DocumentSnapshot document : task.getDocuments()) {
+                               GeoPoint geoPoint = document.getGeoPoint("geopoint");
+                                locations.add(geoPoint);
+                        }
+                        listener.onGeoPointListRetrievalCompleted(locations);   // Pass the list of locations
+                    }
+                }).addOnFailureListener(listener::onError);
+    }
     /**
      * Call when this user accepts or rejects an event. Updates the user-event collection
      * @param didAccept true if this user accepted (enrolled), false if user rejected (cancelled)
