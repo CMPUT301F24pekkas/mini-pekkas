@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.17.4 Admin can now search and delete facility Images. Added dialog box for deleting images
+ * @version 1.17.5 Search now returns unique entries, notifications deleted when user is deleted
  */
 public class Firebase {
     private final String deviceID;
@@ -325,10 +325,10 @@ public class Firebase {
     public void deleteUser(User user, InitializationListener listener) {
         try {
             deleteProfilePicture(user);
-            deleteAllNotification(user);
         } catch (Exception e) {
             listener.onError(e);
         }
+        deleteAllNotification(user);
 
         // Delete all documents from the user-events collection
         userEventsCollection.whereEqualTo("userID", user.getUserID()).get()
@@ -427,7 +427,11 @@ public class Firebase {
         String eventID = event.getId();
 
         // Delete the banner image
-        deletePosterPicture(event);
+        try {
+            deletePosterPicture(event);
+        } catch (Exception e) {
+            listener.onError(e);
+        }
 
         // Delete the event document
         eventCollection.document(eventID).delete()
@@ -1618,16 +1622,17 @@ public class Firebase {
     private void waitForQueryCompletion(ArrayList<Task> tasks, QueryRetrievalListener listener) {
         // wait for all tasks to complete
         Tasks.whenAllSuccess(tasks)
-                .addOnSuccessListener( queries -> {
-                    ArrayList<DocumentSnapshot> results = new ArrayList<>();
+                .addOnSuccessListener(queries -> {
+                    HashSet<DocumentSnapshot> uniqueResults = new HashSet<>(); // Use HashSet to filter duplicate results
                     for (Object query : queries) {
-                        // Check what the query is and add the object to the results array
                         if (query instanceof QuerySnapshot) {
-                            results.addAll(((QuerySnapshot) query).getDocuments());
+                            uniqueResults.addAll(((QuerySnapshot) query).getDocuments());
                         } else if (query instanceof DocumentSnapshot) {
-                            results.add(((DocumentSnapshot) query));
+                            uniqueResults.add(((DocumentSnapshot) query));
                         }
                     }
+                    // Convert back to ArrayList if needed
+                    ArrayList<DocumentSnapshot> results = new ArrayList<>(uniqueResults);
                     listener.onQueryRetrievalCompleted(results);
                 })
                 .addOnFailureListener(listener::onError);
@@ -1665,15 +1670,12 @@ public class Firebase {
 
 
         waitForQueryCompletion(tasks, (results) -> {
-            // Create new unique hashset of users
-            HashSet<User> users = new HashSet<>();
+            ArrayList<User> users = new ArrayList<>();
             for (DocumentSnapshot document : results) {
                 User user = document.toObject(User.class);
                 users.add(user);
             }
-            // Remove duplicate files
-            ArrayList<User> userArray = new ArrayList<>(users);
-            listener.onUserListRetrievalCompleted(userArray);
+            listener.onUserListRetrievalCompleted(users);
         });
     }
 
