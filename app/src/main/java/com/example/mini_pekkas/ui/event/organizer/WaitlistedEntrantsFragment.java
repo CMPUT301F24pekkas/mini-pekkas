@@ -95,6 +95,10 @@ public class WaitlistedEntrantsFragment extends Fragment {
 
             // Now, navigate to the MapFragment using the NavController
             navController.navigate(R.id.action_waitlistedEntrants_to_mapFragment);
+
+            Bundle bundle = new Bundle();
+            bundle.putString("eventID", eventId);
+            Navigation.findNavController(v).navigate(R.id.action_waitlistedEntrants_to_mapFragment, bundle);
         });
 
         return root;
