@@ -124,7 +124,9 @@ public class EventAcceptFragment extends Fragment {
                 FragmentEventLeaveWaitBinding joinWaitBinding = FragmentEventLeaveWaitBinding.inflate(LayoutInflater.from(getContext()));
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                joinWaitBinding.textView5.setText("Decline Event?");
                 joinWaitBinding.textView33.setText("Are you sure you want to decline this event? Your spot could be taken by another person.");
+                joinWaitBinding.leaveWaitConfirmButton.setText("Decline");
                 builder.setView(joinWaitBinding.getRoot());
                 AlertDialog dialog = builder.create();
                 dialog.show();

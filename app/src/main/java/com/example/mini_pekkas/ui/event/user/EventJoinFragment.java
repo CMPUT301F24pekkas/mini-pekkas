@@ -191,13 +191,12 @@ public class EventJoinFragment extends Fragment {
                     @Override
                     public void onSuccess(Integer count) {
                         if (count < event.getMaxWaitlist()){
-                            Toast.makeText(requireContext(), "count"+count +"wait"+ event.getMaxWaitlist(), Toast.LENGTH_SHORT).show();
                             firebaseHelper.waitlistEvent(event);
                             homeEventsListViewModel.addEvent(event);
                             homeEventsListViewModel.setSelectedEvent(event);
                             NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
                             navController.navigate(R.id.action_navigation_event2_to_navigation_event);
-//                            Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
                         } else{
                             Toast.makeText(requireContext(), "Sorry, waitlist is full" + count, Toast.LENGTH_SHORT).show();
                         }
