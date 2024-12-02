@@ -132,40 +132,7 @@ public class EventChooseUsersFragment extends Fragment {
         ImageButton editPosterButton = binding.editEventPictureButton;
         editPosterButton.setOnClickListener(v -> openImageChooser());
 
-        ImageButton chooseButton = binding.chooseButton;
-        chooseButton.setOnClickListener(v -> {
 
-            FragmentChoosePartBinding choosePartBinding = FragmentChoosePartBinding.inflate(
-                    LayoutInflater.from(requireContext()));
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setView(choosePartBinding.getRoot());
-            AlertDialog dialog = builder.create();
-
-            choosePartBinding.cancelChooseButton.setOnClickListener(y -> {
-                dialog.dismiss();
-            });
-
-            choosePartBinding.confirmChooseButton.setOnClickListener(z -> {
-                Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
-                ArrayList<Notifications> notifications = createDefaultNotifications();
-                firebaseHelper.startEnrollingEvent(event, notifications);
-
-                dialog.dismiss();
-            });
-
-            dialog.show();
-
-            // Verify event data is valid when dialog opens
-            Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
-            Log.d("EventDetailsFragment", "Current event when dialog opens: " +
-                    (currentEvent != null ? currentEvent.getName() : "null"));
-        });
-        ImageButton waitButton = binding.waitButton;
-        waitButton.setOnClickListener(v-> {
-            NavController navController = Navigation.findNavController(v);
-            navController.navigate(R.id.action_choose_participants_to_waitlisted_entrants);
-        });
         Button chosenButton = binding.chosenButton;
         chosenButton.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(v);
