@@ -153,7 +153,7 @@
             android:layout_height="48dp"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="2dp"
-            android:text="Set Max Participants"
+            android:text="Set Max Waitlist"
             app:layout_constraintBottom_toTopOf="@+id/geoCheckBox"
             app:layout_constraintEnd_toStartOf="@+id/editMaxPart"
             app:layout_constraintStart_toStartOf="parent"
@@ -171,7 +171,7 @@
             app:layout_constraintTop_toBottomOf="@+id/maxPartCheckBox" />
 
         <EditText
-            android:id="@+id/editMaxPart"
+            android:id="@+id/editMaxWait"
             android:layout_width="160dp"
             android:layout_height="48dp"
             android:layout_marginStart="6dp"
@@ -180,6 +180,21 @@
             android:hint="Number"
             android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/maxPartCheckBox"
+            app:layout_constraintTop_toBottomOf="@+id/editEndTime" />
+
+        <EditText
+            android:id="@+id/editMaxPart"
+            android:layout_width="161dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="48dp"
+            android:layout_marginEnd="31dp"
+            android:ems="10"
+            android:hint="Participant amount"
+            android:inputType="text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/maxPartCheckBox"
             app:layout_constraintTop_toBottomOf="@+id/editEndTime" />
 
