@@ -40,6 +40,7 @@ import com.google.android.gms.location.LocationServices;
 
 
 import java.io.ByteArrayOutputStream;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
@@ -275,7 +276,6 @@ public class EventCreateFragment extends Fragment {
         String endTime = binding.editEndTime.getText().toString().trim();
         String eventDescription = binding.editDescription.getText().toString().trim();
         price = binding.editPrice.getText().toString().trim().isEmpty() ? 0.0f : Float.parseFloat(binding.editPrice.getText().toString().trim());
-        long priceLong = Math.round(price * 100);   // Convert to cents
 
         boolean geolocationEnabled = binding.geoCheckBox.isChecked();
 
@@ -297,12 +297,13 @@ public class EventCreateFragment extends Fragment {
             return null;
         }
 
-        // Parse dates
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        // Parse dates in YYYYMMDD format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMddyyyy", Locale.US);
         Date startDate, endDate;
         try {
             startDate = dateFormat.parse(startDateString);
             endDate = dateFormat.parse(endDateString);
+            Toast.makeText(requireContext(), "Start date" + startDate.toString(), Toast.LENGTH_SHORT).show();
 
             if (startDate.after(endDate)) {
                 Toast.makeText(requireContext(), "Start date must be before or equal to the end date.", Toast.LENGTH_SHORT).show();
