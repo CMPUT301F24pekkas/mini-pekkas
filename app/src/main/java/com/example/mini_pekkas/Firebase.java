@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Any functions that get and request data needs a user defined listener. This is a function that's called after an operation is completed.
  * Every listener will have a on success and an optional on error listener (if not overwritten, the default error handling is to print the error in the log)
  * @author ryan
- * @version 1.17.3 didAcceptEvent now takes in multiple notfications
+ * @version 1.17.5 Search now returns unique entries, notifications deleted when user is deleted
  */
 public class Firebase {
     private final String deviceID;
@@ -50,6 +50,7 @@ public class Firebase {
     private final CollectionReference adminCollection;
     private final StorageReference profilePictureReference;
     private final StorageReference posterPictureReference;
+    private final StorageReference facilityPictureReference;
 
     private DocumentSnapshot userDocument;
 
@@ -74,6 +75,7 @@ public class Firebase {
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         profilePictureReference = storageReference.child("profile-pictures");
         posterPictureReference = storageReference.child("poster-pictures");
+        facilityPictureReference = storageReference.child("facility-pictures");
 
         // Get the device id
         deviceID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -323,12 +325,13 @@ public class Firebase {
     public void deleteUser(User user, InitializationListener listener) {
         try {
             deleteProfilePicture(user);
-            deleteAllNotification(user);
         } catch (Exception e) {
             listener.onError(e);
         }
+        deleteAllNotification(user);
+
         // Delete all documents from the user-events collection
-        userEventsCollection.whereEqualTo("userID", deviceID).get()
+        userEventsCollection.whereEqualTo("userID", user.getUserID()).get()
                 .addOnSuccessListener(task -> {
                     // Use an array list to store the documents to be deleted.
                     if (!task.isEmpty()) {
@@ -424,7 +427,11 @@ public class Firebase {
         String eventID = event.getId();
 
         // Delete the banner image
-        deletePosterPicture(event);
+        try {
+            deletePosterPicture(event);
+        } catch (Exception e) {
+            listener.onError(e);
+        }
 
         // Delete the event document
         eventCollection.document(eventID).delete()
@@ -1511,6 +1518,29 @@ public class Firebase {
     }
 
     /**
+     * Deletes the facility picture from the storage.
+     * @param photoUrl the string path of the facility photo Url to delete
+     * @param listener Optional InitializationListener listener that is called when the image is deleted
+     */
+    public void deleteFacilityPicture(String photoUrl, InitializationListener listener) {
+        // Get the photo Url and delete it
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            facilityPictureReference.child(photoUrl).delete()
+                    .addOnSuccessListener(aVoid -> listener.onInitialized())
+                    .addOnFailureListener(listener::onError);
+        } else {
+            // Throw an exception
+            listener.onError(new Exception("No facility picture to delete"));
+        }
+    }
+
+    /**
+     * Overload of the {@link #deleteFacilityPicture(String, InitializationListener)} with no listener
+     */
+    public void deleteFacilityPicture(String photoUrl) {
+        deleteFacilityPicture(photoUrl, () -> {});
+    }
+    /**
      * Checks if the image is a profile picture.
      * @param imageName the image name to check
      * @param listener the listener that is called when the check is complete. Returns true if the image is a profile picture
@@ -1519,8 +1549,6 @@ public class Firebase {
      */
     public void isProfilePicture(String imageName, CheckListener listener) {
         // Check if the image exists in profilePictureReference
-        System.out.println("imageName: " + imageName);
-
 
         profilePictureReference.child(imageName).getDownloadUrl()
                 .addOnSuccessListener(uri -> listener.onCheckComplete(true)) // Profile picture
@@ -1530,6 +1558,34 @@ public class Firebase {
                         posterPictureReference.child(imageName).getDownloadUrl()
                                 .addOnSuccessListener(uri -> listener.onCheckComplete(false)) // Poster picture
                                 .addOnFailureListener(listener::onError);
+                    } else {
+                        listener.onError(e); // Error checking profilePictureReference
+                    }
+                });
+    }
+
+    /**
+     * Checks where the image is stored. Poster/Profile/Facility
+     * @param imageName the path of the image to check
+     * @param listener A listener that is called when the check is complete
+     *                 Returns one of {profile, poster, facility}
+     */
+    public void findPictureLocation(String imageName, DataRetrievalListener listener) {
+        profilePictureReference.child(imageName).getDownloadUrl()
+                .addOnSuccessListener(uri -> listener.onRetrievalCompleted("profile")) // Profile picture
+                .addOnFailureListener(e -> {
+                    if (e instanceof StorageException && ((StorageException) e).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                        // Image not found in profilePictureReference, check posterPictureReference
+                        posterPictureReference.child(imageName).getDownloadUrl()
+                                .addOnSuccessListener(uri -> listener.onRetrievalCompleted("poster")) // Poster picture
+                                .addOnFailureListener(e2 -> {
+                                    if (e2 instanceof StorageException && ((StorageException) e2).getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+                                        // Image not found in posterPictureReference, check facilityPictureReference
+                                        facilityPictureReference.child(imageName).getDownloadUrl()
+                                                .addOnSuccessListener(uri -> listener.onRetrievalCompleted("facility")) // Facility picture
+                                                .addOnFailureListener(listener::onError);
+                                    }
+                                });
                     } else {
                         listener.onError(e); // Error checking profilePictureReference
                     }
@@ -1569,16 +1625,17 @@ public class Firebase {
     private void waitForQueryCompletion(ArrayList<Task> tasks, QueryRetrievalListener listener) {
         // wait for all tasks to complete
         Tasks.whenAllSuccess(tasks)
-                .addOnSuccessListener( queries -> {
-                    ArrayList<DocumentSnapshot> results = new ArrayList<>();
+                .addOnSuccessListener(queries -> {
+                    HashSet<DocumentSnapshot> uniqueResults = new HashSet<>(); // Use HashSet to filter duplicate results
                     for (Object query : queries) {
-                        // Check what the query is and add the object to the results array
                         if (query instanceof QuerySnapshot) {
-                            results.addAll(((QuerySnapshot) query).getDocuments());
+                            uniqueResults.addAll(((QuerySnapshot) query).getDocuments());
                         } else if (query instanceof DocumentSnapshot) {
-                            results.add(((DocumentSnapshot) query));
+                            uniqueResults.add(((DocumentSnapshot) query));
                         }
                     }
+                    // Convert back to ArrayList if needed
+                    ArrayList<DocumentSnapshot> results = new ArrayList<>(uniqueResults);
                     listener.onQueryRetrievalCompleted(results);
                 })
                 .addOnFailureListener(listener::onError);
@@ -1616,15 +1673,12 @@ public class Firebase {
 
 
         waitForQueryCompletion(tasks, (results) -> {
-            // Create new unique hashset of users
-            HashSet<User> users = new HashSet<>();
+            ArrayList<User> users = new ArrayList<>();
             for (DocumentSnapshot document : results) {
                 User user = document.toObject(User.class);
                 users.add(user);
             }
-            // Remove duplicate files
-            ArrayList<User> userArray = new ArrayList<>(users);
-            listener.onUserListRetrievalCompleted(userArray);
+            listener.onUserListRetrievalCompleted(users);
         });
     }
 
@@ -1664,6 +1718,7 @@ public class Firebase {
 
         tasks.add(profilePictureReference.listAll());
         tasks.add(posterPictureReference.listAll());
+        tasks.add(facilityPictureReference.listAll());
 
         Tasks.whenAllSuccess(tasks)
                 .addOnSuccessListener(results -> {
@@ -1751,7 +1806,6 @@ public class Firebase {
                     }
                 })
                 .addOnFailureListener(listener::onError);
-
     }
 
 }

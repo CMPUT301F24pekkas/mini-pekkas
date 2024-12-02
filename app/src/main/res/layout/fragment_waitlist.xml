@@ -39,5 +39,11 @@
             android:layout_weight="1"
             android:divider="@android:color/darker_gray"
             android:dividerHeight="1dp" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Check Location" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

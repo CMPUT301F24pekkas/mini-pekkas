@@ -1,6 +1,8 @@
 package com.example.mini_pekkas;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -130,16 +132,21 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO Progress bar blocked by image
-                    progressBar.setVisibility(View.VISIBLE); // Reshow the progress bar on Click
-
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Event event = events.get(position);
-                        // Delete the event, update the adapter
-                        firebaseHelper.deleteEvent(event);
-                        adapter.removeItem(position);
-                    }
+                    new AlertDialog.Builder(v.getContext())
+                            .setTitle("Delete Hashcode")
+                            .setMessage("Are you sure you want to delete this QR code? This will also delete the associated event")
+                            .setPositiveButton("Yes", (DialogInterface dialog, int which) -> {
+                                // Delete QR code logic
+                                int position = getAdapterPosition();
+                                if (position != RecyclerView.NO_POSITION) {
+                                    Event event = events.get(position);
+                                    // Delete the event, update the adapter
+                                    firebaseHelper.deleteEvent(event);
+                                    adapter.removeItem(position);
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
                 }
             });
 

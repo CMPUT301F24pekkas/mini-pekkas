@@ -1,10 +1,13 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
+import static com.example.mini_pekkas.QRCodeGenerator.generateQRCode;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -30,14 +33,21 @@ import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.notification.Notifications;
+import com.example.mini_pekkas.QRCodeGenerator;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.Manifest;
 
@@ -82,8 +92,20 @@ public class EventDetailsFragment extends Fragment {
         }
         //observe event data if edited later
         organizerEventsListViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), this::updateEventDetailsUI);
-
         SetButtonListeners();
+
+        String url = event.getPosterPhotoUrl();
+        if (url != null) {
+            Glide.with(this).load(url).into(binding.eventImageView);
+        } else {
+            binding.eventImageView.setImageResource(R.drawable.no_image);
+        }
+
+        String qrCode = event.getQrCode();
+        Bitmap qrCodeBitmap = generateQRCode(qrCode, 300, 300);
+        binding.qrImage.setImageBitmap(qrCodeBitmap);
+
+
 
         return root;
     }
@@ -114,40 +136,6 @@ public class EventDetailsFragment extends Fragment {
             assert fragmentView != null;
             NavController navController = Navigation.findNavController(fragmentView);
             navController.navigate(R.id.action_event_details_to_choose_participants);
-//
-//            FragmentChoosePartBinding choosePartBinding = FragmentChoosePartBinding.inflate(
-//                    LayoutInflater.from(requireContext()));
-//
-//            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-//            builder.setView(choosePartBinding.getRoot());
-//            AlertDialog dialog = builder.create();
-//
-//            View fragmentView = getView();
-//
-//            choosePartBinding.cancelChooseButton.setOnClickListener(y -> {
-//                dialog.dismiss();
-//            });
-//
-//            choosePartBinding.confirmChooseButton.setOnClickListener(z -> {
-//                if (fragmentView == null) {
-//                    return;
-//                }
-//                EditText EditNumParts = choosePartBinding.editNumParticipants;
-//                String numPartsString = EditNumParts.getText().toString();
-//                int numParts = Integer.parseInt(numPartsString);
-//                numEntrantsViewModel.setNumber(numParts);
-//
-//                NavController navController = Navigation.findNavController(fragmentView);
-//                navController.navigate(R.id.action_event_details_to_choose_participants);
-//                dialog.dismiss();
-//            });
-//
-//            dialog.show();
-//
-//            // Verify event data is valid when dialog opens
-//            Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
-//            Log.d("EventDetailsFragment", "Current event when dialog opens: " +
-//                    (currentEvent != null ? currentEvent.getName() : "null"));
         });
         ImageButton waitButton = binding.waitButton;
         waitButton.setOnClickListener(v->{
@@ -183,8 +171,56 @@ public class EventDetailsFragment extends Fragment {
         if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
             imageUri = data.getData();
             binding.eventImageView.setImageURI(imageUri);  // Show selected image in ImageView
+            uploadImageToFirebase(imageUri);        }
+    }
+
+    private void uploadImageToFirebase(Uri imageUri) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        String fileName = "event_images/" + System.currentTimeMillis() + ".jpg";
+        StorageReference imageRef = storageRef.child(fileName);
+
+        UploadTask uploadTask = imageRef.putFile(imageUri);
+
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                String imageUrl = uri.toString();  // The URL of the uploaded image
+                updateEventPosterUrl(imageUrl);
+            });
+        }).addOnFailureListener(exception -> {
+            Log.e("Firebase", "Image upload failed: " + exception.getMessage());
+        });
+    }
+
+    private void updateEventPosterUrl(String imageUrl) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+
+        if (event != null) {
+            event.setPosterPhotoUrl(imageUrl);  // Set the new poster URL
+
+            String eventId = event.getId();
+
+            // Create a map with the updated data
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("posterPhotoUrl", imageUrl);
+
+            // Update the Firestore document with the new URL
+            db.collection("events")
+                    .document(eventId)
+                    .update(eventData)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("Firebase", "Event poster updated successfully");
+                        // Optionally, reload the updated event details
+                        updateEventDetailsUI(event);  // You can reload the event details after update
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("Firebase", "Error updating event: " + e.getMessage());
+                    });
         }
     }
+
 
     private void updateEventDetailsUI(Event event) {
         binding.eventDescriptionView.setText(event.getDescription());
@@ -221,6 +257,8 @@ public class EventDetailsFragment extends Fragment {
         String organizerProfileUrl = event.getEventHost().getProfilePhotoUrl();
         Glide.with(this).load(organizerProfileUrl).into(binding.profilePictureImage);
     }
+
+
 
     @Override
     public void onDestroyView() {

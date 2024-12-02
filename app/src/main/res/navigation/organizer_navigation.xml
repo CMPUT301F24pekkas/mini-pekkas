@@ -95,11 +95,16 @@
     <fragment
         android:id="@+id/navigation_org_waitlisted_entrants"
         android:name="com.example.mini_pekkas.ui.event.organizer.WaitlistedEntrantsFragment"
-        tools:layout="@layout/fragment_waitlist" />
+        tools:layout="@layout/fragment_waitlist"/>
+        <action
+            android:id="@+id/action_waitlistedEntrants_to_mapFragment"
+            app:destination="@id/mapFragment" />
     <fragment
         android:id="@+id/navigation_org_enrolled_entrants"
         android:name="com.example.mini_pekkas.ui.event.organizer.EnrolledEntrantsFragment"
         tools:layout="@layout/fragment_enrolled"/>
-
-
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.mini_pekkas.ui.event.organizer.MapFragment"
+        tools:layout="@layout/fragment_map" />
 </navigation>

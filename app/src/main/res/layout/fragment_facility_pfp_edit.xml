@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/popup_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Facility Picture Options"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:paddingBottom="16dp"/>
+
+    <!-- Button to choose a new facility picture -->
+    <Button
+        android:id="@+id/choose_facility_picture_button"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginBottom="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:text="Choose New Facility Picture"
+        android:textColor="?attr/colorPrimary" />
+
+    <!-- Button to delete the current facility picture -->
+    <Button
+        android:id="@+id/delete_facility_picture_button"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="?attr/selectableItemBackground"
+        android:text="Delete Facility Picture"
+        android:textColor="?attr/colorPrimary" />
+
+</LinearLayout>
