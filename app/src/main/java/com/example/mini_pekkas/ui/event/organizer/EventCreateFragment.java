@@ -317,7 +317,7 @@ public class EventCreateFragment extends Fragment {
         int maxCapacity;
         try {
             maxCapacity = Integer.parseInt(binding.editMaxPart.getText().toString().trim());
-            if (maxCapacity <= 0) {
+            if (maxCapacity < 0) {
                 Toast.makeText(requireContext(), "Max participants must be greater than 0.", Toast.LENGTH_SHORT).show();
                 return null;
             }
@@ -329,7 +329,7 @@ public class EventCreateFragment extends Fragment {
         if (binding.maxPartCheckBox.isChecked()) {
             try {
                 maxWaitlist = Integer.parseInt(binding.editMaxWait.getText().toString().trim());
-                if (maxWaitlist <= 0) {
+                if (maxWaitlist < 0) {
                     Toast.makeText(requireContext(), "Max waitlist must be greater than 0.", Toast.LENGTH_SHORT).show();
                     return null;
                 }
