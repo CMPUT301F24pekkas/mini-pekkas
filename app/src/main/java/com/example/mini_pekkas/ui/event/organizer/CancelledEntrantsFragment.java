@@ -65,7 +65,6 @@ public class CancelledEntrantsFragment extends Fragment {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
                 Log.d("user", "Chosen users retrieved: " + users.size());
-                CancelledArrayAdapter.clearUsers();
                 CancelledArrayAdapter.addUsers(users);
             }
 

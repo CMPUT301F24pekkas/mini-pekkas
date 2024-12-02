@@ -67,7 +67,6 @@ public class EnrolledEntrantsFragment extends Fragment {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
                 Log.d("user", "Chosen users retrieved: " + users.size());
-                enrolledArrayAdapter.clearUsers();
                 enrolledArrayAdapter.addUsers(users);
             }
 
