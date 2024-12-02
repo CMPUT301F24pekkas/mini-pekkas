@@ -14,6 +14,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
@@ -70,7 +71,6 @@ public class EventEditFragment extends Fragment {
         binding.editStartTime.setText(formattedstartTime);
         binding.editEndTime.setText(formattedendTime);
         binding.editDescription.setText(event.getDescription());
-        binding.editDetails.setText(event.getDetails());
 
         if(event.isGeo()){
             binding.geoCheckBox.setChecked(true);
@@ -78,10 +78,7 @@ public class EventEditFragment extends Fragment {
         }
         else{
             binding.createEventLocationEditText.setText("N/A");
-
         }
-
-
         //make button navigate to addEvent fragment with values changed
         Button saveButton = binding.saveEventButton;
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -111,7 +108,7 @@ public class EventEditFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
 
             /**
-             * Called when the "save" button is clicked.
+             * Called when the "delete" button is clicked.
              * Saves the event details and takes you to the updated even details screen
              * @param v The view that was clicked.
              */
@@ -126,7 +123,15 @@ public class EventEditFragment extends Fragment {
 
             }
         });
-
+        Firebase firebaseHelper = new Firebase(requireContext());
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    binding.createEventLocationEditText.setText("Location: " + firebaseHelper.getThisUser().getFacility());
+                }
+            }
+        });
         return root;
     }
     /**
@@ -134,19 +139,17 @@ public class EventEditFragment extends Fragment {
      * @param event Event to update
      */
     private Event UpdateEvent(Event event) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
         event.setName(binding.createEventEditText.getText().toString());
-        Date startDate = dateFormat.parse(binding.editStartDate.getText().toString());
-        Date endDate = dateFormat.parse(binding.editEndDate.getText().toString());
+        Date startDate = dateFormat.parse(binding.editStartDate.getText().toString() + binding.editStartTime.getText().toString());
+        Date endDate = dateFormat.parse(binding.editEndDate.getText().toString() + binding.editEndTime.getText().toString());
 
         event.setStartDate(startDate);
         event.setEndDate(endDate);
-        //TODO figure out time
-//        event.setstartTime("10:00");
-//        event.setEndTime("14:00");
+
+
         event.setDescription(binding.editDescription.getText().toString());
-        event.setDetails(binding.editDetails.getText().toString());
 
         boolean checked = binding.geoCheckBox.isChecked();
         event.setGeo(checked);

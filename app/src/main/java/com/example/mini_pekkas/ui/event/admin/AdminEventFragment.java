@@ -50,14 +50,12 @@ public class AdminEventFragment extends Fragment {
         final TextView organizerNameView = binding.organizerNameView;
         final TextView locationView = binding.locationView;
         final TextView eventDescriptionView = binding.eventDescriptionView;
-        final TextView eventDetailsView = binding.eventDetailsView;
 
         // updates text views when they are changed
         eventViewModel.getEventName().observe(getViewLifecycleOwner(), eventNameView::setText);
         eventViewModel.getOrganizerName().observe(getViewLifecycleOwner(), organizerNameView::setText);
         eventViewModel.getFacility().observe(getViewLifecycleOwner(), locationView::setText);
         eventViewModel.getEventDescription().observe(getViewLifecycleOwner(), eventDescriptionView::setText);
-        eventViewModel.getEventDetails().observe(getViewLifecycleOwner(), eventDetailsView::setText);
 
         // binds the images to the view model
         final ImageView eventImage = binding.eventImageView;

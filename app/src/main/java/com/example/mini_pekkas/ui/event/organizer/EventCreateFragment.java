@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -125,7 +126,14 @@ public class EventCreateFragment extends Fragment {
             // Update live data
             organizerEventsListViewModel.addEvent(createdEvent);
         });
-
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    binding.createEventLocationEditText.setText(firebaseHelper.getThisUser().getFacility());
+                }
+            }
+        });
         Button cancelButton = binding.cancelEventButton;
         cancelButton.setOnClickListener(v -> ClearInput());
 
@@ -269,13 +277,12 @@ public class EventCreateFragment extends Fragment {
 
         // Get input values
         String eventTitle = binding.createEventEditText.getText().toString().trim();
-        String eventLocation = binding.createEventLocationEditText.getText().toString().trim();
+        String facility = binding.createEventLocationEditText.getText().toString().trim();
         String startDateString = binding.editStartDate.getText().toString().trim();
         String endDateString = binding.editEndDate.getText().toString().trim();
         String startTimeString = binding.editStartTime.getText().toString().trim();
         String endTimeString = binding.editEndTime.getText().toString().trim();
         String eventDescription = binding.editDescription.getText().toString().trim();
-        String eventDetails = binding.editDetails.getText().toString().trim();
         boolean geolocationEnabled = binding.geoCheckBox.isChecked();
 
         // Validate required inputs
@@ -291,7 +298,7 @@ public class EventCreateFragment extends Fragment {
             Toast.makeText(requireContext(), "Start and end dates are required.", Toast.LENGTH_SHORT).show();
             return null;
         }
-        if (eventLocation.isEmpty()) {
+        if (facility.isEmpty()) {
             Toast.makeText(requireContext(), "Event location is required.", Toast.LENGTH_SHORT).show();
             return null;
         }
@@ -317,7 +324,7 @@ public class EventCreateFragment extends Fragment {
         int maxCapacity;
         try {
             maxCapacity = Integer.parseInt(binding.editMaxPart.getText().toString().trim());
-            if (maxCapacity <= 0) {
+            if (maxCapacity < 0) {
                 Toast.makeText(requireContext(), "Max participants must be greater than 0.", Toast.LENGTH_SHORT).show();
                 return null;
             }
@@ -329,7 +336,7 @@ public class EventCreateFragment extends Fragment {
         if (binding.maxPartCheckBox.isChecked()) {
             try {
                 maxWaitlist = Integer.parseInt(binding.editMaxWait.getText().toString().trim());
-                if (maxWaitlist <= 0) {
+                if (maxWaitlist < 0) {
                     Toast.makeText(requireContext(), "Max waitlist must be greater than 0.", Toast.LENGTH_SHORT).show();
                     return null;
                 }
@@ -348,9 +355,8 @@ public class EventCreateFragment extends Fragment {
             Toast.makeText(requireContext(), "Host user data is missing. Please try again.", Toast.LENGTH_SHORT).show();
             return null;
         }
-
-        String facility = host.getFacility();
-
+        //make waitlist num final
+        int maxWaitlistNum = maxWaitlist;
         return new Event(
                 event_id,
                 eventTitle,
@@ -362,13 +368,18 @@ public class EventCreateFragment extends Fragment {
                 facility,
                 latitude,
                 longitude,
-                maxWaitlist,
+                maxWaitlistNum,
                 maxCapacity,
                 waitlist,
                 "QrCodePlaceholder", // Replace with actual QR code
                 geolocationEnabled,
-                eventDetails
+                null
         );
+
+
+
+
+
     }
 
     /**
@@ -382,7 +393,6 @@ public class EventCreateFragment extends Fragment {
         binding.editStartTime.getText().clear();
         binding.editEndTime.getText().clear();
         binding.editDescription.getText().clear();
-        binding.editDetails.getText().clear();
         binding.editMaxPart.getText().clear();
         binding.editMaxWait.getText().clear();
         binding.maxPartCheckBox.setChecked(false);
