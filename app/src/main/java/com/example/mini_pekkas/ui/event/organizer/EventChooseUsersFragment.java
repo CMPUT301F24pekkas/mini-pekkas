@@ -40,12 +40,29 @@ import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment for choosing participants for an event.
+ *
+ */
 public class EventChooseUsersFragment extends Fragment {
     private FragmentEventOrg2Binding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private Firebase firebaseHelper;
+
+    /**
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
         binding = FragmentEventOrg2Binding.inflate(inflater, container, false);
@@ -73,6 +90,10 @@ public class EventChooseUsersFragment extends Fragment {
 
     }
 
+    /**
+     * Updates the UI with event details.
+     * @param event
+     */
     private void updateEventDetailsUI(Event event) {
         binding.eventDescriptionView.setText(event.getDescription());
         binding.eventDetailsView.setText(event.getDetails());
@@ -112,6 +133,18 @@ public class EventChooseUsersFragment extends Fragment {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
+
+    /**
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     *
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -120,6 +153,9 @@ public class EventChooseUsersFragment extends Fragment {
             binding.eventImageView.setImageURI(imageUri);  // Show selected image in ImageView
         }
     }
+    /**
+     * Sets up button listeners for the UI elements.
+     */
     private void SetButtonListeners() {
         //editEvent
         Button editButton = binding.editEventButton;
@@ -153,6 +189,10 @@ public class EventChooseUsersFragment extends Fragment {
 
     }
 
+    /**
+     *
+     * @return ArrayList of Default Notifications
+     */
     private ArrayList<Notifications> createDefaultNotifications(){
         Timestamp serverTimestamp = Timestamp.now();
         ArrayList<Notifications> notifications = new ArrayList<>();
@@ -168,6 +208,10 @@ public class EventChooseUsersFragment extends Fragment {
 
     }
 
+    /**
+     * this function sets the amount of users Pending
+     * @param eventId id of Event
+     */
     private void setChosenUsers(String eventId) {
         firebaseHelper.getCountByStatus(eventId, "pending", new Firebase.ResultListener<Integer>() {
             @Override
@@ -182,7 +226,10 @@ public class EventChooseUsersFragment extends Fragment {
             }
         });
     }
-
+    /**
+     * this function sets the amount of users Cancelled
+     * @param eventId id of Event
+     */
     private void setCancelledUsers(String eventId) {
         firebaseHelper.getCountByStatus(eventId, "cancelled", new Firebase.ResultListener<Integer>() {
             @Override
@@ -197,7 +244,10 @@ public class EventChooseUsersFragment extends Fragment {
             }
         });
     }
-
+    /**
+     * this function sets the amount of users Enrolled
+     * @param eventId id of Event
+     */
     private void setEnrolledUsers(String eventId) {
         firebaseHelper.getCountByStatus(eventId, "enrolled", new Firebase.ResultListener<Integer>() {
             @Override
@@ -213,7 +263,9 @@ public class EventChooseUsersFragment extends Fragment {
         });
     }
 
-
+    /**
+     * Called when the fragment's view is being destroyed.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
