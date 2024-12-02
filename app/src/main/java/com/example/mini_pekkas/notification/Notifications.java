@@ -75,6 +75,10 @@ public class Notifications {
         this.fragmentDestination = (String) map.get("fragmentDestination");
     }
 
+    /**
+     * changes the notification to a Map
+     * @return the notification as a Map
+     */
     public HashMap<String, Object> toMap() {
         HashMap<String, Object> map = new HashMap<>();
         map.put("description", description);

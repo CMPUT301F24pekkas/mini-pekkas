@@ -39,6 +39,9 @@ public class NotificationForegroundService extends Service implements SendNotifi
     private NotificationManager notificationManager;
     private ListenerRegistration snapshotListenerRegistration;
 
+    /**
+     * Called when the service is created.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -57,11 +60,23 @@ public class NotificationForegroundService extends Service implements SendNotifi
 
     // ... (other methods for notification channel, notification creation, and Firestore listener) ...
 
+    /**
+     * Called when the service is started.
+     * @param intent The intent that started the service
+     * @param flags Additional data about the start request
+     * @param startId A unique integer representing the start request.
+     * @return The return value indicates whether the service should continue running
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY; // Restart service if killed by system
     }
 
+    /**
+     * Called when the service is destroyed.
+     * @param intent The intent that started the service
+     * @return The return value indicates whether the service should continue running
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return null; // Not a bound service

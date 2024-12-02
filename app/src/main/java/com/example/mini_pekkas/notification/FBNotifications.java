@@ -17,6 +17,9 @@ public class FBNotifications extends FirebaseMessagingService implements SendNot
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private NotificationManager notificationManager;    // Member variable to store the NotificationManager
 
+    /**
+     * Called when the service is created.
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -26,6 +29,10 @@ public class FBNotifications extends FirebaseMessagingService implements SendNot
 
     }
 
+    /**
+     *
+     * @param remoteMessage Remote message that has been received.
+     */
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // Handle FCM messages here.
