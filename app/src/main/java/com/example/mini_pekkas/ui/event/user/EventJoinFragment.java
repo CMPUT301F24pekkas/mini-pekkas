@@ -97,7 +97,6 @@ public class EventJoinFragment extends Fragment {
                 binding.eventNameView.setText(event.getName());
                 binding.organizerNameView.setText(event.getEventHost().getName());
                 binding.eventDescriptionView.setText(event.getDescription());
-                binding.eventDetailsView.setText(event.getDetails());
                 binding.locationView.setText(event.getFacility());
                 if (url != null) {
                     Glide.with(this).load(url).into(binding.eventImageView);

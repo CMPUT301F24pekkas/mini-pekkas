@@ -157,7 +157,6 @@ public class EventFragment extends Fragment {
         binding.eventNameView.setText(eventName);
         binding.organizerNameView.setText(organizerName);
         binding.eventDescriptionView.setText(event.getDescription() != null ? event.getDescription() : "No Description");
-        binding.eventDetailsView.setText(event.getDetails() != null ? event.getDetails() : "No Details");
         binding.locationView.setText(event.getFacility() != null ? event.getFacility() : "No Facility");
         if (url != null) {
             Glide.with(this).load(url).into(binding.eventImageView);

@@ -275,7 +275,6 @@ public class EventCreateFragment extends Fragment {
         String startTimeString = binding.editStartTime.getText().toString().trim();
         String endTimeString = binding.editEndTime.getText().toString().trim();
         String eventDescription = binding.editDescription.getText().toString().trim();
-        String eventDetails = binding.editDetails.getText().toString().trim();
         boolean geolocationEnabled = binding.geoCheckBox.isChecked();
 
         // Validate required inputs
@@ -367,7 +366,7 @@ public class EventCreateFragment extends Fragment {
                 waitlist,
                 "QrCodePlaceholder", // Replace with actual QR code
                 geolocationEnabled,
-                eventDetails
+                null
         );
     }
 
@@ -382,7 +381,6 @@ public class EventCreateFragment extends Fragment {
         binding.editStartTime.getText().clear();
         binding.editEndTime.getText().clear();
         binding.editDescription.getText().clear();
-        binding.editDetails.getText().clear();
         binding.editMaxPart.getText().clear();
         binding.editMaxWait.getText().clear();
         binding.maxPartCheckBox.setChecked(false);
