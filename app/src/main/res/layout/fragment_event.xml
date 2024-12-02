@@ -180,23 +180,6 @@
         </ScrollView>
 
         <TextView
-            android:id="@+id/textView9"
-            android:layout_width="107dp"
-            android:layout_height="19dp"
-            android:layout_marginStart="9dp"
-            android:layout_marginTop="11dp"
-            android:layout_marginEnd="284dp"
-            android:layout_marginBottom="73dp"
-            android:text="Current Waitlist:"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
-            app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
-            app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
-            app:layout_constraintTop_toTopOf="@+id/chosenAmountView"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <TextView
             android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -232,7 +215,7 @@
             android:id="@+id/priceView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="133dp"
+            android:layout_marginStart="60dp"
             android:layout_marginTop="67dp"
             android:layout_marginEnd="243dp"
             android:layout_marginBottom="17dp"
@@ -244,28 +227,13 @@
             app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
         <TextView
-            android:id="@+id/currentWaitView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="133dp"
-            android:layout_marginTop="11dp"
-            android:layout_marginEnd="229dp"
-            android:layout_marginBottom="73dp"
-            android:text="0/200"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
-            app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
-            app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
-            app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
-
-        <TextView
             android:id="@+id/startDateView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="133dp"
-            android:layout_marginTop="39dp"
-            android:layout_marginEnd="192dp"
-            android:layout_marginBottom="45dp"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="38dp"
+            android:layout_marginEnd="193dp"
+            android:layout_marginBottom="46dp"
             android:text="06/01/2024"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"

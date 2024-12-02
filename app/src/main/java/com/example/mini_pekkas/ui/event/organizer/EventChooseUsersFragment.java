@@ -2,7 +2,9 @@ package com.example.mini_pekkas.ui.event.organizer;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
@@ -43,7 +46,6 @@ public class EventChooseUsersFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private Firebase firebaseHelper;
-    private NumEntrantsViewModel numEntrantsViewModel;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
         binding = FragmentEventOrg2Binding.inflate(inflater, container, false);
@@ -53,21 +55,17 @@ public class EventChooseUsersFragment extends Fragment {
                 .get(OrganizerEventsListViewModel.class);
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
 
-        numEntrantsViewModel = new ViewModelProvider(requireActivity()).get(NumEntrantsViewModel.class);
+        firebaseHelper = new Firebase(requireContext());
 
-        if (event != null) {
-            updateEventDetailsUI(event);
-        }
         //observe event data
         organizerEventsListViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), this::updateEventDetailsUI);
         //sets the button listeners
         SetButtonListeners();
         firebaseHelper = new Firebase(requireContext());
         //enroll people in event
-        ArrayList<Notifications> notifications = createDefaultNotifications();
-        firebaseHelper.startEnrollingEvent(event, notifications);
 
-        binding.chosenPartView.setText(Integer.toString(numEntrantsViewModel.getNumber().getValue()));
+        assert event != null;
+        setChosenUsers((event.getId()));
         setEnrolledUsers((event.getId()));
         setCancelledUsers((event.getId()));
 
@@ -123,6 +121,13 @@ public class EventChooseUsersFragment extends Fragment {
         }
     }
     private void SetButtonListeners() {
+        //editEvent
+        Button editButton = binding.editEventButton;
+        editButton.setOnClickListener(v -> {
+            // Navigate to addEvent fragment with values changed
+            NavController navController = NavHostFragment.findNavController(EventChooseUsersFragment.this);
+            navController.navigate(R.id.action_global_navigation_org_edit_event);
+        });
         //edit profile button
         ImageButton editPosterButton = binding.editEventPictureButton;
         editPosterButton.setOnClickListener(v -> openImageChooser());
@@ -137,18 +142,15 @@ public class EventChooseUsersFragment extends Fragment {
             builder.setView(choosePartBinding.getRoot());
             AlertDialog dialog = builder.create();
 
-            View fragmentView = getView();
-
-            choosePartBinding.cancelWaitButton.setOnClickListener(y -> {
+            choosePartBinding.cancelChooseButton.setOnClickListener(y -> {
                 dialog.dismiss();
             });
 
-            choosePartBinding.joinWaitButton.setOnClickListener(z -> {
-                if (fragmentView == null) {
-                    return;
-                }
-                NavController navController = Navigation.findNavController(fragmentView);
-                navController.navigate(R.id.action_event_details_to_choose_participants);
+            choosePartBinding.confirmChooseButton.setOnClickListener(z -> {
+                Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+                ArrayList<Notifications> notifications = createDefaultNotifications();
+                firebaseHelper.startEnrollingEvent(event, notifications);
+
                 dialog.dismiss();
             });
 
@@ -184,40 +186,6 @@ public class EventChooseUsersFragment extends Fragment {
 
     }
 
-    private void setCancelledUsers(String eventId){
-        ArrayList<User> users = new ArrayList<>();
-        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
-            @Override
-            public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                binding.canceledAmountView.setText(Integer.toString(users.size()));
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.d("user", "Error occurred: " + e.getMessage());
-            }
-
-        };
-        firebaseHelper.getCancelledUsers(eventId, listener);
-
-    }
-    private void setEnrolledUsers(String eventId){
-
-        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
-            @Override
-            public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                binding.enrolledAmountView.setText(Integer.toString(users.size()));
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.d("user", "Error occurred: " + e.getMessage());
-            }
-
-        };
-        firebaseHelper.getEnrolledUsers(eventId, listener);
-    }
     private ArrayList<Notifications> createDefaultNotifications(){
         Timestamp serverTimestamp = Timestamp.now();
         ArrayList<Notifications> notifications = new ArrayList<>();
@@ -232,6 +200,53 @@ public class EventChooseUsersFragment extends Fragment {
         return notifications;
 
     }
+
+    private void setChosenUsers(String eventId) {
+        firebaseHelper.getCountByStatus(eventId, "pending", new Firebase.ResultListener<Integer>() {
+            @Override
+            public void onSuccess(Integer count) {
+                Log.d("user", "Chosen count: " + count);
+                binding.chosenPartView.setText(Integer.toString(count));
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.d("user", "Error fetching chosen count: " + error);
+            }
+        });
+    }
+
+    private void setCancelledUsers(String eventId) {
+        firebaseHelper.getCountByStatus(eventId, "cancelled", new Firebase.ResultListener<Integer>() {
+            @Override
+            public void onSuccess(Integer count) {
+                Log.d("user", "Cancelled count: " + count);
+                binding.canceledAmountView.setText(Integer.toString(count));
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.d("user", "Error fetching cancelled count: " + error);
+            }
+        });
+    }
+
+    private void setEnrolledUsers(String eventId) {
+        firebaseHelper.getCountByStatus(eventId, "enrolled", new Firebase.ResultListener<Integer>() {
+            @Override
+            public void onSuccess(Integer count) {
+                Log.d("user", "Enrolled count: " + count);
+                binding.enrolledAmountView.setText(Integer.toString(count));
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.d("user", "Error fetching enrolled count: " + error);
+            }
+        });
+    }
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

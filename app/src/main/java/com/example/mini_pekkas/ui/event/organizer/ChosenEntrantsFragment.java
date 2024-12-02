@@ -26,42 +26,45 @@ import java.util.ArrayList;
 public class ChosenEntrantsFragment extends Fragment {
     private FragmentChosenBinding binding;
     private Firebase firebaseHelper;
-    private UserArrayAdapter ChosenArrayAdapter;
+    private UserArrayAdapter chosenArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState){
+                             ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentChosenBinding.inflate(inflater, container, false);
-
         View root = binding.getRoot();
 
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
         Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
-        //make ArrayAdapter
-        ChosenArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
-        ListView enrolledListView = binding.chosenListView;
-        enrolledListView.setAdapter(ChosenArrayAdapter);
+
+        chosenArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
+        ListView chosenListView = binding.chosenListView;
+        chosenListView.setAdapter(chosenArrayAdapter);
 
         firebaseHelper = new Firebase(requireContext());
 
-        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
-            @Override
-            public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                ChosenArrayAdapter.addUsers(users);
+        loadChosenUsers(currentEvent.getId());
 
-            }
-            @Override
-            public void onError(Exception e) {
-                Log.d("user", "Error occurred: " + e.getMessage());
-            }
-
-        };
-        assert currentEvent != null;
-        firebaseHelper.getPendingUsers(currentEvent.getId(), listener);
-        firebaseHelper.getEnrolledUsers(currentEvent.getId(), listener);
-        firebaseHelper.getCancelledUsers(currentEvent.getId(), listener);
         return root;
     }
+
+    private void loadChosenUsers(String eventId) {
+        Firebase.UserListRetrievalListener chosenUsersListener = new Firebase.UserListRetrievalListener() {
+            @Override
+            public void onUserListRetrievalCompleted(ArrayList<User> users) {
+                Log.d("user", "Chosen users retrieved: " + users.size());
+                chosenArrayAdapter.clearUsers();
+                chosenArrayAdapter.addUsers(users);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("user", "Error fetching chosen users: " + e.getMessage());
+            }
+        };
+
+        firebaseHelper.getPendingUsers(eventId, chosenUsersListener);
+    }
 }
+

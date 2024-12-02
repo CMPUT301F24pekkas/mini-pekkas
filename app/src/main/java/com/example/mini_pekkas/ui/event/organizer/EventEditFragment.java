@@ -1,6 +1,7 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -144,38 +145,11 @@ public class EventEditFragment extends Fragment {
         event.setDetails(binding.editDetails.getText().toString());
 
         boolean checked = binding.geoCheckBox.isChecked();
-
-        int maxCapacity = -1;
-        if (binding.maxPartCheckBox.isChecked()) {
-            maxCapacity = Integer.parseInt(binding.editMaxPart.getText().toString());
-
-        }
-        event.setMaxAttendees(maxCapacity);
         event.setGeo(checked);
         //update db
         organizerEventsListViewModel.updateEventInDb(event);
         return event;
     }
-//    /**
-//     * Uploads a new profile picture to Firebase Storage and updates
-//     * the profile with the new image URL.
-//     *
-//     * @param imageUri The URI of the image to be uploaded.
-//     */
-//    private void uploadImageToFirebase(Uri imageUri) {
-//        StorageReference imageRef = posterImageRef.child(System.currentTimeMillis() + ".jpg");
-//
-//        imageRef.putFile(imageUri)
-//                .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-//                    String downloadUrl = uri.toString();
-//                    profileViewModel.setProfilePictureUrl(downloadUrl);
-//                    profileViewModel.updateProfileInFirebase();
-//                    Glide.with(this).load(downloadUrl).into(binding.profileImage);
-//                }).addOnFailureListener(e ->
-//                        Toast.makeText(getActivity(), "Failed to upload image", Toast.LENGTH_SHORT).show()
-//                ));
-//    }
-
 
     /**
      * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.

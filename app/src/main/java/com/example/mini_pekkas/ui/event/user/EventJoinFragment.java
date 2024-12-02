@@ -5,6 +5,7 @@ import static com.example.mini_pekkas.QRCodeGenerator.generateQRCode;
 import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 
@@ -101,6 +105,11 @@ public class EventJoinFragment extends Fragment {
                     binding.eventImageView.setImageResource(R.drawable.no_image);
                 }
                 binding.qrImage.setImageBitmap(qrCodeBitmap);
+                binding.priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
+                Date startDate = event.getStartDate();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String formattedDate = dateFormat.format(startDate);
+                binding.startDateView.setText(formattedDate);
             }
         });
 
@@ -193,14 +202,26 @@ public class EventJoinFragment extends Fragment {
         joinButton.setOnClickListener(view -> {
             Event event = sharedEventViewModel.getEventDetails().getValue();
             if (event != null) {
-                firebaseHelper.waitlistEvent(event);
-                homeEventsListViewModel.addEvent(event);
-                homeEventsListViewModel.setSelectedEvent(event);
-                NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
-                navController.navigate(R.id.action_navigation_event2_to_navigation_event);
-                Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
+                firebaseHelper.countWaitlistedUsers(event.getId(), new Firebase.ResultListener<Integer>() {
+                    @Override
+                    public void onSuccess(Integer count) {
+                        if (count < event.getMaxWaitlist()){
+                            Toast.makeText(requireContext(), "count"+count +"wait"+ event.getMaxWaitlist(), Toast.LENGTH_SHORT).show();
+                            firebaseHelper.waitlistEvent(event);
+                            homeEventsListViewModel.addEvent(event);
+                            homeEventsListViewModel.setSelectedEvent(event);
+                            NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
+                            navController.navigate(R.id.action_navigation_event2_to_navigation_event);
+//                            Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
+                        } else{
+                            Toast.makeText(requireContext(), "Sorry, waitlist is full" + count, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onError(String errorMessage) {
+                        Log.e("WaitlistedCount", "Error: " + errorMessage);
+                    }
+                });
             }
             dialog.dismiss();
         });

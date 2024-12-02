@@ -25,7 +25,13 @@ import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentEventChosenBinding;
 import com.example.mini_pekkas.databinding.FragmentEventLeaveWaitBinding;
+import com.example.mini_pekkas.notification.Notifications;
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 
 /**
@@ -84,10 +90,37 @@ public class EventAcceptFragment extends Fragment {
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                firebaseHelper.enrollEvent(event);
-                Toast.makeText(requireContext(), "Event Enrolled!", Toast.LENGTH_SHORT).show();
+                ArrayList<Notifications> notifications = new ArrayList<>();
+                notifications.add(new Notifications(
+                        "Enrollment Successful",
+                        "You are now enrolled in the event!",
+                        new Date(),
+                        1,
+                        "EventDetailsFragment"
+                ));
+                notifications.add(new Notifications(
+                        "Enrollment Rejected",
+                        "Your enrollment has been cancelled.",
+                        new Date(),
+                        1,
+                        "HomeFragment"
+                ));
+
+                firebaseHelper.userAcceptEvent(
+                        true,
+                        event.getId(),
+                        notifications,
+                        new Firebase.InitializationListener() {
+                            @Override
+                            public void onInitialized() {
+                                Toast.makeText(requireContext(), "Event Enrolled!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
             }
         });
+
+
         declineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,8 +142,33 @@ public class EventAcceptFragment extends Fragment {
                         navController.navigate(R.id.action_navigation_event3_to_navigation_home);
                         homeEventsListViewModel.deleteEvent(event.getId());
                         firebaseHelper.cancelEvent(event);
-                    } else {
-                        Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
+                        ArrayList<Notifications> notifications = new ArrayList<>();
+                        notifications.add(new Notifications(
+                                "Enrollment Successful",
+                                "You are now enrolled in the event!",
+                                new Date(),
+                                1,
+                                "EventDetailsFragment"
+                        ));
+                        notifications.add(new Notifications(
+                                "Enrollment Rejected",
+                                "Your enrollment has been cancelled.",
+                                new Date(),
+                                1,
+                                "HomeFragment"
+                        ));
+
+                        firebaseHelper.userAcceptEvent(
+                                false,
+                                event.getId(),
+                                notifications,
+                                new Firebase.InitializationListener() {
+                                    @Override
+                                    public void onInitialized() {
+                                        Toast.makeText(requireContext(), "Event declined", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                        );
                     }
                     dialog.dismiss();
                 });
@@ -146,6 +204,11 @@ public class EventAcceptFragment extends Fragment {
             binding.eventImageView.setImageResource(R.drawable.no_image);
         }
         binding.qrImage.setImageBitmap(qrCodeBitmap);
+        binding.priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
+        Date startDate = event.getStartDate();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = dateFormat.format(startDate);
+        binding.startDateView.setText(formattedDate);
     }
 
 

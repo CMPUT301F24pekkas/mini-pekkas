@@ -73,7 +73,7 @@ public class NotificationsCreateFragment extends Fragment {
      * Fetch events from Firebase and populate the spinner.
      */
     private void fetchEvents() {
-        firebaseHelper.searchAllEvents(events -> { // Retrieves all events
+        firebaseHelper.getOrganizedEvents (events -> { // Retrieves all events
             if (events.isEmpty()) {
                 Toast.makeText(getContext(), "No events available.", Toast.LENGTH_SHORT).show();
                 return;
