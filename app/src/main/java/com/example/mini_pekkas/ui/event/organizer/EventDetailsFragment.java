@@ -102,6 +102,7 @@ public class EventDetailsFragment extends Fragment {
         String qrCode = event.getQrCode();
         Bitmap qrCodeBitmap = generateQRCode(qrCode, 300, 300);
         binding.qrImage.setImageBitmap(qrCodeBitmap);
+        updateEventPosterUrl((url));
 
 
 
@@ -222,7 +223,7 @@ public class EventDetailsFragment extends Fragment {
 
     private void updateEventDetailsUI(Event event) {
         binding.eventDescriptionView.setText(event.getDescription());
-        binding.eventDetailsView.setText("Details Placeholder");
+        binding.eventDetailsView.setText(event.getDetails());
         binding.eventNameView.setText(event.getName());
         binding.organizerNameView.setText(event.getEventHost().getName());
         if (event.isGeo()) {

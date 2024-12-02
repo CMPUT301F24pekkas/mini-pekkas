@@ -75,7 +75,7 @@ public class EventChooseUsersFragment extends Fragment {
 
     private void updateEventDetailsUI(Event event) {
         binding.eventDescriptionView.setText(event.getDescription());
-        binding.eventDetailsView.setText("Details Placeholder");
+        binding.eventDetailsView.setText(event.getDetails());
         binding.eventNameView.setText(event.getName());
         binding.organizerNameView.setText(event.getEventHost().getName());
         if (event.isGeo()) {

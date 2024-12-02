@@ -67,7 +67,7 @@ public class EventEditFragment extends Fragment {
         binding.editStartTime.setText("10:00");
         binding.editEndTime.setText("14:00");
         binding.editDescription.setText(event.getDescription());
-        binding.editDetails.setText("Details Placeholder");
+        binding.editDetails.setText(event.getDetails());
 
         if(event.isGeo()){
             binding.createEventLocationEditText.setText("New York City");
@@ -142,6 +142,8 @@ public class EventEditFragment extends Fragment {
 //        event.setstartTime("10:00");
 //        event.setEndTime("14:00");
         event.setDescription(binding.editDescription.getText().toString());
+        event.setDetails(binding.editDetails.getText().toString());
+
         boolean checked = binding.geoCheckBox.isChecked();
         event.setGeo(checked);
         //update db

@@ -1,6 +1,9 @@
 package com.example.mini_pekkas.ui.event.user;
 
+import static com.example.mini_pekkas.QRCodeGenerator.generateQRCode;
+
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
@@ -86,10 +90,21 @@ public class EventJoinFragment extends Fragment {
                         }
                     }
                 });
+                String url = event.getPosterPhotoUrl();
+                String qrCode = event.getQrCode();
+                Bitmap qrCodeBitmap = generateQRCode(qrCode, 300, 300);
+
                 binding.eventNameView.setText(event.getName());
                 binding.organizerNameView.setText(event.getEventHost().getName());
                 binding.eventDescriptionView.setText(event.getDescription());
+                binding.eventDetailsView.setText(event.getDetails());
                 binding.locationView.setText(event.getFacility());
+                if (url != null) {
+                    Glide.with(this).load(url).into(binding.eventImageView);
+                } else {
+                    binding.eventImageView.setImageResource(R.drawable.no_image);
+                }
+                binding.qrImage.setImageBitmap(qrCodeBitmap);
                 binding.priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
                 Date startDate = event.getStartDate();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());

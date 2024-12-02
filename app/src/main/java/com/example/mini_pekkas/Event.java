@@ -17,6 +17,7 @@ public class Event {
     private String name;
     private User eventHost;
     private String description;
+    private String details;
     private Date startDate;
     private Date endDate;
     private double price;
@@ -121,6 +122,11 @@ public class Event {
      * @param description the event description to set
      */
     public void setDescription(String description) { this.description = description; }
+
+    public String getDetails() { return details; }
+
+    public void setDetails(String details) { this.details = details; }
+
     /**
      * Gets the start date of the event.
      * @return the start date of the event
