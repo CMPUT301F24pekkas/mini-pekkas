@@ -32,6 +32,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.notification.Notifications;
 import com.example.mini_pekkas.QRCodeGenerator;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
@@ -50,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.Manifest;
+import android.widget.TextView;
 
 /**
  * Fragment for displaying the event details and enabling the editing of an event.
@@ -104,7 +106,26 @@ public class EventDetailsFragment extends Fragment {
         String qrCode = event.getQrCode();
         Bitmap qrCodeBitmap = generateQRCode(qrCode, 300, 300);
         binding.qrImage.setImageBitmap(qrCodeBitmap);
+        TextView waitlistedAmountView = binding.waitlistedAmountView;
+        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
+            @Override
+            public void onUserListRetrievalCompleted(ArrayList<User> users) {
+                if(users.size() == 1) {
+                    waitlistedAmountView.setText(users.size() + " entrant waitlisted");
+                }
+                else {
+                    waitlistedAmountView.setText(users.size() + " entrants waitlisted");
+                }
+            }
 
+            @Override
+            public void onError(Exception e) {
+                Log.d("user", "Error occurred: " + e.getMessage());
+            }
+        };
+
+        // Make sure currentEvent is not null before calling Firebase
+        firebaseHelper.getWaitlistedUsers(event.getId(), listener);
 
 
         return root;

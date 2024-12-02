@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.UserInEventArrayAdapter;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.User;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 public class ChosenEntrantsFragment extends Fragment {
     private FragmentChosenBinding binding;
     private Firebase firebaseHelper;
-    private UserArrayAdapter ChosenArrayAdapter;
+    private UserInEventArrayAdapter ChosenArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -39,7 +40,7 @@ public class ChosenEntrantsFragment extends Fragment {
                 .get(OrganizerEventsListViewModel.class);
         Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
         //make ArrayAdapter
-        ChosenArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
+        ChosenArrayAdapter = new UserInEventArrayAdapter(requireActivity(),requireContext(), new ArrayList<>());
         ListView enrolledListView = binding.chosenListView;
         enrolledListView.setAdapter(ChosenArrayAdapter);
 
@@ -61,7 +62,6 @@ public class ChosenEntrantsFragment extends Fragment {
         assert currentEvent != null;
         firebaseHelper.getPendingUsers(currentEvent.getId(), listener);
         firebaseHelper.getEnrolledUsers(currentEvent.getId(), listener);
-        firebaseHelper.getCancelledUsers(currentEvent.getId(), listener);
         return root;
     }
 }

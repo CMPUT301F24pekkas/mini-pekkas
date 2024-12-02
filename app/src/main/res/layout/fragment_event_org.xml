@@ -253,7 +253,7 @@
             app:layout_constraintTop_toTopOf="@+id/chosenAmountView" />
 
         <TextView
-            android:id="@+id/textView8"
+            android:id="@+id/waitlistedAmountView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -262,7 +262,7 @@
             android:layout_marginBottom="20dp"
             android:text="%d wait listed"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textSize="16sp"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@+id/chosenAmountView"
             app:layout_constraintEnd_toEndOf="@+id/chosenAmountView"
             app:layout_constraintStart_toStartOf="@+id/chosenAmountView"
