@@ -1,5 +1,6 @@
 package com.example.mini_pekkas.ui.notifications;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
+import com.example.mini_pekkas.databinding.FragmentNotificationOffBinding;
 import com.example.mini_pekkas.databinding.FragmentNotificationsBinding;
 import com.example.mini_pekkas.notification.Notifications;
 import com.example.mini_pekkas.notification.NotificationsArrayAdapter;
@@ -59,10 +61,12 @@ public class NotificationsFragment extends Fragment {
 
         listView = binding.textNotifications;
         ImageButton optOutButton = binding.optOut;
-
+        ImageButton optInButton = binding.optIn;
+        optInButton.setVisibility(View.INVISIBLE);
         // Check if the user has opted out, if so, hide the notifications
         if (isUserOptedOut()) {
             listView.setVisibility(View.INVISIBLE);
+            optInButton.setVisibility(View.VISIBLE);
         }
 
         // Fetch the user's notifications from firebase
@@ -75,12 +79,6 @@ public class NotificationsFragment extends Fragment {
             NotificationsArrayAdapter adapter = new NotificationsArrayAdapter(getContext(), R.layout.list_notification, notificationList);
             listView.setAdapter(adapter);
 
-            // TODO Set the item click listener
-            // Disabled until we figure out how to navigate to a different fragment
-//            listView.setOnItemClickListener((parent, view, position, id) -> {
-//                navigateToFragment(position);
-//            });
-
             // Observe new notifications
             notificationsViewModel.getNotification().observe(getViewLifecycleOwner(), text -> {
                 //notificationList.add(text);
@@ -90,6 +88,40 @@ public class NotificationsFragment extends Fragment {
 
         // Handle opt-out button click
         optOutButton.setOnClickListener(v -> showOptOutDialog());
+        optInButton.setOnClickListener(v -> {
+            FragmentNotificationOffBinding notificationOffBinding = FragmentNotificationOffBinding.inflate(LayoutInflater.from(getContext()));
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setView(notificationOffBinding.getRoot());
+            AlertDialog dialog = builder.create();
+            notificationOffBinding.textView5.setText("Opt in notifications?");
+            notificationOffBinding.textView11.setText("Would you like to opt back in to notifications from organizers and admins?");
+            notificationOffBinding.optOutNotifications.setText("Opt In");
+            dialog.show();
+
+            Button optInConfirmButton = notificationOffBinding.optOutNotifications;
+            Button cancelButton = notificationOffBinding.cancelOptOutNotifications;
+
+            optInConfirmButton.setOnClickListener(view -> {
+                listView.setVisibility(View.VISIBLE);
+                optOutButton.setVisibility(View.VISIBLE);
+                saveOptOutPreference(false);
+
+                // Remove notification permission on device
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // API level 26 and above
+                    Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, "com.example.mini_pekkas");
+                    startActivity(intent);
+                } else { // API level below 26
+                    // For older versions, you might need to open the app's settings page
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", "com.example.mini_pekkas", null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                }
+                dialog.dismiss();
+            });
+            cancelButton.setOnClickListener(view -> dialog.dismiss());
+        });
 
         return root;
     }
@@ -123,7 +155,8 @@ public class NotificationsFragment extends Fragment {
         // Opt-out button listener to hide ListView and save preference
         optOutButton.setOnClickListener(v -> {
             listView.setVisibility(View.INVISIBLE);
-            saveOptOutPreference(true);  // Save opt-out preference
+            optOutButton.setVisibility(View.INVISIBLE);
+            saveOptOutPreference(true);
 
             // Remove notification permission on device
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // API level 26 and above
