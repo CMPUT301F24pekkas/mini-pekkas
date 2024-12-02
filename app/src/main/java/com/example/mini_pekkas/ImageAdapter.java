@@ -1,6 +1,8 @@
 package com.example.mini_pekkas;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -128,31 +130,48 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                     // TODO Progress bar blocked by image
                     progressBar.setVisibility(View.VISIBLE); // Reshow the progress bar on Click
 
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Uri imageUri = images.get(position);
-                        String imageName = imageUri.getLastPathSegment();
-                        // Remove the first part of the string up to and including the path separator
-                        if (imageName.contains("/")) {
-                            imageName = imageName.substring(imageName.indexOf("/") + 1);
-                        }
+                    new AlertDialog.Builder(v.getContext())
+                            .setTitle("Delete Image")
+                            .setMessage("Are you sure you want to delete this image?")
+                            .setPositiveButton("Yes", (DialogInterface dialog, int which) -> {
+                                // Delete Image logic
+                                int position = getAdapterPosition();
+                                if (position != RecyclerView.NO_POSITION) {
+                                    Uri imageUri = images.get(position);
+                                    String imageName = imageUri.getLastPathSegment();
+                                    // Remove the first part of the string up to and including the path separator
+                                    if (imageName.contains("/")) {
+                                        imageName = imageName.substring(imageName.indexOf("/") + 1);
+                                    }
 
-                        // Call Firebase delete function based on image type
-                        String finalImageName = imageName;
-                        firebaseHelper.isProfilePicture(imageName, exist -> {
-                            if (exist) {
-                                firebaseHelper.deleteProfilePicture(finalImageName, () -> {
-                                    adapter.removeItem(position);
-                                });
-                            } else {
-                                firebaseHelper.deletePosterPicture(finalImageName, () -> {
-                                    // Get adapter instance and call removeItem()
-                                    adapter.removeItem(position);
-                                });
-                            }
-                            progressBar.setVisibility(View.GONE); // And hide the bar on completion
-                        });
-                    }
+                                    // Call Firebase delete function based on image type
+                                    String finalImageName = imageName;
+                                    firebaseHelper.findPictureLocation(imageName, result -> {
+                                        switch (result) {
+                                            case "profile":
+                                                firebaseHelper.deleteProfilePicture(finalImageName, () -> {
+                                                    adapter.removeItem(position);
+                                                });
+                                                break;
+                                            case "poster":
+                                                firebaseHelper.deletePosterPicture(finalImageName, () -> {
+                                                    adapter.removeItem(position);
+                                                });
+                                                break;
+                                            case "facility":
+                                                firebaseHelper.deleteFacilityPicture(finalImageName, () -> {
+                                                    adapter.removeItem(position);
+                                                });
+                                                break;
+                                            default:
+                                                throw new IllegalStateException("Unexpected value: " + result);
+                                        }
+                                        progressBar.setVisibility(View.GONE); // And hide the bar on completion
+                                    });
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
                 }
             });
 
