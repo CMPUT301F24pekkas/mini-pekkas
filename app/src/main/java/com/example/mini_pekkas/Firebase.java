@@ -1857,12 +1857,21 @@ public class Firebase {
             });
     }
 
-    // Interface to handle async result
+    /**
+     * Generic interface for handling results
+     * @param <T>
+     */
     public interface ResultListener<T> {
         void onSuccess(T result);
         void onError(String errorMessage);
     }
 
+    /**
+     * Gets the count of users in an event
+     * @param eventId the id of the event
+     * @param status the status of the user
+     * @param listener the listener that is called when the search is complete. Returns an integer
+     */
     public void getCountByStatus(String eventId, String status, ResultListener<Integer> listener) {
         Query query = userEventsCollection.whereEqualTo("eventID", eventId);
         if (!status.equals("all")) {

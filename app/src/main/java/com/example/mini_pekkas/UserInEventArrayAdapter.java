@@ -179,12 +179,19 @@ public class UserInEventArrayAdapter extends ArrayAdapter<User> {
         users.remove(position);
         notifyDataSetChanged();
     }
+
+    /**
+     * Adds multiple Users to the adapter's data set.
+     * @param usersToAdd The list of Users to add.
+     */
     public void addUsers(ArrayList<User> usersToAdd) {
         users.addAll(usersToAdd);
         notifyDataSetChanged();
     }
 
-
+    /**
+     * Clears the adapter's data set.
+     */
     private void checkIfAllCallbacksCompleted() {
         pendingCallbacks--; // Decrement the counter when a callback completes
 

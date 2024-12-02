@@ -34,6 +34,12 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
     private QrCodeAdapter adapter; // Add adapter reference
     private List<Event> events; // Add events list>
 
+    /**
+     * Constructor for the ImageAdapter class
+     * @param context the context
+     * @param images the list of images to be displayed
+     * @param events the list of events to be displayed
+     */
     public QrCodeAdapter(Context context, List<Bitmap> images, List<Event> events) {
         this.context = context;
         this.images = images;
@@ -99,6 +105,10 @@ public class QrCodeAdapter extends RecyclerView.Adapter<QrCodeAdapter.ImageViewH
                 .into(holder.imageView);
     }
 
+    /**
+     * gets the item count
+     * @return the item count
+     */
     @Override
     public int getItemCount() {
         return images.size();

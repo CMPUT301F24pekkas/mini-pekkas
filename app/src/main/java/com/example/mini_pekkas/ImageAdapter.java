@@ -33,6 +33,11 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     private final Context context;
     private ImageAdapter adapter; // Add adapter reference
 
+    /**
+     * Constructor for the ImageAdapter class
+     * @param context the context
+     * @param images the list of images to be displayed
+     */
     public ImageAdapter(Context context, List<Uri> images) {
         this.context = context;
         this.images = images;
@@ -96,6 +101,10 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                 .into(holder.imageView);
     }
 
+    /**
+     * Returns the total number of items in the data set held by the adapter.
+     * @return The total number of items in this adapter.
+     */
     @Override
     public int getItemCount() {
         return images.size();
@@ -114,6 +123,12 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
         public Firebase firebaseHelper;
         public ImageAdapter adapter;
 
+        /**
+         * Constructor for the ImageViewHolder class
+         * @param itemView The view in which to display the data
+         * @param images The list of images to be displayed
+         * @param adapter The adapter that is using this view holder
+         */
         public ImageViewHolder(@NonNull View itemView, List<Uri> images, ImageAdapter adapter) {
             super(itemView);
             this.images = images;

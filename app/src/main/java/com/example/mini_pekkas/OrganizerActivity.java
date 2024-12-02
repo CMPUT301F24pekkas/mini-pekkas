@@ -49,7 +49,10 @@ public class OrganizerActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.organizerView, navController);
     }
 
-
+    /**
+     * Handles the "Up" navigation in the action bar.
+     * @return True if the "Up" navigation was handled, false otherwise.
+     */
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.organizer_main);

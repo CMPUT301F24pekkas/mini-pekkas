@@ -163,26 +163,50 @@ public class User {
         this.profilePhotoUrl = profilePhotoUrl;
     }
 
+    /**
+     * gets the user's ID
+     * @return the user's ID
+     */
     public String getUserID() {
         return userID;
     }
 
+    /**
+     * sets the user's ID
+     * @param userID the user's ID to set
+     */
     public void setUserID(String userID) {
         this.userID = userID;
     }
 
+    /**
+     * Gets the URL of the user's facility photo.
+     * @return The facility photo URL of the user.
+     */
     public String getFacilityPhotoUrl() {
         return facilityPhotoUrl;
     }
 
+    /**
+     * Sets the URL of the user's facility photo.
+     * @param facilityPhotoUrl The facility photo URL to set.
+     */
     public void setFacilityPhotoUrl(String facilityPhotoUrl) {
         this.facilityPhotoUrl = facilityPhotoUrl;
     }
 
+    /**
+     * gets the user's facility description
+     * @return the user's facility description
+     */
     public String getFacilityDesc() {
         return facilityDesc;
     }
 
+    /**
+     * sets the user's facility description
+     * @param facilityDesc the user's facility description to set
+     */
     public void setFacilityDesc(String facilityDesc) {
         this.facilityDesc = facilityDesc;
     }
