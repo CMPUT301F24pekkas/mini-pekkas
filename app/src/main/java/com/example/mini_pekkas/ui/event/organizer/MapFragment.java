@@ -63,9 +63,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
         // Get eventID from arguments
-        if (getArguments() != null) {
-            eventID = getArguments().getString("eventID");
-        }
+        String eventID = MapFragmentArgs.fromBundle(getArguments()).getEventID();
 
         // Initialize Firebase helper
         firebaseHelper = new Firebase(requireContext());
