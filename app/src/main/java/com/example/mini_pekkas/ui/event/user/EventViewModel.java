@@ -27,7 +27,7 @@ public class EventViewModel extends ViewModel {
     private final MutableLiveData<String> facility;
     private final MutableLiveData<String> eventDescription;
     private final MutableLiveData<String> eventDetails;
-    private final MutableLiveData<Integer> eventImage;
+    private final MutableLiveData<String> eventImage;
 
     /**
      * Constructor for the EventViewModel.
@@ -69,6 +69,7 @@ public class EventViewModel extends ViewModel {
             organizerName.setValue(event.getEventHost().getName());
             facility.setValue(event.getFacility());
             eventDescription.setValue(event.getDescription());
+            eventDetails.setValue(event.getDetails());
         }
     }
 
@@ -123,7 +124,7 @@ public class EventViewModel extends ViewModel {
      *
      * @return The MutableLiveData containing the event image resource ID
      */
-    public MutableLiveData<Integer> getEventImage() {
+    public MutableLiveData<String> getEventImage() {
         return eventImage;
     }
 }

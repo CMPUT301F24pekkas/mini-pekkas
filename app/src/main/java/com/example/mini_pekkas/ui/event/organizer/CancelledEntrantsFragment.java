@@ -57,7 +57,24 @@ public class CancelledEntrantsFragment extends Fragment {
 
         };
         assert currentEvent != null;
-        firebaseHelper.getCancelledUsers(currentEvent.getId(), listener);
+        loadCancelledUsers(currentEvent.getId());
         return root;
+    }
+    private void loadCancelledUsers(String eventId) {
+        Firebase.UserListRetrievalListener cancelledUsersListener = new Firebase.UserListRetrievalListener() {
+            @Override
+            public void onUserListRetrievalCompleted(ArrayList<User> users) {
+                Log.d("user", "Chosen users retrieved: " + users.size());
+                CancelledArrayAdapter.clearUsers();
+                CancelledArrayAdapter.addUsers(users);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("user", "Error fetching chosen users: " + e.getMessage());
+            }
+        };
+
+        firebaseHelper.getCancelledUsers(eventId, cancelledUsersListener);
     }
 }

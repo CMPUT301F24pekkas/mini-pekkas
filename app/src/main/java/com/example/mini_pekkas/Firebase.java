@@ -1237,7 +1237,7 @@ public class Firebase {
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
 
-                if (waitlist_size > user_cap && user_cap != -1) {
+                if (waitlist_size > user_cap) {
                     Random random = new Random();
                     while (randomIntegers.size() < user_cap) { // Keep generating until we have 'numIntegers' unique integers
                         randomIntegers.add(random.nextInt(waitlist_size));
@@ -1253,7 +1253,7 @@ public class Firebase {
                 // Now we sample X users (Or all users if we're under capacity
                 List<String> selectedUsersID = new ArrayList<>();
                 Iterator<Integer> iterator = randomIntegers.iterator();
-                for (int i = 0; i < waitlist_size && (i < user_cap || user_cap == -1); i++) {
+                for (int i = 0; i < waitlist_size && i < user_cap; i++) {
                     selectedUsersID.add(Objects.requireNonNull(task.getDocuments().get(iterator.next()).get("userID")).toString());
                     Log.d("firebase", "selected users: " + selectedUsersID);
                 }
@@ -1843,6 +1843,43 @@ public class Firebase {
                 })
                 .addOnFailureListener(listener::onError);
     }
+
+        public void countWaitlistedUsers(String event, ResultListener<Integer> listener) {
+            userEventsCollection.whereEqualTo("status", "waitlisted").whereEqualTo("eventID", event).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    int count = task.getResult().size();
+                    listener.onSuccess(count);
+                } else {
+                    // Handle errors
+                    Exception e = task.getException();
+                    listener.onError(e != null ? e.getMessage() : "Unknown error occurred");
+                }
+            });
+    }
+
+    // Interface to handle async result
+    public interface ResultListener<T> {
+        void onSuccess(T result);
+        void onError(String errorMessage);
+    }
+
+    public void getCountByStatus(String eventId, String status, ResultListener<Integer> listener) {
+        Query query = userEventsCollection.whereEqualTo("eventID", eventId);
+        if (!status.equals("all")) {
+            query = query.whereEqualTo("status", status);
+        }
+
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                listener.onSuccess(task.getResult().size());
+            } else {
+                String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                listener.onError(error);
+            }
+        });
+    }
+
+
 
 }
 

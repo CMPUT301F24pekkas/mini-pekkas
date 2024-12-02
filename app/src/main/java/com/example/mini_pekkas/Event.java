@@ -17,6 +17,7 @@ public class Event {
     private String name;
     private User eventHost;
     private String description;
+    private String details;
     private Date startDate;
     private Date endDate;
     private double price;
@@ -24,6 +25,7 @@ public class Event {
     private double facilityGeoLat;
     private double facilityGeoLong;
     private long maxAttendees;
+    private long maxWaitlist;
     private ArrayList<User> attendees;
     private ArrayList<User> waitlist;
     private boolean isUserInWaitlist;
@@ -52,7 +54,7 @@ public class Event {
      * @param posterPhotoUrl   The URL of the event poster.
      */
     public Event(String id, String name, User eventHost, String description, Date startDate, Date endDate, float price,
-                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees,
+                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees, int maxWaitlist,
                  ArrayList<User> waitlist, String QrCode, boolean geo, String posterPhotoUrl) {
         this.id = id;
         this.name = name;
@@ -65,7 +67,7 @@ public class Event {
         this.facilityGeoLat = facilityGeoLat;
         this.facilityGeoLong = facilityGeoLong;
         this.maxAttendees = maxAttendees;
-        this.waitlist = waitlist;
+        this.maxWaitlist = maxWaitlist;
         this.QrCode = QrCode;
         this.geo = geo;
         this.posterPhotoUrl = posterPhotoUrl;
@@ -120,6 +122,11 @@ public class Event {
      * @param description the event description to set
      */
     public void setDescription(String description) { this.description = description; }
+
+    public String getDetails() { return details; }
+
+    public void setDetails(String details) { this.details = details; }
+
     /**
      * Gets the start date of the event.
      * @return the start date of the event
@@ -192,16 +199,16 @@ public class Event {
      */
     public void setMaxAttendees(long maxAttendees) { this.maxAttendees = maxAttendees; }
     /**
-     * Gets the list of users attending the event.
-     * @return an ArrayList of User objects representing the attendees
+     * Gets the maximum number of waitlist for the event.
+     *
+     * @return the maximum number of waitlist
      */
-
-    public ArrayList<User> getAttendees() { return attendees; }
+    public long getMaxWaitlist() {return maxWaitlist;}
     /**
-     * Sets the list of users attending the event.
-     * @param attendees an ArrayList of User objects representing the attendees
+     * Sets the maximum number of waitlist for the event.
+     * @param maxWaitlist the maximum number of waitlist to set
      */
-    public void setAttendees(ArrayList<User> attendees) { this.attendees = attendees; }
+    public void setMaxWaitlist(long maxWaitlist) {this.maxWaitlist = maxWaitlist;}
     /**
      * Gets the waitlist of users for the event.
      * @return an ArrayList of User objects representing the waitlist
@@ -304,6 +311,7 @@ public class Event {
         this.facilityGeoLat = map.get("facilityGeoLat") != null ? (double) map.get("facilityGeoLat") : 0.0;
         this.facilityGeoLong = map.get("facilityGeoLong") != null ? (double) map.get("facilityGeoLong") : 0.0;
         this.maxAttendees = map.get("maxAttendees") != null ? (long) map.get("maxAttendees") : 0;
+        this.maxWaitlist = map.get("maxWaitlist") != null ? (long) map.get("maxWaitlist") : 0;
         this.attendees = (ArrayList<User>) map.get("attendees");
         this.waitlist = (ArrayList<User>) map.get("waitlist");
         this.QrCode = (String) map.get("QrCode");
@@ -330,6 +338,7 @@ public class Event {
         map.put("facilityGeoLat", facilityGeoLat);
         map.put("facilityGeoLong", facilityGeoLong);
         map.put("maxAttendees", maxAttendees);
+        map.put("maxWaitlist", maxWaitlist);
         map.put("attendees", attendees);
         map.put("waitlist", waitlist);
         map.put("geo", geo);

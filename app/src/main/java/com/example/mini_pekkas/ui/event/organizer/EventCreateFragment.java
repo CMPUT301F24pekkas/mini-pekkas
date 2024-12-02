@@ -103,6 +103,11 @@ public class EventCreateFragment extends Fragment {
         Button addButton = binding.addEventButton;
         addButton.setOnClickListener(v -> {
             createdEvent = CreateEvent();
+
+            if (createdEvent == null) {
+                // Validation failed; return without proceeding
+                return;
+            }
             // Generate a unique QR code raw string (event ID + UUID)
             String uniqueQrData = createdEvent.getId() + UUID.randomUUID().toString();
             // Set the raw QR code data in the event
@@ -307,19 +312,31 @@ public class EventCreateFragment extends Fragment {
         }
 
         // Parse max participants if applicable
-        int maxCapacity = -1;
+        int maxCapacity;
+        try {
+            maxCapacity = Integer.parseInt(binding.editMaxPart.getText().toString().trim());
+            if (maxCapacity <= 0) {
+                Toast.makeText(requireContext(), "Max participants must be greater than 0.", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(requireContext(), "Invalid max participant number.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        int maxWaitlist = -1;
         if (binding.maxPartCheckBox.isChecked()) {
             try {
-                maxCapacity = Integer.parseInt(binding.editMaxPart.getText().toString().trim());
-                if (maxCapacity <= 0) {
-                    Toast.makeText(requireContext(), "Max participants must be greater than 0.", Toast.LENGTH_SHORT).show();
+                maxWaitlist = Integer.parseInt(binding.editMaxWait.getText().toString().trim());
+                if (maxWaitlist <= 0) {
+                    Toast.makeText(requireContext(), "Max waitlist must be greater than 0.", Toast.LENGTH_SHORT).show();
                     return null;
                 }
             } catch (NumberFormatException e) {
-                Toast.makeText(requireContext(), "Invalid max participant number.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Invalid max waitlist number.", Toast.LENGTH_SHORT).show();
                 return null;
             }
         }
+
 
         // Get host user details
         User host = firebaseHelper.getThisUser();
@@ -343,6 +360,7 @@ public class EventCreateFragment extends Fragment {
                 facility,
                 latitude,
                 longitude,
+                maxWaitlist,
                 maxCapacity,
                 waitlist,
                 "QrCodePlaceholder", // Replace with actual QR code
@@ -364,6 +382,7 @@ public class EventCreateFragment extends Fragment {
         binding.editDescription.getText().clear();
         binding.editDetails.getText().clear();
         binding.editMaxPart.getText().clear();
+        binding.editMaxWait.getText().clear();
         binding.maxPartCheckBox.setChecked(false);
         binding.geoCheckBox.setChecked(false);
     }

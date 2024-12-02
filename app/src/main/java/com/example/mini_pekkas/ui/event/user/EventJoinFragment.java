@@ -1,7 +1,11 @@
 package com.example.mini_pekkas.ui.event.user;
 
+import static com.example.mini_pekkas.QRCodeGenerator.generateQRCode;
+
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
@@ -85,10 +90,21 @@ public class EventJoinFragment extends Fragment {
                         }
                     }
                 });
+                String url = event.getPosterPhotoUrl();
+                String qrCode = event.getQrCode();
+                Bitmap qrCodeBitmap = generateQRCode(qrCode, 300, 300);
+
                 binding.eventNameView.setText(event.getName());
                 binding.organizerNameView.setText(event.getEventHost().getName());
                 binding.eventDescriptionView.setText(event.getDescription());
+                binding.eventDetailsView.setText(event.getDetails());
                 binding.locationView.setText(event.getFacility());
+                if (url != null) {
+                    Glide.with(this).load(url).into(binding.eventImageView);
+                } else {
+                    binding.eventImageView.setImageResource(R.drawable.no_image);
+                }
+                binding.qrImage.setImageBitmap(qrCodeBitmap);
                 binding.priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
                 Date startDate = event.getStartDate();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -186,14 +202,25 @@ public class EventJoinFragment extends Fragment {
         joinButton.setOnClickListener(view -> {
             Event event = sharedEventViewModel.getEventDetails().getValue();
             if (event != null) {
-                firebaseHelper.waitlistEvent(event);
-                homeEventsListViewModel.addEvent(event);
-                homeEventsListViewModel.setSelectedEvent(event);
-                NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
-                navController.navigate(R.id.action_navigation_event2_to_navigation_event);
-                Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(requireContext(), "Event not found", Toast.LENGTH_SHORT).show();
+                firebaseHelper.countWaitlistedUsers(event.getId(), new Firebase.ResultListener<Integer>() {
+                    @Override
+                    public void onSuccess(Integer count) {
+                        if (count < event.getMaxWaitlist()){
+                            firebaseHelper.waitlistEvent(event);
+                            homeEventsListViewModel.addEvent(event);
+                            homeEventsListViewModel.setSelectedEvent(event);
+                            NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
+                            navController.navigate(R.id.action_navigation_event2_to_navigation_event);
+                            Toast.makeText(requireContext(), "Joining waitlist...", Toast.LENGTH_SHORT).show();
+                        } else{
+                            Toast.makeText(requireContext(), "Sorry, waitlist is full" + count, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onError(String errorMessage) {
+                        Log.e("WaitlistedCount", "Error: " + errorMessage);
+                    }
+                });
             }
             dialog.dismiss();
         });

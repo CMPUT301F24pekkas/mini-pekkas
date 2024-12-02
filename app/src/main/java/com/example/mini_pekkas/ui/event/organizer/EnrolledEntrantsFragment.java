@@ -58,7 +58,25 @@ public class EnrolledEntrantsFragment extends Fragment {
 
         };
         assert currentEvent != null;
-        firebaseHelper.getEnrolledUsers(currentEvent.getId(), listener);
+        loadEnrolledUsers(currentEvent.getId());
         return root;
+    }
+
+    private void loadEnrolledUsers(String eventId) {
+        Firebase.UserListRetrievalListener enrolledUsersListener = new Firebase.UserListRetrievalListener() {
+            @Override
+            public void onUserListRetrievalCompleted(ArrayList<User> users) {
+                Log.d("user", "Chosen users retrieved: " + users.size());
+                enrolledArrayAdapter.clearUsers();
+                enrolledArrayAdapter.addUsers(users);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.d("user", "Error fetching chosen users: " + e.getMessage());
+            }
+        };
+
+        firebaseHelper.getEnrolledUsers(eventId, enrolledUsersListener);
     }
 }
