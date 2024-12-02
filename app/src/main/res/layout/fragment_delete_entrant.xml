@@ -8,8 +8,9 @@
 
     <LinearLayout
         android:id="@+id/joinDialogue"
-        android:layout_width="360dp"
-        android:layout_height="243dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="360dp"
         android:layout_marginStart="1dp"
         android:layout_marginTop="1dp"
         android:layout_marginEnd="1dp"
