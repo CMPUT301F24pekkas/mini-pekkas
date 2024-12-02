@@ -13,12 +13,20 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Custom view for displaying a map with markers and current location.
+ */
 public class CustomMapView extends View {
 
     private Paint markerPaint;
     private List<PointF> markers = new ArrayList<>();
     private PointF currentLocation;
 
+    /**
+     * Constructor for CustomMapView.
+     * @param context The context
+     * @param attrs attributes of map view
+     */
     public CustomMapView(Context context, AttributeSet attrs) {
         super(context, attrs);
         markerPaint = new Paint();
@@ -26,16 +34,32 @@ public class CustomMapView extends View {
         markerPaint.setStyle(Paint.Style.FILL);
     }
 
+    /**
+     * Add a marker to the map.
+     * @param latitude latitude of marker
+     * @param longitude longitude of marker
+     */
     public void addMarker(double latitude, double longitude) {
         markers.add(convertToCanvasPoint(latitude, longitude));
         invalidate(); // Redraw the view
     }
 
+    /**
+     * Update the current location on the map.
+     * @param latitude the latitude to be changed
+     * @param longitude the longitude to be changed
+     */
     public void updateCurrentLocation(double latitude, double longitude) {
         currentLocation = convertToCanvasPoint(latitude, longitude);
         invalidate(); // Redraw the view
     }
 
+    /**
+     * Convert latitude and longitude to canvas coordinates.
+     * @param latitude latitude of marker
+     * @param longitude longitude of marker
+     * @return PointF representing the canvas coordinates
+     */
     private PointF convertToCanvasPoint(double latitude, double longitude) {
         // Convert lat/lon to x/y canvas coordinates
         float x = (float) (longitude * 10); // Example conversion
@@ -43,6 +67,10 @@ public class CustomMapView extends View {
         return new PointF(x, y);
     }
 
+    /**
+     * Draw the markers and current location on the canvas.
+     * @param canvas canvas to draw on
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);

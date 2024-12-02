@@ -23,13 +23,27 @@ import com.example.mini_pekkas.databinding.FragmentEnrolledBinding;
 
 import java.util.ArrayList;
 
-
+/**
+ * Fragment for displaying chosen entrants in an event.
+ */
 public class ChosenEntrantsFragment extends Fragment {
     private FragmentChosenBinding binding;
     private Firebase firebaseHelper;
     private UserInEventArrayAdapter ChosenArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
 
+    /**
+     * Fragment for displaying chosen entrants in an event.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
         binding = FragmentChosenBinding.inflate(inflater, container, false);

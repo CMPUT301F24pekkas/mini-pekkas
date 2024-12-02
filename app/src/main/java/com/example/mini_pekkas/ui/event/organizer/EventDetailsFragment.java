@@ -129,6 +129,9 @@ public class EventDetailsFragment extends Fragment {
         return root;
     }
 
+    /**
+     * sets the button listeners of the fragment
+     */
     private void SetButtonListeners() {
         //editEvent
         Button editButton = binding.editEventButton;
@@ -164,6 +167,10 @@ public class EventDetailsFragment extends Fragment {
         });
     }
 
+    /**
+     * creates Default Notifications for the event
+     * @return an Arraylist of the default Notifications
+     */
     private ArrayList<Notifications> createDefaultNotifications(){
         Timestamp serverTimestamp = Timestamp.now();
         ArrayList<Notifications> notifications = new ArrayList<>();

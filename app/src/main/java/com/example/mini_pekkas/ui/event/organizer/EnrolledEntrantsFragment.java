@@ -22,12 +22,27 @@ import com.example.mini_pekkas.databinding.FragmentEnrolledBinding;
 
 import java.util.ArrayList;
 
-
+/**
+ * Fragment for displaying enrolled entrants in an event.
+ */
 public class EnrolledEntrantsFragment extends Fragment {
     private FragmentEnrolledBinding binding;
     private Firebase firebaseHelper;
     private UserInEventArrayAdapter enrolledArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
+
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
         binding = FragmentEnrolledBinding.inflate(inflater, container, false);
@@ -62,6 +77,10 @@ public class EnrolledEntrantsFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Loads enrolled users for an event.
+     * @param eventId ID of Event
+     */
     private void loadEnrolledUsers(String eventId) {
         Firebase.UserListRetrievalListener enrolledUsersListener = new Firebase.UserListRetrievalListener() {
             @Override
