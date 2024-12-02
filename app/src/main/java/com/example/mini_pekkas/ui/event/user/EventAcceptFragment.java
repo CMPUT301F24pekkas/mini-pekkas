@@ -1,8 +1,10 @@
 package com.example.mini_pekkas.ui.event.user;
 
+import static com.example.mini_pekkas.QRCodeGenerator.generateQRCode;
 import static org.junit.Assert.assertEquals;
 
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
@@ -129,10 +132,20 @@ public class EventAcceptFragment extends Fragment {
                 ? event.getEventHost().getName()
                 : "Unknown Organizer";
 
+        String url = event.getPosterPhotoUrl();
+        String qrCode = event.getQrCode();
+        Bitmap qrCodeBitmap = generateQRCode(qrCode, 300, 300);
+
         binding.eventNameView.setText(eventName);
         binding.organizerNameView.setText(organizerName);
         binding.eventDescriptionView.setText(event.getDescription() != null ? event.getDescription() : "No Description");
         binding.locationView.setText(event.getFacility() != null ? event.getFacility() : "No Facility");
+        if (url != null) {
+            Glide.with(this).load(url).into(binding.eventImageView);
+        } else {
+            binding.eventImageView.setImageResource(R.drawable.no_image);
+        }
+        binding.qrImage.setImageBitmap(qrCodeBitmap);
     }
 
 

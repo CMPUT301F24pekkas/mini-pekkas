@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentEventBinding;
@@ -61,8 +62,13 @@ public class AdminEventFragment extends Fragment {
         // binds the images to the view model
         final ImageView eventImage = binding.eventImageView;
         ImageView qrImageView = root.findViewById(R.id.qrImage);
-        eventViewModel.getEventImage().observe(getViewLifecycleOwner(), eventImage::setImageResource);
-
+        eventViewModel.getEventImage().observe(getViewLifecycleOwner(), imageUrl -> {
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Glide.with(this).load(imageUrl).into(binding.eventImageView);
+            } else {
+                binding.eventImageView.setImageResource(R.drawable.no_image);
+            }
+        });
 
         // placeholders for what the qr code will be
         qrImageView.setImageResource(R.drawable.camera);
