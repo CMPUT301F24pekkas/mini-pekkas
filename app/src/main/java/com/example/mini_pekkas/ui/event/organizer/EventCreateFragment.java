@@ -310,7 +310,7 @@ public class EventCreateFragment extends Fragment {
                 return null;
             }
         } catch (ParseException e) {
-            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Invalid date format. Please input in MMddyyyy.", Toast.LENGTH_SHORT).show();
             return null;
         }
 
