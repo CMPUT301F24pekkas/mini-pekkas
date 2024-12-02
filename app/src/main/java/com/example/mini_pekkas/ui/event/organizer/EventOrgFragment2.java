@@ -71,25 +71,6 @@ public class EventOrgFragment2 extends Fragment {
         qrImageView.setImageResource(R.drawable.camera);
 
         // Sets up the choose button to open a participant selection dialog
-        ImageButton chooseButton = binding.chooseButton;
-        chooseButton.setOnClickListener(new View.OnClickListener() {
-
-            /**
-             * Called when "Choose" button is clicked. It creates and displays
-             * a dialog for selecting participants.
-             *
-             * @param v The view that was clicked, in this case, the "Choose" button.
-             */
-            @Override
-            public void onClick(View v) {
-                // Creates a dialog for choosing participants when the button is clicked
-                FragmentChoosePartBinding choosePartBinding = FragmentChoosePartBinding.inflate(LayoutInflater.from(getContext()));
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setView(choosePartBinding.getRoot());
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        });
 
         return root;
     }
