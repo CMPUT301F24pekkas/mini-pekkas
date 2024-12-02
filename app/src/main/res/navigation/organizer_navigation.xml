@@ -107,4 +107,7 @@
         android:id="@+id/mapFragment"
         android:name="com.example.mini_pekkas.ui.event.organizer.MapFragment"
         tools:layout="@layout/fragment_map" />
+    <action
+        android:id="@+id/action_global_navigation_org_edit_event"
+        app:destination="@id/navigation_org_edit_event" />
 </navigation>

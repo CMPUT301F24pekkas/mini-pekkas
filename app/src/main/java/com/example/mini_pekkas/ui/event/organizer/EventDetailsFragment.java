@@ -60,7 +60,6 @@ public class EventDetailsFragment extends Fragment {
 
     private FragmentEventOrgBinding binding;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
-    private NumEntrantsViewModel numEntrantsViewModel;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private Firebase firebaseHelper;
@@ -83,7 +82,6 @@ public class EventDetailsFragment extends Fragment {
         // Get selected event from ViewModel
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
-        numEntrantsViewModel = new ViewModelProvider(requireActivity()).get(NumEntrantsViewModel.class);
 
         // Set elements in fragment to selected event
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
