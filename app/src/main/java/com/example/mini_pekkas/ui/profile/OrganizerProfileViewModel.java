@@ -211,12 +211,28 @@ public class OrganizerProfileViewModel extends ViewModel {
         profilePictureUrl.setValue(url);
     }
 
+    /**
+     * Gets the LiveData for the organizer's user ID.
+     * @return LiveData for Facility picture
+     */
     public LiveData<String> getFacilityPictureUrl() { return facilityPictureUrl; }
 
+    /**
+     * Sets the facility picture URL of the organizer.
+     * @param url The new facility picture URL to set.
+     */
     public void setFacilityPictureUrl(String url) { facilityPictureUrl.setValue(url); }
 
+    /**
+     * Gets the LiveData for the facility description.
+     * @return LiveData for facility description
+     */
     public LiveData<String> getFacilityDescription() { return facilityDescription; }
 
+    /**
+     * Sets the facility description.
+     * @param description description to set
+     */
     public void setFacilityDescription(String description) { facilityDescription.setValue(description); }
 
 }

@@ -7,7 +7,6 @@ import com.example.mini_pekkas.R;
 
 /**
  * View model for the event fragment.
- * TODO Need to adjust data as needed
  */
 public class AdminEventViewModel extends ViewModel {
 

@@ -19,6 +19,9 @@ import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.databinding.FragmentUserOrganizerBinding;
 
+/**
+ * Fragment for changing a user to an organizer of the current user.
+ */
 public class UserOrganizerFragment extends Fragment {
 
     private FragmentUserOrganizerBinding binding;
@@ -26,6 +29,18 @@ public class UserOrganizerFragment extends Fragment {
     private EditText facilityEditText;
     private Button confirmFacilityButton;
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout using ViewBinding
@@ -83,6 +98,9 @@ public class UserOrganizerFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Called when the fragment's view is being destroyed.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

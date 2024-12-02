@@ -82,7 +82,7 @@ public class OrganizerHomeFragment extends Fragment {
 
         return root;
     }
-    //TODO calculate the time until the start of the event
+
 
     /**
      * this function updates the UI with the given Livedata eventList
@@ -128,49 +128,6 @@ public class OrganizerHomeFragment extends Fragment {
 
             EventsContainer.addView(eventView);
         }
-    }
-
-
-    /**
-     * Displays the details of the given event in the fragment's layout.
-     *
-     * @param event The event to display.
-     */
-//    private void displayEventData(Event event) {
-//        Log.d("OrganizerHomeFragment", "Displaying event: " + event.getName());
-//
-//        // Access and update the TextViews in the XML layout
-//        CardView EventView = binding.ExampleEvent1;
-//        String description = binding.EventDescription.getText().toString();
-//        TextView eventDescriptionView =  EventTitle;
-//        TextView daysCountView = binding.dayUserCountView;
-//        Button editButton = binding.homeUserVIewEvent;
-//
-//        // Set text content based on the retrieved Event data
-//        eventNameView.setText(event.getName());
-//        eventDescriptionView.setText(event.getDescription());
-//
-//        // Calculate and display the number of days until the event starts
-//        int daysUntilEvent = calculateDaysUntilEvent(event.getStartDate());
-//        daysCountView.setText("Starts in " + daysUntilEvent + " Days");
-//
-//        // Set a click listener for the edit button
-//        editButton.setOnClickListener(view -> {
-//            Log.d("OrganizerHomeFragment", "Edit event clicked for: " + event.getName());
-//            // Implement navigation to event editing fragment or activity if needed
-//        });
-//    }
-
-    /**
-     * Calculates the number of days until the event starts based on its start date.
-     *
-     * @param startDate The start date of the event in string format (e.g., "YYYY-MM-DD").
-     * @return The number of days until the event starts.
-     */
-    private int calculateDaysUntilEvent(String startDate) {
-        // Implement logic to calculate days until event start based on `startDate`
-        // Placeholder value; replace with actual date calculation logic
-        return 12;
     }
 
     /**

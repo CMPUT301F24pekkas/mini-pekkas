@@ -193,6 +193,9 @@ public class OrganizerProfileFragment extends Fragment {
         dialog.show();
     }
 
+    /**
+     * Shows a dialog allowing the user to choose between uploading a new facility picture or deleting the current one.
+     */
     private void showFacilityPictureOptionsDialog() {
         View popupView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_facility_pfp_edit, null);
 

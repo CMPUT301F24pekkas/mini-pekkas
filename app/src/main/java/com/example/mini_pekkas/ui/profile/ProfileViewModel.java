@@ -201,12 +201,5 @@ public class ProfileViewModel extends ViewModel {
         profilePictureUrl.setValue(url);
     }
 
-    public LiveData<String> getFacilityPictureUrl() { return facilityPictureUrl; }
-
-    public void setFacilityPictureUrl(String url) { facilityPictureUrl.setValue(url); }
-
-    public LiveData<String> getFacilityDescription() { return facilityDescription; }
-
-    public void setFacilityDescription(String description) { facilityDescription.setValue(description); }
 }
 

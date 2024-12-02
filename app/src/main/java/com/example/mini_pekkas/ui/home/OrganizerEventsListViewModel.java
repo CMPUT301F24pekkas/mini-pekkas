@@ -146,6 +146,11 @@ public class OrganizerEventsListViewModel extends ViewModel {
         firebaseHelper.getOrganizedEvents(listener);
 
     }
+
+    /**
+     * removes event from db
+     * @param event Event to delete
+     */
     public void removeEventFromDb(Event event) {
         firebaseHelper.deleteEvent(event);
     }

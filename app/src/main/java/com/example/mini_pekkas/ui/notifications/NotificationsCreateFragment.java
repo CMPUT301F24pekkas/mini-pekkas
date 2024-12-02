@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Fragment for creating notifications.
+ */
 public class NotificationsCreateFragment extends Fragment {
 
     private FragmentCreateNotificationBinding binding;
@@ -34,6 +37,18 @@ public class NotificationsCreateFragment extends Fragment {
     private ArrayAdapter<String> eventAdapter, statusAdapter;
     private Firebase firebaseHelper;
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCreateNotificationBinding.inflate(inflater, container, false);
@@ -157,6 +172,9 @@ public class NotificationsCreateFragment extends Fragment {
         spinnerStatus.setSelection(0);
     }
 
+    /**
+     * Cleans up resources and references to avoid memory leaks when the fragment's view is destroyed.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
