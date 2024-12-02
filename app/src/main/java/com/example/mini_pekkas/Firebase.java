@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.example.mini_pekkas.notification.Notifications;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -382,7 +384,16 @@ public class Firebase {
     public void deleteThisUser() {
         deleteThisUser(() -> {});
     }
-
+    /**
+     * Cancels the specified user's registration for the given event by updating their status to "cancelled".
+     *
+     * @param userID the unique identifier of the user whose registration is to be canceled
+     * @param eventID the unique identifier of the event for which the user's registration is being canceled
+     * @param listener an {@link InitializationListener} to handle success or failure callbacks for the operation
+     */
+    public void cancelUser( String userID, String eventID, InitializationListener listener) {
+        setNewStatus("cancelled",userID, eventID, listener);
+    }
     /*
      *  Functionality for managing events
      */
@@ -856,6 +867,31 @@ public class Firebase {
      */
     public void getStatusInEvent(Event event, DataRetrievalListener listener) {
         userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", deviceID).get()
+                .addOnSuccessListener(task -> {
+                    // Check if there are any documents in the query result
+                    if (!task.getDocuments().isEmpty()) {
+                        DocumentSnapshot document = task.getDocuments().get(0);
+                        String status = document.getString("status");
+                        // Call the listener with the retrieved status or "unknown" if the status is null
+                        listener.onRetrievalCompleted(status != null ? status : "unknown");
+                    } else {
+                        // No documents found; call listener with a default "unknown" status
+                        listener.onRetrievalCompleted("unknown");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Pass the error to the listener
+                    listener.onError(e);
+                });
+    }
+    /**
+     * Get the current status of a user in the event.
+     * @param user A user object to get the status of.
+     * @param event An event object to get the status of.
+     * @param listener A DataRetrievalListener listener that returns the status of the user in the event.
+     */
+    public void getUserStatusInEvent(User user, Event event, DataRetrievalListener listener) {
+        userEventsCollection.whereEqualTo("eventID", event.getId()).whereEqualTo("userID", user.getUserID()).get()
                 .addOnSuccessListener(task -> {
                     // Check if there are any documents in the query result
                     if (!task.getDocuments().isEmpty()) {

@@ -13,10 +13,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.UserArrayAdapter;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.User;
-import com.example.mini_pekkas.UserArrayAdapter;
+import com.example.mini_pekkas.UserInEventArrayAdapter;
 import com.example.mini_pekkas.databinding.FragmentCanceledBinding;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 public class CancelledEntrantsFragment extends Fragment {
     private FragmentCanceledBinding binding;
     private Firebase firebaseHelper;
-    private UserArrayAdapter CancelledArrayAdapter;
+    private UserInEventArrayAdapter CancelledArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
@@ -36,7 +37,7 @@ public class CancelledEntrantsFragment extends Fragment {
                 .get(OrganizerEventsListViewModel.class);
         Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
         //intialize ArrayAdapter
-        CancelledArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
+        CancelledArrayAdapter = new UserInEventArrayAdapter(requireActivity(),requireContext(), new ArrayList<>());
         ListView enrolledListView = binding.canceledListView;
         enrolledListView.setAdapter(CancelledArrayAdapter);
 
@@ -64,7 +65,6 @@ public class CancelledEntrantsFragment extends Fragment {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
                 Log.d("user", "Chosen users retrieved: " + users.size());
-                CancelledArrayAdapter.clearUsers();
                 CancelledArrayAdapter.addUsers(users);
             }
 

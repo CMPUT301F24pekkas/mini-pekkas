@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.UserInEventArrayAdapter;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.User;
@@ -26,45 +27,41 @@ import java.util.ArrayList;
 public class ChosenEntrantsFragment extends Fragment {
     private FragmentChosenBinding binding;
     private Firebase firebaseHelper;
-    private UserArrayAdapter chosenArrayAdapter;
+    private UserInEventArrayAdapter ChosenArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+                             ViewGroup container, Bundle savedInstanceState){
         binding = FragmentChosenBinding.inflate(inflater, container, false);
+
         View root = binding.getRoot();
 
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
         Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
-
-        chosenArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
-        ListView chosenListView = binding.chosenListView;
-        chosenListView.setAdapter(chosenArrayAdapter);
+        //make ArrayAdapter
+        ChosenArrayAdapter = new UserInEventArrayAdapter(requireActivity(),requireContext(), new ArrayList<>());
+        ListView enrolledListView = binding.chosenListView;
+        enrolledListView.setAdapter(ChosenArrayAdapter);
 
         firebaseHelper = new Firebase(requireContext());
 
-        loadChosenUsers(currentEvent.getId());
-
-        return root;
-    }
-
-    private void loadChosenUsers(String eventId) {
-        Firebase.UserListRetrievalListener chosenUsersListener = new Firebase.UserListRetrievalListener() {
+        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                Log.d("user", "Chosen users retrieved: " + users.size());
-                chosenArrayAdapter.clearUsers();
-                chosenArrayAdapter.addUsers(users);
-            }
+                Log.d("user", "User list retrieval completed" + " size:" + users.size());
+                ChosenArrayAdapter.addUsers(users);
 
+            }
             @Override
             public void onError(Exception e) {
-                Log.d("user", "Error fetching chosen users: " + e.getMessage());
+                Log.d("user", "Error occurred: " + e.getMessage());
             }
-        };
 
-        firebaseHelper.getPendingUsers(eventId, chosenUsersListener);
+        };
+        assert currentEvent != null;
+        firebaseHelper.getPendingUsers(currentEvent.getId(), listener);
+        firebaseHelper.getEnrolledUsers(currentEvent.getId(), listener);
+        return root;
     }
 }
-

@@ -18,6 +18,7 @@ import com.example.mini_pekkas.Firebase;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.User;
 import com.example.mini_pekkas.UserArrayAdapter;
+import com.example.mini_pekkas.UserInEventArrayAdapter;
 import com.example.mini_pekkas.databinding.FragmentWaitlistBinding;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 public class WaitlistedEntrantsFragment extends Fragment {
     private FragmentWaitlistBinding binding;
     private Firebase firebaseHelper;
-    private UserArrayAdapter waitlistedArrayAdapter;
+    private UserInEventArrayAdapter waitlistedArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,7 +43,7 @@ public class WaitlistedEntrantsFragment extends Fragment {
         Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
 
         // Set up the ArrayAdapter for the ListView
-        waitlistedArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
+        waitlistedArrayAdapter = new UserInEventArrayAdapter(requireActivity(),requireContext(), new ArrayList<>());
         ListView enrolledListView = binding.waitListView;
         enrolledListView.setAdapter(waitlistedArrayAdapter);
 

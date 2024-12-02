@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_pekkas.Event;
 import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.UserInEventArrayAdapter;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.User;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 public class EnrolledEntrantsFragment extends Fragment {
     private FragmentEnrolledBinding binding;
     private Firebase firebaseHelper;
-    private UserArrayAdapter enrolledArrayAdapter;
+    private UserInEventArrayAdapter enrolledArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
@@ -37,7 +38,7 @@ public class EnrolledEntrantsFragment extends Fragment {
 
         //make ArrayAdapter
 
-        enrolledArrayAdapter = new UserArrayAdapter(requireContext(), new ArrayList<>());
+        enrolledArrayAdapter = new UserInEventArrayAdapter(requireActivity(),requireContext(), new ArrayList<>());
         ListView enrolledListView = binding.enrolledListView;
         enrolledListView.setAdapter(enrolledArrayAdapter);
 
@@ -66,7 +67,6 @@ public class EnrolledEntrantsFragment extends Fragment {
             @Override
             public void onUserListRetrievalCompleted(ArrayList<User> users) {
                 Log.d("user", "Chosen users retrieved: " + users.size());
-                enrolledArrayAdapter.clearUsers();
                 enrolledArrayAdapter.addUsers(users);
             }
 
