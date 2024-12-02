@@ -137,18 +137,18 @@
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="81dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="306dp"
             android:text="Description"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textSize="16sp"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toTopOf="@+id/editDescription"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/geoCheckBox"
-            app:layout_constraintBottom_toTopOf= "@+id/editDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/geoCheckBox" />
 
         <TextView
             android:id="@+id/textView4"
