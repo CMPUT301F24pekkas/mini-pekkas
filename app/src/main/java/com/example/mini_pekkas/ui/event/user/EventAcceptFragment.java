@@ -117,6 +117,8 @@ public class EventAcceptFragment extends Fragment {
                             }
                         }
                 );
+                acceptButton.setVisibility(View.GONE);
+                declineButton.setVisibility(View.GONE);
             }
         });
 
