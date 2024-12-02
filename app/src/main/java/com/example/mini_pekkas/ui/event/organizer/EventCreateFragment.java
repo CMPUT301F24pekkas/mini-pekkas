@@ -103,6 +103,11 @@ public class EventCreateFragment extends Fragment {
         Button addButton = binding.addEventButton;
         addButton.setOnClickListener(v -> {
             createdEvent = CreateEvent();
+
+            if (createdEvent == null) {
+                // Validation failed; return without proceeding
+                return;
+            }
             // Generate a unique QR code raw string (event ID + UUID)
             String uniqueQrData = createdEvent.getId() + UUID.randomUUID().toString();
             // Set the raw QR code data in the event
