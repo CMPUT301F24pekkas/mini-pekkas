@@ -64,13 +64,17 @@ public class EventEditFragment extends Fragment {
         binding.createEventEditText.setText(event.getName());
         binding.editStartDate.setText(dateFormat.format(event.getStartDate()));
         binding.editEndDate.setText(dateFormat.format(event.getEndDate()));
-        binding.editStartTime.setText("10:00");
-        binding.editEndTime.setText("14:00");
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+        String formattedstartTime = formatter.format(event.getStartDate());
+        String formattedendTime = formatter.format(event.getEndDate());
+        binding.editStartTime.setText(formattedstartTime);
+        binding.editEndTime.setText(formattedendTime);
         binding.editDescription.setText(event.getDescription());
         binding.editDetails.setText(event.getDetails());
 
         if(event.isGeo()){
-            binding.createEventLocationEditText.setText("New York City");
+            binding.geoCheckBox.setChecked(true);
+            binding.createEventLocationEditText.setText(event.getFacility());
         }
         else{
             binding.createEventLocationEditText.setText("N/A");
