@@ -154,6 +154,18 @@ public class AdminUiTests {
         onView(withText("Android Unit Testing")).check(matches(isDisplayed()));
     }
 
+    /**
+     * US 03.06.01 As an administrator, I want to be able to browse images.
+     */
+    @Test
+    public void testBrowseImages(){
+
+    }
+
+    /**
+     * US 03.01.01 As an administrator, I want to be able to remove events.
+     * @throws InterruptedException
+     */
     @Test
     public void testDeleteEvent() throws InterruptedException {
         CreateTestEvent();
@@ -180,7 +192,28 @@ public class AdminUiTests {
         onView(withText("Yes")).perform(click());
         onView(withText("Test Event")).check(doesNotExist());
     }
+    /**
+     * US 03.02.01 As an administrator, I want to be able to remove profiles.
+     */
+    @Test
+    public void testDeleteProfiles(){
 
+    }
+    /**
+     * US 03.03.01 As an administrator, I want to be able to remove images.
+     */
+    @Test
+    public void testRemoveImages(){
+
+    }
+
+    /**
+     * US 03.07.01 As an administrator I want to remove facilities that violate app policy
+     */
+    @Test
+    public void testRemoveFacilities(){
+
+    }
     /**
      * Delete all test documents after the test, even if any tests fail
      */
