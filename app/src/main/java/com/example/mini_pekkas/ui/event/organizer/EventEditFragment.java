@@ -126,7 +126,7 @@ public class EventEditFragment extends Fragment {
     }
     /**
      * Updates the event details
-     * @param event
+     * @param event Event to update
      */
     private Event UpdateEvent(Event event) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());

@@ -40,7 +40,6 @@ import com.google.android.gms.location.LocationServices;
 
 
 import java.io.ByteArrayOutputStream;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
@@ -66,6 +65,7 @@ public class EventCreateFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private Event createdEvent;
+
     /**
      * Called to initialize the fragment's view.
      * Sets up UI components for event creation, including image selection
@@ -272,11 +272,10 @@ public class EventCreateFragment extends Fragment {
         String eventLocation = binding.createEventLocationEditText.getText().toString().trim();
         String startDateString = binding.editStartDate.getText().toString().trim();
         String endDateString = binding.editEndDate.getText().toString().trim();
-        String startTime = binding.editStartTime.getText().toString().trim();
-        String endTime = binding.editEndTime.getText().toString().trim();
+        String startTimeString = binding.editStartTime.getText().toString().trim();
+        String endTimeString = binding.editEndTime.getText().toString().trim();
         String eventDescription = binding.editDescription.getText().toString().trim();
-        price = binding.editPrice.getText().toString().trim().isEmpty() ? 0.0f : Float.parseFloat(binding.editPrice.getText().toString().trim());
-
+        String eventDetails = binding.editDetails.getText().toString().trim();
         boolean geolocationEnabled = binding.geoCheckBox.isChecked();
 
         // Validate required inputs
@@ -297,20 +296,20 @@ public class EventCreateFragment extends Fragment {
             return null;
         }
 
-        // Parse dates in yyyy-MM-dd format
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        // Parse dates
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         Date startDate, endDate;
         try {
-            startDate = dateFormat.parse(startDateString);
-            endDate = dateFormat.parse(endDateString);
-            Toast.makeText(requireContext(), "Start date" + startDate.toString(), Toast.LENGTH_SHORT).show();
+            startDate = dateFormat.parse(startDateString + " " + startTimeString);
+            endDate = dateFormat.parse(endDateString + " " + endTimeString);
 
             if (startDate.after(endDate)) {
                 Toast.makeText(requireContext(), "Start date must be before or equal to the end date.", Toast.LENGTH_SHORT).show();
                 return null;
             }
         } catch (ParseException e) {
-            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd for the date and HH:mm for the time.(24 hour format)", Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -326,12 +325,6 @@ public class EventCreateFragment extends Fragment {
             Toast.makeText(requireContext(), "Invalid max participant number.", Toast.LENGTH_SHORT).show();
             return null;
         }
-        // Check if price is non negative
-        if (price < 0) {
-            Toast.makeText(requireContext(), "Price must be non-negative.", Toast.LENGTH_SHORT).show();
-            return null;
-        }
-
         int maxWaitlist = -1;
         if (binding.maxPartCheckBox.isChecked()) {
             try {
@@ -374,7 +367,7 @@ public class EventCreateFragment extends Fragment {
                 waitlist,
                 "QrCodePlaceholder", // Replace with actual QR code
                 geolocationEnabled,
-                null    // Placeholder for poster photo URL
+                eventDetails
         );
     }
 
@@ -389,7 +382,7 @@ public class EventCreateFragment extends Fragment {
         binding.editStartTime.getText().clear();
         binding.editEndTime.getText().clear();
         binding.editDescription.getText().clear();
-        binding.editPrice.getText().clear();
+        binding.editDetails.getText().clear();
         binding.editMaxPart.getText().clear();
         binding.editMaxWait.getText().clear();
         binding.maxPartCheckBox.setChecked(false);

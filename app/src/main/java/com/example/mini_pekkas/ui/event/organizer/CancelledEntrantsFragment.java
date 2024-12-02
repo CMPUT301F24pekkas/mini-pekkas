@@ -22,12 +22,27 @@ import com.example.mini_pekkas.databinding.FragmentCanceledBinding;
 
 import java.util.ArrayList;
 
-
+/**
+ * Fragment for displaying cancelled entrants in an event.
+ */
 public class CancelledEntrantsFragment extends Fragment {
     private FragmentCanceledBinding binding;
     private Firebase firebaseHelper;
     private UserInEventArrayAdapter CancelledArrayAdapter;
     private OrganizerEventsListViewModel organizerEventsListViewModel;
+
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
         binding = FragmentCanceledBinding.inflate(inflater, container, false);
@@ -60,6 +75,11 @@ public class CancelledEntrantsFragment extends Fragment {
         loadCancelledUsers(currentEvent.getId());
         return root;
     }
+
+    /**
+     * Loads the Cancelled users for the given event.
+     * @param eventId ID of Event
+     */
     private void loadCancelledUsers(String eventId) {
         Firebase.UserListRetrievalListener cancelledUsersListener = new Firebase.UserListRetrievalListener() {
             @Override
