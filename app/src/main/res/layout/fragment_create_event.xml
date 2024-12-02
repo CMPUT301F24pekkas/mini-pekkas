@@ -97,7 +97,7 @@
                 android:background="@drawable/editdate"
                 android:ems="10"
                 android:hint="Start Date"
-                android:inputType="date"
+                android:inputType="text"
                 android:textAlignment="center" />
 
             <EditText
@@ -123,7 +123,7 @@
                 android:background="@drawable/editdate"
                 android:ems="10"
                 android:hint="End Date"
-                android:inputType="date"
+                android:inputType="text"
                 android:textAlignment="center" />
 
             <EditText

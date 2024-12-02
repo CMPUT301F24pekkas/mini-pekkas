@@ -297,8 +297,8 @@ public class EventCreateFragment extends Fragment {
             return null;
         }
 
-        // Parse dates in YYYYMMDD format
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMddyyyy", Locale.US);
+        // Parse dates in yyyy-MM-dd format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         Date startDate, endDate;
         try {
             startDate = dateFormat.parse(startDateString);
@@ -310,7 +310,7 @@ public class EventCreateFragment extends Fragment {
                 return null;
             }
         } catch (ParseException e) {
-            Toast.makeText(requireContext(), "Invalid date format. Please input in MMddyyyy.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd.", Toast.LENGTH_SHORT).show();
             return null;
         }
 
