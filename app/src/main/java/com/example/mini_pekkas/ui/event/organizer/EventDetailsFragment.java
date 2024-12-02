@@ -1,7 +1,9 @@
 package com.example.mini_pekkas.ui.event.organizer;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,11 +28,14 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
 import com.example.mini_pekkas.Event;
+import com.example.mini_pekkas.Firebase;
+import com.example.mini_pekkas.notification.Notifications;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModel;
 import com.example.mini_pekkas.ui.home.OrganizerEventsListViewModelFactory;
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentChoosePartBinding;
 import com.example.mini_pekkas.databinding.FragmentEventOrgBinding;
+import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 
@@ -48,6 +53,7 @@ public class EventDetailsFragment extends Fragment {
     private NumEntrantsViewModel numEntrantsViewModel;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
+    private Firebase firebaseHelper;
 
     /**
      * Inflates the layout, binds the views, and sets up the event details in the fragment.
@@ -63,7 +69,7 @@ public class EventDetailsFragment extends Fragment {
         Log.d("onCreateView", "EventDetailsFragment onCreateView called");
         binding = FragmentEventOrgBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
+        firebaseHelper = new Firebase(requireContext());
         // Get selected event from ViewModel
         organizerEventsListViewModel = new ViewModelProvider(requireActivity(), new OrganizerEventsListViewModelFactory(getActivity()))
                 .get(OrganizerEventsListViewModel.class);
@@ -96,40 +102,52 @@ public class EventDetailsFragment extends Fragment {
         //choose participants
         ImageButton chooseButton = binding.chooseButton;
         chooseButton.setOnClickListener(v -> {
-
-            FragmentChoosePartBinding choosePartBinding = FragmentChoosePartBinding.inflate(
-                    LayoutInflater.from(requireContext()));
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setView(choosePartBinding.getRoot());
-            AlertDialog dialog = builder.create();
-
+            Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+            ArrayList<Notifications> notifications = createDefaultNotifications();
+            firebaseHelper.startEnrollingEvent(event, notifications, new Firebase.InitializationListener() {
+                    @Override
+                    public void onInitialized() {
+                        EnrollmentStatusHelper.setEnrollmentStarted(requireContext(), event.getId(), true);
+                    }
+            });
             View fragmentView = getView();
-
-            choosePartBinding.cancelWaitButton.setOnClickListener(y -> {
-                dialog.dismiss();
-            });
-
-            choosePartBinding.joinWaitButton.setOnClickListener(z -> {
-                if (fragmentView == null) {
-                    return;
-                }
-                EditText EditNumParts = choosePartBinding.editNumParticipants;
-                String numPartsString = EditNumParts.getText().toString();
-                int numParts = Integer.parseInt(numPartsString);
-                numEntrantsViewModel.setNumber(numParts);
-
-                NavController navController = Navigation.findNavController(fragmentView);
-                navController.navigate(R.id.action_event_details_to_choose_participants);
-                dialog.dismiss();
-            });
-
-            dialog.show();
-
-            // Verify event data is valid when dialog opens
-            Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
-            Log.d("EventDetailsFragment", "Current event when dialog opens: " +
-                    (currentEvent != null ? currentEvent.getName() : "null"));
+            assert fragmentView != null;
+            NavController navController = Navigation.findNavController(fragmentView);
+            navController.navigate(R.id.action_event_details_to_choose_participants);
+//
+//            FragmentChoosePartBinding choosePartBinding = FragmentChoosePartBinding.inflate(
+//                    LayoutInflater.from(requireContext()));
+//
+//            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+//            builder.setView(choosePartBinding.getRoot());
+//            AlertDialog dialog = builder.create();
+//
+//            View fragmentView = getView();
+//
+//            choosePartBinding.cancelChooseButton.setOnClickListener(y -> {
+//                dialog.dismiss();
+//            });
+//
+//            choosePartBinding.confirmChooseButton.setOnClickListener(z -> {
+//                if (fragmentView == null) {
+//                    return;
+//                }
+//                EditText EditNumParts = choosePartBinding.editNumParticipants;
+//                String numPartsString = EditNumParts.getText().toString();
+//                int numParts = Integer.parseInt(numPartsString);
+//                numEntrantsViewModel.setNumber(numParts);
+//
+//                NavController navController = Navigation.findNavController(fragmentView);
+//                navController.navigate(R.id.action_event_details_to_choose_participants);
+//                dialog.dismiss();
+//            });
+//
+//            dialog.show();
+//
+//            // Verify event data is valid when dialog opens
+//            Event currentEvent = organizerEventsListViewModel.getSelectedEvent().getValue();
+//            Log.d("EventDetailsFragment", "Current event when dialog opens: " +
+//                    (currentEvent != null ? currentEvent.getName() : "null"));
         });
         ImageButton waitButton = binding.waitButton;
         waitButton.setOnClickListener(v->{
@@ -137,6 +155,21 @@ public class EventDetailsFragment extends Fragment {
             navController.navigate(R.id.action_event_details_to_waitlisted_entrants);
 
         });
+    }
+
+    private ArrayList<Notifications> createDefaultNotifications(){
+        Timestamp serverTimestamp = Timestamp.now();
+        ArrayList<Notifications> notifications = new ArrayList<>();
+        Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+        String eventTitle = event.getName();
+        String eventId = event.getId();
+
+        Notifications notification1 = new Notifications("Chosen", "you have been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
+        notifications.add(notification1);
+        Notifications notification2 = new Notifications("Not Chosen", "unfortunately you have not been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
+        notifications.add(notification2);
+        return notifications;
+
     }
 
     private void openImageChooser() {

@@ -27,6 +27,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -65,7 +68,11 @@ public class EventFragment extends Fragment {
                 if (homeEvent != null) {
                     event = homeEvent;
 
-                    fetchEventStatus();
+                    try {
+                        fetchEventStatus();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     Toast.makeText(requireContext(), "Home event not found", Toast.LENGTH_SHORT).show();
                 }
@@ -73,7 +80,11 @@ public class EventFragment extends Fragment {
                 Event qrCodeEvent = sharedEventViewModel.getEventDetails().getValue();
                 if (qrCodeEvent != null) {
                     event = qrCodeEvent;
-                    fetchEventStatus();
+                    try {
+                        fetchEventStatus();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     Toast.makeText(requireContext(), "QR code event not found", Toast.LENGTH_SHORT).show();
                 }
@@ -110,7 +121,8 @@ public class EventFragment extends Fragment {
         return root;
     }
 
-    private void fetchEventStatus() {
+    private void fetchEventStatus() throws InterruptedException {
+        Thread.sleep(500);
         firebaseHelper.getStatusInEvent(event, new Firebase.DataRetrievalListener() {
             @Override
             public void onRetrievalCompleted(String status) {
@@ -139,6 +151,11 @@ public class EventFragment extends Fragment {
         binding.organizerNameView.setText(organizerName);
         binding.eventDescriptionView.setText(event.getDescription() != null ? event.getDescription() : "No Description");
         binding.locationView.setText(event.getFacility() != null ? event.getFacility() : "No Facility");
+        binding.priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
+        Date startDate = event.getStartDate();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = dateFormat.format(startDate);
+        binding.startDateView.setText(formattedDate);
     }
 
 

@@ -142,6 +142,7 @@ public class Event {
     public void setEndDate(Date endDate) { this.endDate = endDate; }
     /**
      * Gets the price of the event.
+     *
      * @return the price of the event
      */
     public double getPrice() { return price; }

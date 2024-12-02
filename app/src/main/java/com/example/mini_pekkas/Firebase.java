@@ -1184,7 +1184,7 @@ public class Firebase {
                 .whereEqualTo("status", "waitlisted").get()
             .addOnSuccessListener(task -> {
                 int waitlist_size = task.size();
-
+                Log.d("firebase", " waitlist_size:" + waitlist_size);
                 Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
                 try {
                     sleep(0,100);  // 100 nano s delay to prevent race condition
@@ -1198,11 +1198,13 @@ public class Firebase {
                     Random random = new Random();
                     while (randomIntegers.size() < user_cap) { // Keep generating until we have 'numIntegers' unique integers
                         randomIntegers.add(random.nextInt(waitlist_size));
+                        Log.d("firebase", "adding random integer with usercap" + randomIntegers);
                     }
                 } else {
                     // If we have less users than the waitlist size, pick all users
                     for (int i = 0; i < waitlist_size; i++) {
                         randomIntegers.add(i);
+                        Log.d("firebase", "adding random integer without" + randomIntegers);
                     }
                 }
                 // Now we sample X users (Or all users if we're under capacity
@@ -1210,8 +1212,9 @@ public class Firebase {
                 Iterator<Integer> iterator = randomIntegers.iterator();
                 for (int i = 0; i < waitlist_size && (i < user_cap || user_cap == -1); i++) {
                     selectedUsersID.add(Objects.requireNonNull(task.getDocuments().get(iterator.next()).get("userID")).toString());
+                    Log.d("firebase", "selected users: " + selectedUsersID);
                 }
-
+                Log.d("firebase", "starting enrolling and sending notifications");
                 // Now enroll everyone
                 for (String userID : selectedUsersID) {
                     // Send a success notification to each user
