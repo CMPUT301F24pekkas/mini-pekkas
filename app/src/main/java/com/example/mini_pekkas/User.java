@@ -10,7 +10,6 @@ import java.util.Map;
 public class User {
     @PropertyName("userID")
     private String userID;
-
     private String name;
     private String lastname;
     private String email;
