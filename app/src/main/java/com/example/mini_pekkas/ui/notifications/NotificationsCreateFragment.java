@@ -27,11 +27,11 @@ import java.util.List;
 public class NotificationsCreateFragment extends Fragment {
 
     private FragmentCreateNotificationBinding binding;
-    private Spinner spinnerEvents;
+    private Spinner spinnerEvents, spinnerStatus;
     private EditText etTitle, etMessage;
     private Button btnCreateNotification;
     private ArrayList<Event> eventList;
-    private ArrayAdapter<String> eventAdapter;
+    private ArrayAdapter<String> eventAdapter, statusAdapter;
     private Firebase firebaseHelper;
 
     @Override
@@ -41,6 +41,7 @@ public class NotificationsCreateFragment extends Fragment {
 
         // Initialize UI components
         spinnerEvents = root.findViewById(R.id.spinnerPriority);
+        spinnerStatus = root.findViewById(R.id.spinnerPriority2);
         etTitle = root.findViewById(R.id.etNotificationTitle);
         etMessage = root.findViewById(R.id.etNotificationMessage);
         btnCreateNotification = root.findViewById(R.id.btnSubmitNotification);
@@ -53,13 +54,17 @@ public class NotificationsCreateFragment extends Fragment {
         eventAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEvents.setAdapter(eventAdapter);
 
+        // Initialize status spinner
+        List<String> statuses = List.of("organized", "pending", "waitlisted", "enrolled", "cancelled");
+        statusAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, statuses);
+        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerStatus.setAdapter(statusAdapter);
+
         // Fetch events from Firebase
         fetchEvents();
 
         // Handle notification creation
         btnCreateNotification.setOnClickListener(view -> createNotification());
-
-
 
         return root;
     }
@@ -68,7 +73,7 @@ public class NotificationsCreateFragment extends Fragment {
      * Fetch events from Firebase and populate the spinner.
      */
     private void fetchEvents() {
-        firebaseHelper.searchAllEvents(events -> {     // TODO This retrieves every single event, even ones the user doesn't own - ryan
+        firebaseHelper.searchAllEvents(events -> { // Retrieves all events
             if (events.isEmpty()) {
                 Toast.makeText(getContext(), "No events available.", Toast.LENGTH_SHORT).show();
                 return;
@@ -89,17 +94,19 @@ public class NotificationsCreateFragment extends Fragment {
     }
 
     /**
-     * Create a notification for the selected event.
+     * Create a notification for the selected event and status.
      */
     private void createNotification() {
         String title = etTitle.getText().toString().trim();
         String description = etMessage.getText().toString().trim();
         String selectedEventName = (String) spinnerEvents.getSelectedItem();
+        String selectedStatus = (String) spinnerStatus.getSelectedItem();
 
-        if (title.isEmpty() || description.isEmpty() || selectedEventName == null) {
+        if (title.isEmpty() || description.isEmpty() || selectedEventName == null || selectedStatus == null) {
             Toast.makeText(getContext(), "Please fill in all fields.", Toast.LENGTH_SHORT).show();
             return;
         }
+
         Event selectedEvent = null;
         for (Event event : eventList) {
             if (event.getName().equals(selectedEventName)) {
@@ -112,7 +119,7 @@ public class NotificationsCreateFragment extends Fragment {
             Toast.makeText(getContext(), "Selected event not found.", Toast.LENGTH_SHORT).show();
             return;
         }
-        String status = "all";
+
         // Create a Notifications object
         Notifications notification = new Notifications(
                 title,
@@ -122,12 +129,12 @@ public class NotificationsCreateFragment extends Fragment {
                 selectedEvent.getName()
         );
 
-        // Push the notification to Firebase
-        firebaseHelper.sendEventNotificationByStatus(notification, selectedEvent, status, new Firebase.InitializationListener() {
-
+        // Push the notification to Firebase for users with the selected status
+        firebaseHelper.sendEventNotificationByStatus(notification, selectedEvent, selectedStatus, new Firebase.InitializationListener() {
             @Override
             public void onInitialized() {
-
+                Toast.makeText(getContext(), "Notification sent successfully!", Toast.LENGTH_SHORT).show();
+                clearFields();
             }
 
             @Override
@@ -136,11 +143,7 @@ public class NotificationsCreateFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to create notification: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
-
     }
-
-
 
     /**
      * Clear input fields after successful submission.
@@ -151,6 +154,7 @@ public class NotificationsCreateFragment extends Fragment {
         if (!eventList.isEmpty()) {
             spinnerEvents.setSelection(0);
         }
+        spinnerStatus.setSelection(0);
     }
 
     @Override

@@ -58,7 +58,7 @@
         android:id="@+id/tvPriorityLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Choose the event to make "
+        android:text="Choose the event to make the notif for "
         android:textSize="16sp"
         android:textColor="@android:color/black"
         android:layout_marginBottom="8dp" />
@@ -67,18 +67,33 @@
         android:id="@+id/spinnerPriority"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:drawable/btn_dropdown"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:background="@android:drawable/btn_dropdown" />
 
-    <!-- Submit Button -->
+    <TextView
+        android:id="@+id/tvPriorityLabel2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Choose who to send the notification to "
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+    <Spinner
+        android:id="@+id/spinnerPriority2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@android:drawable/btn_dropdown" />
+
     <Button
         android:id="@+id/btnSubmitNotification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
         android:layout_gravity="center"
-        android:text="Create Notification"
-        android:textColor="@android:color/white"
+        android:layout_marginTop="24dp"
         android:backgroundTint="@android:color/holo_blue_light"
-        android:layout_marginTop="24dp" />
+        android:padding="16dp"
+        android:text="Create Notification"
+        android:textColor="@android:color/white" />
 </LinearLayout>
