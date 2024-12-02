@@ -34,41 +34,44 @@
                 android:text="Event Name"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/EventSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Subtitle"
-                android:textSize="15sp"/>
+                android:textSize="15sp" />
+
             <TextView
                 android:id="@+id/EventDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingVertical="30dp"
                 android:text="This is a description."
-                android:textSize="16sp"
-                android:paddingVertical="30dp"/>
+                android:textSize="16sp" />
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="73dp"
                 android:orientation="horizontal"
-                android:paddingTop="16dp">
+                android:paddingTop="8dp">
 
                 <TextView
                     android:id="@+id/TimeUntilEvent"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:paddingEnd="10dp"
+                    android:paddingEnd="5dp"
                     android:text="Starts in n days"
-                    android:textSize="18sp"/>
+                    android:textSize="18sp" />
 
                 <Button
                     android:id="@+id/EditEvent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/rounded_button"
-                    android:text="Edit"/>
+                    android:text="Edit" />
             </LinearLayout>
         </LinearLayout>
 
