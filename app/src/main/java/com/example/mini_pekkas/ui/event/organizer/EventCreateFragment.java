@@ -65,6 +65,7 @@ public class EventCreateFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private Event createdEvent;
+
     /**
      * Called to initialize the fragment's view.
      * Sets up UI components for event creation, including image selection
@@ -271,8 +272,8 @@ public class EventCreateFragment extends Fragment {
         String eventLocation = binding.createEventLocationEditText.getText().toString().trim();
         String startDateString = binding.editStartDate.getText().toString().trim();
         String endDateString = binding.editEndDate.getText().toString().trim();
-        String startTime = binding.editStartTime.getText().toString().trim();
-        String endTime = binding.editEndTime.getText().toString().trim();
+        String startTimeString = binding.editStartTime.getText().toString().trim();
+        String endTimeString = binding.editEndTime.getText().toString().trim();
         String eventDescription = binding.editDescription.getText().toString().trim();
         String eventDetails = binding.editDetails.getText().toString().trim();
         boolean geolocationEnabled = binding.geoCheckBox.isChecked();
@@ -296,18 +297,19 @@ public class EventCreateFragment extends Fragment {
         }
 
         // Parse dates
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         Date startDate, endDate;
         try {
-            startDate = dateFormat.parse(startDateString);
-            endDate = dateFormat.parse(endDateString);
+            startDate = dateFormat.parse(startDateString + " " + startTimeString);
+            endDate = dateFormat.parse(endDateString + " " + endTimeString);
 
             if (startDate.after(endDate)) {
                 Toast.makeText(requireContext(), "Start date must be before or equal to the end date.", Toast.LENGTH_SHORT).show();
                 return null;
             }
         } catch (ParseException e) {
-            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd for the date and HH:mm for the time.(24 hour format)", Toast.LENGTH_SHORT).show();
             return null;
         }
 
