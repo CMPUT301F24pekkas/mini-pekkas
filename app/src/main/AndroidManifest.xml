@@ -44,6 +44,9 @@
         <service
             android:name="com.example.mini_pekkas.notification.NotificationForegroundService"
             android:foregroundServiceType="dataSync" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyB755ubKafQRKl2_WvanltazOEnd19cwh0" />
     </application>
 
 </manifest>
