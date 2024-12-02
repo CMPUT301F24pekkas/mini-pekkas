@@ -119,7 +119,7 @@ public class HomeFragment extends Fragment {
             EventTitleView.setText(event.getName());
             EventSubtitleView.setText("hosted by " + event.getEventHost().getName());
             EventDescriptionView.setText(event.getDescription());
-            TimeUntilEventView.setText("10 days until event");
+            TimeUntilEventView.setText("Starts on " + event.getStartDate().toString());
             //set tag for identification later
             eventView.setTag(event.getId());
 
