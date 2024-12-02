@@ -2,7 +2,9 @@ package com.example.mini_pekkas.ui.event.organizer;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -54,18 +56,14 @@ public class EventChooseUsersFragment extends Fragment {
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
 
         numEntrantsViewModel = new ViewModelProvider(requireActivity()).get(NumEntrantsViewModel.class);
+        firebaseHelper = new Firebase(requireContext());
 
-        if (event != null) {
-            updateEventDetailsUI(event);
-        }
         //observe event data
         organizerEventsListViewModel.getSelectedEvent().observe(getViewLifecycleOwner(), this::updateEventDetailsUI);
         //sets the button listeners
         SetButtonListeners();
         firebaseHelper = new Firebase(requireContext());
         //enroll people in event
-        ArrayList<Notifications> notifications = createDefaultNotifications();
-        firebaseHelper.startEnrollingEvent(event, notifications);
 
         binding.chosenPartView.setText(Integer.toString(numEntrantsViewModel.getNumber().getValue()));
         setEnrolledUsers((event.getId()));
@@ -137,18 +135,15 @@ public class EventChooseUsersFragment extends Fragment {
             builder.setView(choosePartBinding.getRoot());
             AlertDialog dialog = builder.create();
 
-            View fragmentView = getView();
-
-            choosePartBinding.cancelWaitButton.setOnClickListener(y -> {
+            choosePartBinding.cancelChooseButton.setOnClickListener(y -> {
                 dialog.dismiss();
             });
 
-            choosePartBinding.joinWaitButton.setOnClickListener(z -> {
-                if (fragmentView == null) {
-                    return;
-                }
-                NavController navController = Navigation.findNavController(fragmentView);
-                navController.navigate(R.id.action_event_details_to_choose_participants);
+            choosePartBinding.confirmChooseButton.setOnClickListener(z -> {
+                Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+                ArrayList<Notifications> notifications = createDefaultNotifications();
+                firebaseHelper.startEnrollingEvent(event, notifications);
+
                 dialog.dismiss();
             });
 
@@ -181,6 +176,21 @@ public class EventChooseUsersFragment extends Fragment {
             NavController navController = Navigation.findNavController(v);
             navController.navigate(R.id.action_choose_participants_to_cancelled_entrants);
         });
+
+    }
+
+    private ArrayList<Notifications> createDefaultNotifications(){
+        Timestamp serverTimestamp = Timestamp.now();
+        ArrayList<Notifications> notifications = new ArrayList<>();
+        Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
+        String eventTitle = event.getName();
+        String eventId = event.getId();
+
+        Notifications notification1 = new Notifications("Chosen", "you have been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
+        notifications.add(notification1);
+        Notifications notification2 = new Notifications("Not Chosen", "unfortunately you have not been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
+        notifications.add(notification2);
+        return notifications;
 
     }
 
@@ -218,20 +228,7 @@ public class EventChooseUsersFragment extends Fragment {
         };
         firebaseHelper.getEnrolledUsers(eventId, listener);
     }
-    private ArrayList<Notifications> createDefaultNotifications(){
-        Timestamp serverTimestamp = Timestamp.now();
-        ArrayList<Notifications> notifications = new ArrayList<>();
-        Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
-        String eventTitle = event.getName();
-        String eventId = event.getId();
 
-        Notifications notification1 = new Notifications("Chosen", "you have been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
-        notifications.add(notification1);
-        Notifications notification2 = new Notifications("Not Chosen", "unfortunately you have not been chosen to attend " + eventTitle, serverTimestamp, 0, eventId);
-        notifications.add(notification2);
-        return notifications;
-
-    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

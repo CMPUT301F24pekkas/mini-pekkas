@@ -31,7 +31,11 @@
         android:id="@+id/navigation_org_home"
         android:name="com.example.mini_pekkas.ui.home.OrganizerHomeFragment"
         android:label="Organizer Home"
-        tools:layout="@layout/fragment_organizer_home"/>
+        tools:layout="@layout/fragment_organizer_home">
+        <action
+            android:id="@+id/action_navigation_org_home_to_navigation_org_event_choose_participants"
+            app:destination="@id/navigation_org_event_choose_participants" />
+    </fragment>
         <action
             android:id="@+id/action_home_to_event_details"
             app:destination="@id/navigation_org_event_details" />

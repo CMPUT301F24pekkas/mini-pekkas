@@ -26,6 +26,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 
@@ -86,6 +89,11 @@ public class EventJoinFragment extends Fragment {
                 binding.organizerNameView.setText(event.getEventHost().getName());
                 binding.eventDescriptionView.setText(event.getDescription());
                 binding.locationView.setText(event.getFacility());
+                binding.priceView.setText(String.format(Locale.getDefault(), "$%.2f", event.getPrice()));
+                Date startDate = event.getStartDate();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String formattedDate = dateFormat.format(startDate);
+                binding.startDateView.setText(formattedDate);
             }
         });
 

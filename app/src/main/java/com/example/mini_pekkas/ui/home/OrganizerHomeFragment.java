@@ -22,6 +22,7 @@ import com.example.mini_pekkas.Event;
 
 import com.example.mini_pekkas.R;
 import com.example.mini_pekkas.databinding.FragmentOrganizerHomeBinding;
+import com.example.mini_pekkas.ui.event.organizer.EnrollmentStatusHelper;
 
 import java.util.ArrayList;
 
@@ -102,13 +103,20 @@ public class OrganizerHomeFragment extends Fragment {
             TextView TimeUntilEventView = NewMockEventCardView.findViewById(R.id.TimeUntilEvent);
 
             Button EditEvent = NewMockEventCardView.findViewById(R.id.EditEvent);
-            EditEvent.setOnClickListener(v->{
+            EditEvent.setOnClickListener(v -> {
                 NavController navController = NavHostFragment.findNavController(OrganizerHomeFragment.this);
-                navController.navigate(R.id.action_home_to_event_details);
                 assert event != null;
                 organizerEventsListViewModel.setSelectedEvent(event);
-                // Implement navigation to event editing fragment or activity if needed
+
+                boolean isEnrollmentStarted = EnrollmentStatusHelper.isEnrollmentStarted(requireContext(), event.getId());
+
+                if (isEnrollmentStarted) {
+                    navController.navigate(R.id.action_navigation_org_home_to_navigation_org_event_choose_participants);
+                } else {
+                    navController.navigate(R.id.action_home_to_event_details);
+                }
             });
+
 
 
             EventTitleView.setText(event.getName());
