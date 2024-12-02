@@ -3,7 +3,11 @@ package com.example.mini_pekkas.ui.event.user;
 import static com.example.mini_pekkas.QRCodeGenerator.generateQRCode;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +17,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -30,6 +35,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.example.mini_pekkas.ui.home.HomeEventsListViewModel;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -123,6 +129,9 @@ public class EventJoinFragment extends Fragment {
                             if (documentSnapshot.exists()) {
                                 Boolean isGeoEnabled = documentSnapshot.getBoolean("geo");
                                 if (isGeoEnabled != null && isGeoEnabled) {
+                                    // Get the users geo location in a GeoPoint
+                                    GeoPoint location = getUserLocation(getContext());
+
                                     FragmentEventJoinGeoBinding joinGeoBinding = FragmentEventJoinGeoBinding.inflate(LayoutInflater.from(getContext()));
                                     AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                                     builder.setView(joinGeoBinding.getRoot());
@@ -131,7 +140,7 @@ public class EventJoinFragment extends Fragment {
 
                                     Button joinGeoButton = joinGeoBinding.joinWaitButton;
                                     Button cancelGeoButton = joinGeoBinding.cancelWaitButton;
-                                    showJoinDialog(dialog, joinGeoButton, cancelGeoButton);
+                                    showJoinDialog(dialog, joinGeoButton, cancelGeoButton, location);
                                 } else {
                                     FragmentEventJoinWaitBinding joinWaitBinding = FragmentEventJoinWaitBinding.inflate(LayoutInflater.from(getContext()));
                                     AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -141,7 +150,7 @@ public class EventJoinFragment extends Fragment {
 
                                     Button joinWaitButton = joinWaitBinding.joinWaitButton;
                                     Button cancelWaitButton = joinWaitBinding.cancelWaitButton;
-                                    showJoinDialog(dialog, joinWaitButton, cancelWaitButton);
+                                    showJoinDialog(dialog, joinWaitButton, cancelWaitButton, null);
                                 }
                             } else {
                                 Toast.makeText(requireContext(), "Event not found in Firebase", Toast.LENGTH_SHORT).show();
@@ -196,8 +205,9 @@ public class EventJoinFragment extends Fragment {
      * @param dialog The AlertDialog with either a simple confirmation or with a geolocation confirmation if needed
      * @param joinButton The button to join the wait list
      * @param cancelButton The button to cancel joining the wait list
+     * @param location The geo location of the user if needed. Null if not used
      */
-    private void showJoinDialog(AlertDialog dialog, Button joinButton, Button cancelButton){
+    private void showJoinDialog(AlertDialog dialog, Button joinButton, Button cancelButton, GeoPoint location){
         joinButton.setOnClickListener(view -> {
             Event event = sharedEventViewModel.getEventDetails().getValue();
             if (event != null) {
@@ -205,7 +215,11 @@ public class EventJoinFragment extends Fragment {
                     @Override
                     public void onSuccess(Integer count) {
                         if (count < event.getMaxWaitlist()){
-                            firebaseHelper.waitlistEvent(event);
+                            if (location == null) {
+                                firebaseHelper.waitlistEvent(event);
+                            } else {
+                                firebaseHelper.waitlistEvent(event, location);
+                            }
                             homeEventsListViewModel.addEvent(event);
                             homeEventsListViewModel.setSelectedEvent(event);
                             NavController navController = NavHostFragment.findNavController(EventJoinFragment.this);
@@ -227,6 +241,35 @@ public class EventJoinFragment extends Fragment {
         cancelButton.setOnClickListener(view -> dialog.dismiss());
     }
 
+    /**
+     * Gets the device's current location.
+     * @param context
+     * @return GeoPoint representing the device's location
+     */
+    public GeoPoint getUserLocation(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null;
+        }
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location == null) {
+            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        }
+        if (location != null) {
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            return new GeoPoint(latitude, longitude);
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Called when the fragment's view is destroyed. Cleans up the binding to prevent memory leaks.
