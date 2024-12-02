@@ -274,7 +274,9 @@ public class EventCreateFragment extends Fragment {
         String startTime = binding.editStartTime.getText().toString().trim();
         String endTime = binding.editEndTime.getText().toString().trim();
         String eventDescription = binding.editDescription.getText().toString().trim();
-        String eventDetails = binding.editDetails.getText().toString().trim();
+        price = binding.editPrice.getText().toString().trim().isEmpty() ? 0.0f : Float.parseFloat(binding.editPrice.getText().toString().trim());
+        long priceLong = Math.round(price * 100);   // Convert to cents
+
         boolean geolocationEnabled = binding.geoCheckBox.isChecked();
 
         // Validate required inputs
@@ -323,6 +325,12 @@ public class EventCreateFragment extends Fragment {
             Toast.makeText(requireContext(), "Invalid max participant number.", Toast.LENGTH_SHORT).show();
             return null;
         }
+        // Check if price is non negative
+        if (price < 0) {
+            Toast.makeText(requireContext(), "Price must be non-negative.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
         int maxWaitlist = -1;
         if (binding.maxPartCheckBox.isChecked()) {
             try {
@@ -365,7 +373,7 @@ public class EventCreateFragment extends Fragment {
                 waitlist,
                 "QrCodePlaceholder", // Replace with actual QR code
                 geolocationEnabled,
-                eventDetails
+                null    // Placeholder for poster photo URL
         );
     }
 
@@ -380,7 +388,7 @@ public class EventCreateFragment extends Fragment {
         binding.editStartTime.getText().clear();
         binding.editEndTime.getText().clear();
         binding.editDescription.getText().clear();
-        binding.editDetails.getText().clear();
+        binding.editPrice.getText().clear();
         binding.editMaxPart.getText().clear();
         binding.editMaxWait.getText().clear();
         binding.maxPartCheckBox.setChecked(false);
