@@ -224,14 +224,6 @@
                     android:text="event description"
                     android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/eventDetailsView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="event details"
-                    android:textSize="14sp" />
-
             </LinearLayout>
         </ScrollView>
 

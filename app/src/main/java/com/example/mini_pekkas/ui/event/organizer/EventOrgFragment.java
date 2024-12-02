@@ -50,14 +50,12 @@ public class EventOrgFragment extends Fragment {
         final TextView organizerNameView = binding.organizerNameView;
         final TextView locationView = binding.locationView;
         final TextView eventDescriptionView = binding.eventDescriptionView;
-        final TextView eventDetailsView = binding.eventDetailsView;
 
         // Observes LiveData in the view model to update text views
         eventViewModel.getEventName().observe(getViewLifecycleOwner(), eventNameView::setText);
         eventViewModel.getOrganizerName().observe(getViewLifecycleOwner(), organizerNameView::setText);
         eventViewModel.getLocation().observe(getViewLifecycleOwner(), locationView::setText);
         eventViewModel.getEventDescription().observe(getViewLifecycleOwner(), eventDescriptionView::setText);
-        eventViewModel.getEventDetails().observe(getViewLifecycleOwner(), eventDetailsView::setText);
 
         // Binds the event image to the view model
         final ImageView eventImage = binding.eventImageView;

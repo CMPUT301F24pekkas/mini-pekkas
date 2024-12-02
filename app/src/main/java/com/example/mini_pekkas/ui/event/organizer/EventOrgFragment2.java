@@ -47,7 +47,6 @@ public class EventOrgFragment2 extends Fragment {
         final TextView organizerNameView = binding.organizerNameView;
         final TextView locationView = binding.locationView;
         final TextView eventDescriptionView = binding.eventDescriptionView;
-        final TextView eventDetailsView = binding.eventDetailsView;
         final TextView chosenPartView = binding.chosenPartView;
         final TextView canceledPartView = binding.canceledAmountView;
         final TextView enrolledPartView = binding.enrolledAmountView;
@@ -57,7 +56,6 @@ public class EventOrgFragment2 extends Fragment {
         eventViewModel.getOrganizerName().observe(getViewLifecycleOwner(), organizerNameView::setText);
         eventViewModel.getLocation().observe(getViewLifecycleOwner(), locationView::setText);
         eventViewModel.getEventDescription().observe(getViewLifecycleOwner(), eventDescriptionView::setText);
-        eventViewModel.getEventDetails().observe(getViewLifecycleOwner(), eventDetailsView::setText);
         eventViewModel.getChosenPart().observe(getViewLifecycleOwner(), chosenPartView::setText);
         eventViewModel.getCanceledPart().observe(getViewLifecycleOwner(), canceledPartView::setText);
         eventViewModel.getEnrolledPart().observe(getViewLifecycleOwner(), enrolledPartView::setText);
