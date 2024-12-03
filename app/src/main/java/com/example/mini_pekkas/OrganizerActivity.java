@@ -1,6 +1,7 @@
 package com.example.mini_pekkas;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -12,6 +13,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.mini_pekkas.databinding.OrganizerMainBinding;
 import com.example.mini_pekkas.ui.event.organizer.EventChooseUsersFragment;
+import com.example.mini_pekkas.ui.event.organizer.EventDetailsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 /**
  * OrganizerActivity is the main activity for organizers, setting up the navigation controller
@@ -57,8 +59,23 @@ public class OrganizerActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.organizer_main);
         // Check if the current destination is a EventChooseUsersFragment
-        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.organizer_main);
-        if (currentFragment instanceof EventChooseUsersFragment) {
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.organizer_main);
+        if (navHostFragment != null) {
+            // Get the current fragment from NavHostFragment
+            Fragment currentFragment = navHostFragment.getChildFragmentManager()
+                    .getPrimaryNavigationFragment();
+
+            if (currentFragment != null) {
+                Log.d("FragmentCheck", "Current fragment: " + currentFragment.getClass().getSimpleName());
+
+                if (currentFragment instanceof EventChooseUsersFragment ||
+                        currentFragment instanceof EventDetailsFragment) {
+                    return navController.popBackStack(R.id.navigation_org_home, false);
+                }
+                else{
+                    return navController.navigateUp();
+                }
+            }
             // Handle the "Up" navigation differently for this fragment
             navController.popBackStack(R.id.navigation_org_event_details, false); // Go back to eventDetails
             return true;
