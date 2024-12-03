@@ -89,6 +89,7 @@ public class UserInEventArrayAdapter extends ArrayAdapter<User> {
         Log.d("CancelEntrant", "list title: " + listTitle);
         //if it's the chosen entrants page make delete buttons appear
         if(listTitle.equals("Chosen Entrants")){
+            Log.d("List", "list title: " + listTitle);
             Firebase.DataRetrievalListener statuslistener = new Firebase.DataRetrievalListener() {
                 @Override
                 public void onRetrievalCompleted(String status) {
@@ -130,14 +131,15 @@ public class UserInEventArrayAdapter extends ArrayAdapter<User> {
             }
         }
         else{
+            Log.d("List", "list title: " + listTitle);
             Firebase.DataRetrievalListener statuslistener = new Firebase.DataRetrievalListener() {
                 @Override
                 public void onRetrievalCompleted(String status) {
-                    if(!Objects.equals(status, "enrolled")){
-                        statusView.setText("not enrolled");
+                    if(status.equals("enrolled")){
+                        statusView.setText("enrolled");
                     }
                     else{
-                        statusView.setText("enrolled");
+                        statusView.setText("not enrolled");
                     }
                 }
 
@@ -147,7 +149,7 @@ public class UserInEventArrayAdapter extends ArrayAdapter<User> {
                 }
 
             };
-            firebasehelper.getStatusInEvent(event, statuslistener);
+            firebasehelper.getUserStatusInEvent(user, event, statuslistener);
         }
         // Set profile image if available, otherwise use a default placeholder
         if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().isEmpty()) {

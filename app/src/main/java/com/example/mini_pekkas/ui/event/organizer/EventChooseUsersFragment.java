@@ -217,6 +217,19 @@ public class EventChooseUsersFragment extends Fragment {
             public void onSuccess(Integer count) {
                 Log.d("user", "Chosen count: " + count);
                 binding.chosenPartView.setText(Integer.toString(count));
+                firebaseHelper.getCountByStatus(eventId, "enrolled", new Firebase.ResultListener<Integer>() {
+                    @Override
+                    public void onSuccess(Integer count) {
+                        Log.d("user", "Chosen count: " + count);
+                        int pendingUsers = Integer.parseInt(binding.chosenPartView.getText().toString());
+                        binding.chosenPartView.setText(Integer.toString(pendingUsers + count));
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.d("user", "Error fetching chosen count: " + error);
+                    }
+                });
             }
 
             @Override
@@ -224,6 +237,7 @@ public class EventChooseUsersFragment extends Fragment {
                 Log.d("user", "Error fetching chosen count: " + error);
             }
         });
+
     }
     /**
      * this function sets the amount of users Cancelled

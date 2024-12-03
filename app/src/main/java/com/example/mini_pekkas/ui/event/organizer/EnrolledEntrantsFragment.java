@@ -59,19 +59,7 @@ public class EnrolledEntrantsFragment extends Fragment {
 
         firebaseHelper = new Firebase(requireContext());
 
-        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
-            @Override
-            public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                enrolledArrayAdapter.addUsers(users);
-            }
 
-            @Override
-            public void onError(Exception e) {
-                Log.d("user", "Error occurred: " + e.getMessage());
-            }
-
-        };
         assert currentEvent != null;
         loadEnrolledUsers(currentEvent.getId());
         return root;

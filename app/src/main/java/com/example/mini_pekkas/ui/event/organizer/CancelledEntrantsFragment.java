@@ -57,20 +57,6 @@ public class CancelledEntrantsFragment extends Fragment {
         enrolledListView.setAdapter(CancelledArrayAdapter);
 
         firebaseHelper = new Firebase(requireContext());
-
-        Firebase.UserListRetrievalListener listener = new Firebase.UserListRetrievalListener() {
-            @Override
-            public void onUserListRetrievalCompleted(ArrayList<User> users) {
-                Log.d("user", "User list retrieval completed" + " size:" + users.size());
-                CancelledArrayAdapter.addUsers(users);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.d("user", "Error occurred: " + e.getMessage());
-            }
-
-        };
         assert currentEvent != null;
         loadCancelledUsers(currentEvent.getId());
         return root;
