@@ -84,6 +84,9 @@
         <action
             android:id="@+id/action_edit_event_to_event_details"
             app:destination="@id/navigation_org_event_details" />
+        <action
+            android:id="@+id/action_edit_event_to_choose_participants"
+            app:destination="@id/navigation_org_event_choose_participants" />
     <fragment
         android:id="@+id/navigation_org_chosen_entrants"
         android:name="com.example.mini_pekkas.ui.event.organizer.ChosenEntrantsFragment"
