@@ -110,11 +110,9 @@ public class AdminUiTests {
     public void setup() throws InterruptedException {
         Context context = ApplicationProvider.getApplicationContext();
         CreateTestProfile(context);
-        CreateTestUser();   // Which also calls test event
+        CreateTestUser();
 
-        Thread.sleep(2000); // TODO bad idea but simple way to wait for adding events
-
-        // TODO add a poster to browse and delete
+        Thread.sleep(2000);
         onView(withId(R.id.adminBrowseEvents)).perform(click());
     }
 
@@ -145,7 +143,6 @@ public class AdminUiTests {
 
     /**
      * US 03.05.01 - Browse profiles
-     * TODO need to make a mock user for this
      */
     @Test
     public void testBrowseProfile() {
@@ -159,7 +156,7 @@ public class AdminUiTests {
      */
     @Test
     public void testBrowseImages(){
-
+        onView(withId(R.id.adminBrowseImages)).perform(click());
     }
 
     /**
@@ -173,21 +170,11 @@ public class AdminUiTests {
         onView(withId(R.id.adminBrowseEvents)).perform(click());
         onView(withId(R.id.admin_search_events)).perform(typeText("Test Event")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
         Thread.sleep(1000);
-
-        // Check if clicking no does not delete the event
-        onData(hasEntry(equalTo("name"), equalTo("Test Event")))
-                .inAdapterView(withId(R.id.adminEventListView)) // Replace with your list view ID
-                .atPosition(0) // Specify the position of the item if needed
-                .perform(longClick());
+        onView(withText("Test Event")).perform(longClick());
         Thread.sleep(1000);
         onView(withText("No")).perform(click());
         onView(withText("Test Event")).check(matches(isDisplayed()));
-
-        // Check if clicking yes does delete the event
-        onData(hasEntry(equalTo("name"), equalTo("Test Event")))
-                .inAdapterView(withId(R.id.adminEventListView)) // Replace with your list view ID
-                .atPosition(0) // Specify the position of the item if needed
-                .perform(longClick());
+        onView(withText("Test Event")).perform(longClick());
         Thread.sleep(1000);
         onView(withText("Yes")).perform(click());
         onView(withText("Test Event")).check(doesNotExist());
@@ -196,15 +183,29 @@ public class AdminUiTests {
      * US 03.02.01 As an administrator, I want to be able to remove profiles.
      */
     @Test
-    public void testDeleteProfiles(){
-
+    public void testDeleteProfiles() throws InterruptedException {
+        CreateTestUser();
+        Thread.sleep(2000);
+        onView(withId(R.id.adminBrowseProfiles)).perform(click());
+        onView(withId(R.id.admin_search_events)).perform(typeText("Android Unit Testing")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
+        Thread.sleep(1000);
+        onView(withText("Android Unit Testing")).perform(longClick());
+        Thread.sleep(1000);
+        onView(withText("No")).perform(click());
+        onView(withText("Android Unit Testing")).check(matches(isDisplayed()));
+        onView(withText("Android Unit Testing")).perform(longClick());
+        Thread.sleep(1000);
+        onView(withText("Yes")).perform(click());
+        onView(withText("Android Unit Testing")).check(doesNotExist());
     }
     /**
      * US 03.03.01 As an administrator, I want to be able to remove images.
      */
     @Test
-    public void testRemoveImages(){
-
+    public void testRemoveImages() throws InterruptedException {
+        onView(withId(R.id.adminBrowseProfiles)).perform(click());
+        Thread.sleep(10000);
+        onView(withId(R.id.deleteImage)).perform(click());
     }
 
     /**
@@ -212,7 +213,18 @@ public class AdminUiTests {
      */
     @Test
     public void testRemoveFacilities(){
-
+        onView(withId(R.id.adminBrowseFacilities)).perform(click());
+        onView(withId(R.id.admin_search_facilities)).perform(typeText("Test Facility")).perform(pressKey(KeyEvent.KEYCODE_ENTER));
+        onView(withText("Test Facility")).check(matches(isDisplayed()));
+    }
+    /**
+     * US 03.03.02 As an administrator, I want to be able to remove hashed QR code data
+     */
+    @Test
+    public void testRemoveHash() throws InterruptedException {
+        onView(withId(R.id.adminBrowseQrCodes)).perform(click());
+        Thread.sleep(7000);
+        onView(withId(R.id.deleteImage)).perform(click());
     }
     /**
      * Delete all test documents after the test, even if any tests fail
