@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -125,7 +126,14 @@ public class EventCreateFragment extends Fragment {
             // Update live data
             organizerEventsListViewModel.addEvent(createdEvent);
         });
-
+        firebaseHelper.fetchUserDocument(new Firebase.InitializationListener() {
+            @Override
+            public void onInitialized() {
+                if (firebaseHelper.getThisUser() != null) {
+                    binding.createEventLocationEditText.setText(firebaseHelper.getThisUser().getFacility());
+                }
+            }
+        });
         Button cancelButton = binding.cancelEventButton;
         cancelButton.setOnClickListener(v -> ClearInput());
 
@@ -269,7 +277,7 @@ public class EventCreateFragment extends Fragment {
 
         // Get input values
         String eventTitle = binding.createEventEditText.getText().toString().trim();
-        String eventLocation = binding.createEventLocationEditText.getText().toString().trim();
+        String facility = binding.createEventLocationEditText.getText().toString().trim();
         String startDateString = binding.editStartDate.getText().toString().trim();
         String endDateString = binding.editEndDate.getText().toString().trim();
         String startTimeString = binding.editStartTime.getText().toString().trim();
@@ -290,7 +298,7 @@ public class EventCreateFragment extends Fragment {
             Toast.makeText(requireContext(), "Start and end dates are required.", Toast.LENGTH_SHORT).show();
             return null;
         }
-        if (eventLocation.isEmpty()) {
+        if (facility.isEmpty()) {
             Toast.makeText(requireContext(), "Event location is required.", Toast.LENGTH_SHORT).show();
             return null;
         }
@@ -308,7 +316,7 @@ public class EventCreateFragment extends Fragment {
                 return null;
             }
         } catch (ParseException e) {
-            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd for the date and HH:mm for the time.(24 hour format)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Invalid date format use yyyy-MM-dd for the date and HH:mm for the time (24 hour format)", Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -347,9 +355,8 @@ public class EventCreateFragment extends Fragment {
             Toast.makeText(requireContext(), "Host user data is missing. Please try again.", Toast.LENGTH_SHORT).show();
             return null;
         }
-
-        String facility = host.getFacility();
-
+        //make waitlist num final
+        int maxWaitlistNum = maxWaitlist;
         return new Event(
                 event_id,
                 eventTitle,
@@ -361,7 +368,7 @@ public class EventCreateFragment extends Fragment {
                 facility,
                 latitude,
                 longitude,
-                maxWaitlist,
+                maxWaitlistNum,
                 maxCapacity,
                 waitlist,
                 "QrCodePlaceholder", // Replace with actual QR code

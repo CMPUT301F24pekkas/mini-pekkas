@@ -88,6 +88,10 @@ public class EventAcceptFragment extends Fragment {
         Button acceptButton = binding.acceptButton;
         Button declineButton = binding.declineButton;
         acceptButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Called when the accept button is clicked.
+             * @param v
+             */
             @Override
             public void onClick(View v) {
                 ArrayList<Notifications> notifications = new ArrayList<>();
@@ -124,6 +128,10 @@ public class EventAcceptFragment extends Fragment {
 
 
         declineButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * Called when the decline button is clicked.
+             * @param v
+             */
             @Override
             public void onClick(View v) {
                 FragmentEventLeaveWaitBinding joinWaitBinding = FragmentEventLeaveWaitBinding.inflate(LayoutInflater.from(getContext()));
@@ -183,7 +191,10 @@ public class EventAcceptFragment extends Fragment {
         return root;
     }
 
-
+    /**
+     * Displays the event details in the UI.
+     * @param event Event object containing event details
+     */
     private void displayEventDetails(Event event) {
         if (event == null) {
             Toast.makeText(requireContext(), "Event details are not available", Toast.LENGTH_SHORT).show();

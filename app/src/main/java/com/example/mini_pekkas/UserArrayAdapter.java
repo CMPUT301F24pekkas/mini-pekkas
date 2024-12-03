@@ -99,13 +99,4 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         users.remove(position);
         notifyDataSetChanged();
     }
-    public void addUsers(ArrayList<User> users) {
-        this.addAll(users);
-        notifyDataSetChanged();
-    }
-
-    public void clearUsers() {
-        this.clear(); // Clear the adapter's data
-        notifyDataSetChanged();
-    }
 }

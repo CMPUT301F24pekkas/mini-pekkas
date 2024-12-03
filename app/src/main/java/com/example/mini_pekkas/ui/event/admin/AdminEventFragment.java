@@ -21,7 +21,7 @@ import com.example.mini_pekkas.ui.event.user.EventViewModel;
  * Fragment that displays details of an event in the Admin interface.
  * This fragment binds data from the EventViewModel to the UI elements.
  * It also handles displaying a QR code.
- * TODO need to be completed
+ *
  */
 public class AdminEventFragment extends Fragment {
     private FragmentEventBinding binding;

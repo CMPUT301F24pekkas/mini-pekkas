@@ -124,6 +124,10 @@ public class EventFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Fetches the status of the event and updates the UI accordingly.
+     * @throws InterruptedException if the fetch fails
+     */
     private void fetchEventStatus() throws InterruptedException {
         Thread.sleep(500);
         firebaseHelper.getStatusInEvent(event, new Firebase.DataRetrievalListener() {
@@ -139,7 +143,10 @@ public class EventFragment extends Fragment {
         });
     }
 
-
+    /**
+     * Displays the details of the event in the UI.
+     * @param event the event to display
+     */
     private void displayEventDetails(Event event) {
         if (event == null) {
             Toast.makeText(requireContext(), "Event details are not available", Toast.LENGTH_SHORT).show();

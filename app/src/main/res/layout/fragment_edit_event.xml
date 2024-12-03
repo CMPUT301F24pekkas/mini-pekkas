@@ -51,8 +51,11 @@
             android:layout_marginBottom="8dp"
             android:background="@drawable/rounded_edittext"
             android:ems="10"
-            android:hint="Location"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:inputType="text"
+            android:textColor="@color/grey"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/createEventEditText" />

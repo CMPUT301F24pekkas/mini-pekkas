@@ -99,7 +99,7 @@ public class EventChooseUsersFragment extends Fragment {
         binding.eventNameView.setText(event.getName());
         binding.organizerNameView.setText(event.getEventHost().getName());
         if (event.isGeo()) {
-            binding.locationView.setText("Location Placeholder");
+            binding.locationView.setText(event.getFacility());
         } else {
             binding.locationView.setText("No Location");
         }

@@ -1229,11 +1229,6 @@ public class Firebase {
                 int waitlist_size = task.size();
                 Log.d("firebase", " waitlist_size:" + waitlist_size);
                 Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
-                try {
-                    sleep(0,100);  // 100 nano s delay to prevent race condition
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
 
@@ -1857,12 +1852,21 @@ public class Firebase {
             });
     }
 
-    // Interface to handle async result
+    /**
+     * Generic interface for handling results
+     * @param <T>
+     */
     public interface ResultListener<T> {
         void onSuccess(T result);
         void onError(String errorMessage);
     }
 
+    /**
+     * Gets the count of users in an event
+     * @param eventId the id of the event
+     * @param status the status of the user
+     * @param listener the listener that is called when the search is complete. Returns an integer
+     */
     public void getCountByStatus(String eventId, String status, ResultListener<Integer> listener) {
         Query query = userEventsCollection.whereEqualTo("eventID", eventId);
         if (!status.equals("all")) {
