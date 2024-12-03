@@ -316,7 +316,7 @@ public class EventCreateFragment extends Fragment {
                 return null;
             }
         } catch (ParseException e) {
-            Toast.makeText(requireContext(), "Invalid date format. Please use yyyy-MM-dd for the date and HH:mm for the time.(24 hour format)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Invalid date format use yyyy-MM-dd for the date and HH:mm for the time (24 hour format)", Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -375,11 +375,6 @@ public class EventCreateFragment extends Fragment {
                 geolocationEnabled,
                 null
         );
-
-
-
-
-
     }
 
     /**

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -94,6 +95,10 @@ public class EventEditFragment extends Fragment {
                 Event UpdatedEvent = null;
                 try {
                     UpdatedEvent = UpdateEvent(event);
+                    if (UpdatedEvent == null) {
+                        // Validation failed; return without proceeding
+                        return;
+                    }
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
@@ -139,18 +144,46 @@ public class EventEditFragment extends Fragment {
      * @param event Event to update
      */
     private Event UpdateEvent(Event event) throws ParseException {
+        String eventTitle = binding.createEventEditText.getText().toString().trim();
+        String startDateString = binding.editStartDate.getText().toString().trim();
+        String endDateString = binding.editEndDate.getText().toString().trim();
+        String startTimeString = binding.editStartTime.getText().toString().trim();
+        String endTimeString = binding.editEndTime.getText().toString().trim();
+        String eventDescription = binding.editDescription.getText().toString().trim();
+
+        // Validate required inputs
+        if (eventTitle.isEmpty()) {
+            Toast.makeText(requireContext(), "Event title is required.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        if (eventDescription.isEmpty()) {
+            Toast.makeText(requireContext(), "Event description is required.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        if (startDateString.isEmpty() || endDateString.isEmpty()) {
+            Toast.makeText(requireContext(), "Start and end dates are required.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+        Date startDate, endDate;
+        try {
+            startDate = dateFormat.parse(startDateString + " " + startTimeString);
+            endDate = dateFormat.parse(endDateString + " " + endTimeString);
 
-        event.setName(binding.createEventEditText.getText().toString());
-        Date startDate = dateFormat.parse(binding.editStartDate.getText().toString() + binding.editStartTime.getText().toString());
-        Date endDate = dateFormat.parse(binding.editEndDate.getText().toString() + binding.editEndTime.getText().toString());
+            if (startDate.after(endDate)) {
+                Toast.makeText(requireContext(), "Start date must be before or equal to the end date.", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        } catch (ParseException e) {
+            Toast.makeText(requireContext(), "Invalid date format Please use yyyy-MM-dd (date) and HH:mm (time).(for 24 hour format)", Toast.LENGTH_SHORT).show();
+            return null;
+        }
 
+        event.setName(eventTitle);
         event.setStartDate(startDate);
         event.setEndDate(endDate);
-
-
-        event.setDescription(binding.editDescription.getText().toString());
-
+        event.setDescription(eventDescription);
         boolean checked = binding.geoCheckBox.isChecked();
         event.setGeo(checked);
         //update db

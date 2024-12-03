@@ -1229,11 +1229,6 @@ public class Firebase {
                 int waitlist_size = task.size();
                 Log.d("firebase", " waitlist_size:" + waitlist_size);
                 Set<Integer> randomIntegers = new HashSet<>();  // Store unique random integers
-                try {
-                    sleep(0,100);  // 100 nano s delay to prevent race condition
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
                 // If we have more users than the waitlist size, randomly pick x users to enroll
 

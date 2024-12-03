@@ -66,6 +66,7 @@ public class EventDetailsFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
     private Firebase firebaseHelper;
+    private boolean isFragmentActive = false;
 
     /**
      * Inflates the layout, binds the views, and sets up the event details in the fragment.
@@ -88,6 +89,9 @@ public class EventDetailsFragment extends Fragment {
         // Set elements in fragment to selected event
         Event event = organizerEventsListViewModel.getSelectedEvent().getValue();
         if (event != null) {
+            if (isFragmentActive && binding != null) {
+                binding.eventDescriptionView.setText(event.getDescription());
+            }
             updateEventDetailsUI(event);
         }
         //observe event data if edited later
@@ -125,7 +129,7 @@ public class EventDetailsFragment extends Fragment {
         // Make sure currentEvent is not null before calling Firebase
         firebaseHelper.getWaitlistedUsers(event.getId(), listener);
 
-
+        binding.locationView.setText(event.getFacility());
         return root;
     }
 
@@ -253,7 +257,7 @@ public class EventDetailsFragment extends Fragment {
         binding.eventNameView.setText(event.getName());
         binding.organizerNameView.setText(event.getEventHost().getName());
         if (event.isGeo()) {
-            binding.locationView.setText("Location Placeholder");
+            binding.locationView.setText(event.getFacility());
         } else {
             binding.locationView.setText("No Location");
         }
@@ -289,5 +293,17 @@ public class EventDetailsFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        isFragmentActive = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isFragmentActive = false;
     }
 }
