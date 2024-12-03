@@ -105,7 +105,14 @@ public class EventEditFragment extends Fragment {
                 //update viewmodel with new updated event
                 organizerEventsListViewModel.setSelectedEvent(UpdatedEvent);
                 NavController navController = NavHostFragment.findNavController(EventEditFragment.this);
-                navController.navigate(R.id.navigation_org_event_details);
+                boolean isEnrollmentStarted = EnrollmentStatusHelper.isEnrollmentStarted(requireContext(), UpdatedEvent.getId());
+
+                if (isEnrollmentStarted) {
+                    navController.navigate(R.id.action_edit_event_to_choose_participants);
+                } else {
+                    navController.navigate(R.id.action_edit_event_to_event_details);
+                }
+
 
             }
         });
