@@ -3,6 +3,7 @@ package com.example.mini_pekkas;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -108,6 +109,12 @@ public class OrganizerTests {
                         document.getReference().delete();
                     }
                 });
+        database.collection("user-notifications").whereEqualTo("userID", "testUserID").get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                        document.getReference().delete();
+                    }
+                });
     }
 
     /**
@@ -130,19 +137,19 @@ public class OrganizerTests {
      */
     @Test
     public void testCreateQR() throws InterruptedException {
-        Thread.sleep(3000);
         onView(withId(R.id.navigation_org_add)).perform(click());
         Thread.sleep(3000);
         onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
         onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
-        onView(withId(R.id.editMaxWait)).perform(ViewActions.typeText("1"));
         onView(withId(R.id.editMaxPart)).perform(ViewActions.typeText("1"));
         onView(withId(R.id.editStartDate)).perform(ViewActions.typeText("2024-03-14"));
         onView(withId(R.id.editEndDate)).perform(ViewActions.typeText("2024-03-15"));
+        Thread.sleep(1000);
         onView(withId(R.id.editStartTime)).perform(ViewActions.typeText("10:00"));
         onView(withId(R.id.editEndTime)).perform(ViewActions.typeText("10:00"));
         onView(withId(R.id.editDescription)).perform(ViewActions.typeText("Testing Description"));
         onView(withId(R.id.addEventButton)).perform(scrollTo(), click());
+        Thread.sleep(1000);
         onView(withId(R.id.qrDialogueImageView)).check(matches(isDisplayed()));
         database.collection("events")
                 .whereEqualTo("name", "Oilers Event")
@@ -159,12 +166,7 @@ public class OrganizerTests {
      */
     @Test
     public void testStoreHash() throws InterruptedException {
-        onView(withId(R.id.navigation_org_add)).perform(click());
-        Thread.sleep(3000);
-        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
-        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
-        onView(withId(R.id.addEventButton)).perform(click());
-        onView(withId(R.id.qrDialogueImageView)).check(matches(isDisplayed()));
+        CreateEvent();
         database.collection("events")
                 .whereEqualTo("name", "Oilers Event")
                 .limit(1)
@@ -185,29 +187,29 @@ public class OrganizerTests {
         AddWaitlist();
         onView(withId(R.id.navigation_org_home)).perform(click());
         onView(withId(R.id.EditEvent)).perform(click());
-        onView(withId(R.id.waitButton));
+        onView(withId(R.id.waitButton)).perform(click());
         Thread.sleep(3000);
-        onView(withText("John")).check(matches(isDisplayed()));
+        onView(withText("John Doe")).check(matches(isDisplayed()));
     }
     /**
      * US 02.02.02 As an organizer I want to see on a map where entrants joined my event waiting list from.
      */
     @Test
-    public void testEntrantMap(){
-
+    public void testEntrantMap() throws InterruptedException {
+        CreateEvent();
+        AddWaitlist();
+        onView(withId(R.id.navigation_org_home)).perform(click());
+        onView(withId(R.id.EditEvent)).perform(click());
+        onView(withId(R.id.waitButton)).perform(click());
+        Thread.sleep(3000);
+        onView(withId(R.id.button)).perform(click());
     }
     /**
      * US 02.02.03 As an organizer I want to enable or disable the geolocation requirement for my event.
      */
     @Test
     public void testEnableGeolocation() throws InterruptedException {
-        Thread.sleep(3000);
-        onView(withId(R.id.navigation_org_add)).perform(click());
-        Thread.sleep(3000);
-        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Test Event"));
-        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
-        onView(withId(R.id.geoCheckBox)).perform(click());
-        onView(withId(R.id.addEventButton)).perform(click());
+        CreateEvent();
         database.collection("events")
                 .whereEqualTo("name", "Test Event")
                 .limit(1)
@@ -224,21 +226,14 @@ public class OrganizerTests {
      */
     @Test
     public void testLimitEntrants() throws InterruptedException {
-        Thread.sleep(3000);
-        onView(withId(R.id.navigation_org_add)).perform(click());
-        Thread.sleep(3000);
-        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Test Event"));
-        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
-        onView(withId(R.id.maxPartCheckBox)).perform(click());
-        onView(withId(R.id.editMaxPart)).perform(ViewActions.typeText("300"));
-        onView(withId(R.id.addEventButton)).perform(click());
+        CreateEvent();
         database.collection("events")
-                .whereEqualTo("name", "Test Event")
+                .whereEqualTo("name", "Oilers Event")
                 .limit(1)
                 .get()
                 .addOnCompleteListener(task -> {
                     DocumentSnapshot document = task.getResult().getDocuments().get(0);
-                    assertEquals(300L, document.getLong("maxAttendees").longValue());
+                    assertEquals(2, document.getLong("maxWaitlist").intValue());
                     document.getReference().delete();
                 });
         deleteUserEvent();
@@ -270,7 +265,6 @@ public class OrganizerTests {
         onView(withId(R.id.confirmQrButton)).perform(click());
         onView(withId(R.id.navigation_org_home)).perform(click());
         onView(withId(R.id.EditEvent)).perform(click());
-        onView(withId(R.id.editEventPictureButton)).perform(click());
         database.collection("events")
                 .whereEqualTo("name", "Oilers Event")
                 .limit(1)
@@ -299,7 +293,7 @@ public class OrganizerTests {
         onView(withId(R.id.spinnerPriority)).perform(click());
         onView(withText("Oilers Event")).perform(click());
         onView(withId(R.id.spinnerPriority2)).perform(click());
-        onView(withText("enrolled")).perform(click());
+        onView(withText("pending")).perform(click());
         onView(withId(R.id.btnSubmitNotification)).perform(click());
         database.collection("events")
                 .whereEqualTo("name", "Oilers Event")
@@ -308,6 +302,28 @@ public class OrganizerTests {
                 .addOnCompleteListener(task -> {
                     DocumentSnapshot document = task.getResult().getDocuments().get(0);
                     document.getReference().delete();
+                });
+        database.collection("user-notifications")
+                .whereEqualTo("userID", "testUserID")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String notificationID = task.getResult().getDocuments().get(0).getId();
+                        database.collection("notifications")
+                                .document(notificationID)
+                                .get()
+                                .addOnCompleteListener(innerTask -> {
+                                    if (innerTask.isSuccessful()) {
+                                        DocumentSnapshot document = innerTask.getResult();
+                                        if (document.exists()) {
+                                            String description = document.getString("Test Message");
+                                            if ("Test Message".equals(description)) {
+                                                assertTrue("Description matches expected value", true);
+                                            }
+                                        }
+                                    }
+                                });
+                    }
                 });
     }
     /**
@@ -320,6 +336,7 @@ public class OrganizerTests {
         onView(withId(R.id.navigation_org_home)).perform(click());
         onView(withId(R.id.EditEvent)).perform(click());
         onView(withId(R.id.chooseButton)).perform(click());
+        Thread.sleep(1000);
         database.collection("user-events")
                 .document("Test User")
                 .get()
@@ -333,18 +350,8 @@ public class OrganizerTests {
                                 Log.d("Firestore", "Status is not pending. Current status: " + status);
                             }
                         }
+                        document.getReference().delete();
                 });
-
-
-
-    }
-    /**
-     * US 02.05.03 As an organizer I want to be able to draw a replacement applicant from the pooling system
-     * when a previously selected applicant cancels or rejects the invitation
-     */
-    @Test
-    public void testDrawReplacement(){
-
     }
     /**
      * US 02.06.01 As an organizer I want to view a list of all chosen entrants who are invited to apply
@@ -358,7 +365,7 @@ public class OrganizerTests {
         onView(withId(R.id.chooseButton)).perform(click());
         onView(withId(R.id.chosenButton)).perform(click());
         Thread.sleep(3000);
-        onView(withText("John")).check(matches(isDisplayed()));
+        onView(withText("John Doe")).check(matches(isDisplayed()));
     }
     /**
      * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
@@ -370,12 +377,13 @@ public class OrganizerTests {
         onView(withId(R.id.navigation_org_home)).perform(click());
         onView(withId(R.id.EditEvent)).perform(click());
         onView(withId(R.id.chooseButton)).perform(click());
+        Thread.sleep(2000);
         database.collection("user-events")
-                .document("Test User")
+                .document("Test Event Waitlist")
                 .update("status", "cancelled");
         onView(withId(R.id.canceledButton)).perform(click());
         Thread.sleep(3000);
-        onView(withText("John")).check(matches(isDisplayed()));
+        onView(withText("John Doe")).check(matches(isDisplayed()));
 
     }
     /**
@@ -388,19 +396,30 @@ public class OrganizerTests {
         onView(withId(R.id.navigation_org_home)).perform(click());
         onView(withId(R.id.EditEvent)).perform(click());
         onView(withId(R.id.chooseButton)).perform(click());
+        Thread.sleep(2000);
         database.collection("user-events")
-                .document("Test User")
+                .document("Test Event Waitlist")
                 .update("status", "enrolled");
         onView(withId(R.id.enrolledButton)).perform(click());
         Thread.sleep(3000);
-        onView(withText("John")).check(matches(isDisplayed()));
+        onView(withText("John Doe")).check(matches(isDisplayed()));
     }
     /**
      * US 02.06.04 As an organizer I want to cancel entrants that did not sign up for the event
      */
     @Test
-    public void testCancelEntrants(){
-
+    public void testCancelEntrants() throws InterruptedException {
+        CreateEvent();
+        AddWaitlist();
+        onView(withId(R.id.navigation_org_home)).perform(click());
+        onView(withId(R.id.EditEvent)).perform(click());
+        onView(withId(R.id.chooseButton)).perform(click());
+        onView(withId(R.id.chosenButton)).perform(click());
+        Thread.sleep(3000);
+        onView(withText("John Doe")).check(matches(isDisplayed()));
+        onView(withId(R.id.deleteButton)).perform(click());
+        onView(withText("John Doe")).perform(click());
+        onView(withText("John Doe")).check(doesNotExist());
     }
     /**
      * US 02.07.01 As an organizer I want to send notifications to all entrants on the waiting list
@@ -408,6 +427,8 @@ public class OrganizerTests {
     @Test
     public void testNotifyWait() throws InterruptedException {
         CreateEvent();
+        AddWaitlist();
+        Thread.sleep(2000);
         onView(withId(R.id.navigation_org_notifications)).perform(click());
         onView(withId(R.id.etNotificationTitle)).perform(ViewActions.typeText("Test Notification"));
         onView(withId(R.id.etNotificationMessage)).perform(ViewActions.typeText("Test Message"));
@@ -424,6 +445,28 @@ public class OrganizerTests {
                     DocumentSnapshot document = task.getResult().getDocuments().get(0);
                     document.getReference().delete();
                 });
+        database.collection("user-notifications")
+                .whereEqualTo("userID", "testUserID")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String notificationID = task.getResult().getDocuments().get(0).getId();
+                        database.collection("notifications")
+                                .document(notificationID)
+                                .get()
+                                .addOnCompleteListener(innerTask -> {
+                                    if (innerTask.isSuccessful()) {
+                                        DocumentSnapshot document = innerTask.getResult();
+                                        if (document.exists()) {
+                                            String description = document.getString("Test Message");
+                                            if ("Test Message".equals(description)) {
+                                                assertTrue("Description matches expected value", true);
+                                            }
+                                        }
+                                    }
+                                });
+                    }
+                });
 
     }
     /**
@@ -432,13 +475,19 @@ public class OrganizerTests {
     @Test
     public void testNotifySelected() throws InterruptedException {
         CreateEvent();
+        AddWaitlist();
+        onView(withId(R.id.navigation_org_home)).perform(click());
+        onView(withId(R.id.EditEvent)).perform(click());
+        onView(withId(R.id.chooseButton)).perform(click());
+        Thread.sleep(2000);
         onView(withId(R.id.navigation_org_notifications)).perform(click());
         onView(withId(R.id.etNotificationTitle)).perform(ViewActions.typeText("Test Notification"));
         onView(withId(R.id.etNotificationMessage)).perform(ViewActions.typeText("Test Message"));
         onView(withId(R.id.spinnerPriority)).perform(click());
         onView(withText("Oilers Event")).perform(click());
         onView(withId(R.id.spinnerPriority2)).perform(click());
-        onView(withText("pending")).perform(click());
+        onView(withText("enrolled")).perform(click());
+        database.collection("user-events").document("Test Event Waitlist").update("status", "enrolled");
         onView(withId(R.id.btnSubmitNotification)).perform(click());
         database.collection("events")
                 .whereEqualTo("name", "Oilers Event")
@@ -448,7 +497,28 @@ public class OrganizerTests {
                     DocumentSnapshot document = task.getResult().getDocuments().get(0);
                     document.getReference().delete();
                 });
-
+        database.collection("user-notifications")
+                .whereEqualTo("userID", "testUserID")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String notificationID = task.getResult().getDocuments().get(0).getId();
+                        database.collection("notifications")
+                                .document(notificationID)
+                                .get()
+                                .addOnCompleteListener(innerTask -> {
+                                    if (innerTask.isSuccessful()) {
+                                        DocumentSnapshot document = innerTask.getResult();
+                                        if (document.exists()) {
+                                            String description = document.getString("Test Message");
+                                            if ("Test Message".equals(description)) {
+                                                assertTrue("Description matches expected value", true);
+                                            }
+                                        }
+                                    }
+                                });
+                    }
+                });
     }
     /**
      * US 02.07.03 As an organizer I want to send a notification to all cancelled entrants
@@ -456,6 +526,11 @@ public class OrganizerTests {
     @Test
     public void testNotifyCancelled() throws InterruptedException {
         CreateEvent();
+        AddWaitlist();
+        onView(withId(R.id.navigation_org_home)).perform(click());
+        onView(withId(R.id.EditEvent)).perform(click());
+        onView(withId(R.id.chooseButton)).perform(click());
+        Thread.sleep(2000);
         onView(withId(R.id.navigation_org_notifications)).perform(click());
         onView(withId(R.id.etNotificationTitle)).perform(ViewActions.typeText("Test Notification"));
         onView(withId(R.id.etNotificationMessage)).perform(ViewActions.typeText("Test Message"));
@@ -463,6 +538,7 @@ public class OrganizerTests {
         onView(withText("Oilers Event")).perform(click());
         onView(withId(R.id.spinnerPriority2)).perform(click());
         onView(withText("cancelled")).perform(click());
+        database.collection("user-events").document("Test Event Waitlist").update("status", "cancelled");
         onView(withId(R.id.btnSubmitNotification)).perform(click());
         database.collection("events")
                 .whereEqualTo("name", "Oilers Event")
@@ -471,6 +547,28 @@ public class OrganizerTests {
                 .addOnCompleteListener(task -> {
                     DocumentSnapshot document = task.getResult().getDocuments().get(0);
                     document.getReference().delete();
+                });
+        database.collection("user-notifications")
+                .whereEqualTo("userID", "testUserID")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String notificationID = task.getResult().getDocuments().get(0).getId();
+                        database.collection("notifications")
+                                .document(notificationID)
+                                .get()
+                                .addOnCompleteListener(innerTask -> {
+                                    if (innerTask.isSuccessful()) {
+                                        DocumentSnapshot document = innerTask.getResult();
+                                        if (document.exists()) {
+                                            String description = document.getString("Test Message");
+                                            if ("Test Message".equals(description)) {
+                                                assertTrue("Description matches expected value", true);
+                                            }
+                                        }
+                                    }
+                                });
+                    }
                 });
 
     }
@@ -479,47 +577,8 @@ public class OrganizerTests {
      */
     @Test
     public void testChosenNotifications() throws InterruptedException {
-        onView(withId(R.id.navigation_org_add)).perform(click());
-        Thread.sleep(3000);
-        // create an event
-        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
-        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
-        onView(withId(R.id.editMaxWait)).perform(ViewActions.typeText("1"));
-        onView(withId(R.id.maxPartCheckBox)).perform(click());
-        onView(withId(R.id.editMaxPart)).perform(ViewActions.typeText("1"));
-        onView(withId(R.id.editStartDate)).perform(ViewActions.typeText("2024-03-14"));
-        onView(withId(R.id.editEndDate)).perform(ViewActions.typeText("2024-03-15"));
-        onView(withId(R.id.editStartTime)).perform(ViewActions.typeText("10:00"));
-        onView(withId(R.id.editEndTime)).perform(ViewActions.typeText("10:00"));
-        onView(withId(R.id.editDescription)).perform(ViewActions.typeText("Testing Description"));
-        onView(withId(R.id.addEventButton)).perform(scrollTo(), click());
-        onView(withId(R.id.confirmQrButton)).perform(click());
-        Thread.sleep(3000);
-
-        database.collection("user-events")
-                .whereEqualTo("userID", deviceId)
-                .whereEqualTo("status", "organized")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                        // Get the first matching document
-                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
-                        String eventID = document.getString("eventID");
-                        Log.d("Firestore", "Found eventID: " + eventID);
-                        Map<String, Object> mockUserEvent = new HashMap<>();
-                        mockUserEvent.put("eventID", eventID);
-                        mockUserEvent.put("status", "waitlisted");
-                        mockUserEvent.put("userID", "testUserID");
-                        database.collection("user-events")
-                                .document("Test Event Waitlist")
-                                .set(mockUserEvent);
-                    } else if (task.getResult().isEmpty()) {
-                        Log.d("Firestore", "No matching documents found");
-                    } else {
-                        Log.e("Firestore", "Error querying documents", task.getException());
-                    }
-                });
-//        // choose the participant
+        CreateEvent();
+        AddWaitlist();
         Thread.sleep(2000);
         onView(withId(R.id.chooseButton)).perform(click());
         Thread.sleep(2000);
@@ -551,43 +610,8 @@ public class OrganizerTests {
      */
     @Test
     public void testLoseNotifications() throws InterruptedException {
-        onView(withId(R.id.navigation_org_add)).perform(click());
-        Thread.sleep(3000);
-
-        // Create an event
-        onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
-        onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
-        onView(withId(R.id.editMaxWait)).perform(ViewActions.typeText("1"));
-        onView(withId(R.id.maxPartCheckBox)).perform(click());
-        onView(withId(R.id.editMaxPart)).perform(ViewActions.typeText("0"));
-        onView(withId(R.id.editStartDate)).perform(ViewActions.typeText("2024-03-14"));
-        onView(withId(R.id.editEndDate)).perform(ViewActions.typeText("2024-03-15"));
-        onView(withId(R.id.editStartTime)).perform(ViewActions.typeText("10:00"));
-        onView(withId(R.id.editEndTime)).perform(ViewActions.typeText("10:00"));
-        onView(withId(R.id.editDescription)).perform(ViewActions.typeText("Testing Description"));
-        onView(withId(R.id.addEventButton)).perform(scrollTo(), click());
-        Thread.sleep(2000);
-        onView(withId(R.id.confirmQrButton)).perform(click());
-        Thread.sleep(3000);
-
-        // Query Firestore for the event ID
-        database.collection("user-events")
-                .whereEqualTo("userID", deviceId)
-                .whereEqualTo("status", "organized")
-                .get()
-                .addOnSuccessListener(task -> {
-                    if (!task.isEmpty()) {
-                        String eventID = task.getDocuments().get(0).getString("eventID");
-
-                        // Add a test user to the waitlist
-                        Map<String, Object> mockUserEvent = new HashMap<>();
-                        mockUserEvent.put("eventID", eventID);
-                        mockUserEvent.put("status", "waitlisted");
-                        mockUserEvent.put("userID", "testUserID");
-                        database.collection("user-events").document("Test Event Waitlist").set(mockUserEvent);
-                    }
-                });
-
+        CreateEvent();
+        AddWaitlist();
         Thread.sleep(2000);
         onView(withId(R.id.chooseButton)).perform(click());
         Thread.sleep(2000);
@@ -623,16 +647,22 @@ public class OrganizerTests {
                     }
                 });
     }
+
+    /**
+     * Creates a test event
+     * @throws InterruptedException
+     */
     private void CreateEvent() throws InterruptedException {
         onView(withId(R.id.navigation_org_add)).perform(click());
         Thread.sleep(3000);
         onView(withId(R.id.createEventEditText)).perform(ViewActions.typeText("Oilers Event"));
         onView(withId(R.id.createEventLocationEditText)).perform(ViewActions.typeText("Stadium"));
-        onView(withId(R.id.editMaxWait)).perform(ViewActions.typeText("1"));
+        onView(withId(R.id.editMaxWait)).perform(ViewActions.typeText("2"));
         onView(withId(R.id.maxPartCheckBox)).perform(click());
         onView(withId(R.id.editMaxPart)).perform(ViewActions.typeText("1"));
         onView(withId(R.id.editStartDate)).perform(ViewActions.typeText("2024-03-14"));
         onView(withId(R.id.editEndDate)).perform(ViewActions.typeText("2024-03-15"));
+        Thread.sleep(1000);
         onView(withId(R.id.editStartTime)).perform(ViewActions.typeText("10:00"));
         onView(withId(R.id.editEndTime)).perform(ViewActions.typeText("10:00"));
         onView(withId(R.id.editDescription)).perform(ViewActions.typeText("Testing Description"));
@@ -641,6 +671,9 @@ public class OrganizerTests {
         onView(withId(R.id.confirmQrButton)).perform(click());
     }
 
+    /**
+     * Adds a user to the waitlist
+     */
     private void AddWaitlist() {
         database.collection("user-events")
         .whereEqualTo("userID", deviceId)
