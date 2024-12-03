@@ -41,10 +41,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 
@@ -98,7 +96,7 @@ public class UserTests {
         mockEventData.put("id", "Test Event");
         mockEventData.put("description", "Test Description");
         mockEventData.put("maxAttendees", 1);
-        mockEventData.put("maxWaitlist", 1);
+        mockEventData.put("maxWaitlist", 2);
         mockEventData.put("startDate", startDate);
         mockEventData.put("endDate", endDate);
         mockEventData.put("waitlist", new ArrayList<>());
@@ -114,13 +112,6 @@ public class UserTests {
         database.collection("events")
                 .document("Test Event")
                 .set(mockEventData);
-//        Map<String, Object> mockUserEvent = new HashMap<>();
-//        mockUserEvent.put("eventID", "Test Event Organizer");
-//        mockUserEvent.put("status", "organized");
-//        mockUserEvent.put("userID", "Test Organizer ID");
-//        database.collection("user-events")
-//                .document("Test Event Organizer")
-//                .set(mockUserEvent);
 
 
     }
@@ -350,8 +341,52 @@ public class UserTests {
      * US 01.05.01 As an entrant I want another chance to be chosen from the waiting list if a selected user declines an invitation to sign up
      */
     @Test
-    public void testChanceChosenAgain(){
-
+    public void testChanceChosenAgain() throws InterruptedException {
+        Map<String, Object> mockUser = new HashMap<>();
+        mockUser.put("eventID", "Test Event");
+        mockUser.put("status", "waitlisted");
+        mockUser.put("userID", "RedrawnUserID");
+        database.collection("user-events")
+                .document("Test Redrawn User")
+                .set(mockUser);
+        checkNotifs();
+        joinWaitList();
+        onView(withId(R.id.navigation_home)).perform(click());
+        Thread.sleep(2000);
+        database.collection("user-events")
+                .whereEqualTo("eventID", "Test Event")
+                .whereEqualTo("userID", deviceId)
+                .whereEqualTo("status", "waitlisted")
+                .get()
+                .addOnSuccessListener(task -> {
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        database.collection("user-events")
+                                .document(document.getId())
+                                .update("status", "pending");
+                    }
+                });
+        Thread.sleep(2000);
+        onView(withId(R.id.EditEvent)).perform(click());
+        onView(withId(R.id.declineButton)).perform(click());
+        Thread.sleep(2000);
+        database.collection("user-events")
+                .whereEqualTo("eventID", "Test Event")
+                .whereEqualTo("userID", "RedrawnUserID")
+                .whereEqualTo("status", "waitlisted")
+                .get()
+                .addOnSuccessListener(task -> {
+                    for (DocumentSnapshot document : task.getDocuments()) {
+                        String status = document.getString("status");
+                        if ("pending".equals(status)) {
+                            assertTrue("redraw user successful", true);
+                            database.collection("user-notifications")
+                                    .document(document.getId())
+                                    .delete();
+                        } else {
+                            fail("Failed to redraw");
+                        }
+                    }
+                });
     }
     /**
      * US 01.05.02 As an entrant I want to be able to accept the invitation to register/sign up when chosen to participate in an event
@@ -389,9 +424,7 @@ public class UserTests {
                             assertTrue("testUserID enrolled in event", true);
                             database.collection("user-notifications")
                                     .document(document.getId())
-                                    .delete()
-                                    .addOnSuccessListener(aVoid -> Log.d("Firestore", "Document deleted: " + document.getId()))
-                                    .addOnFailureListener(e -> fail("Failed to delete document: " + e.getMessage()));
+                                    .delete();
                         } else {
                             fail("Failed to enroll in event");
                         }

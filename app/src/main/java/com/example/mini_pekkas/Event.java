@@ -53,7 +53,7 @@ public class Event {
      * @param posterPhotoUrl   The URL of the event poster.
      */
     public Event(String id, String name, User eventHost, String description, Date startDate, Date endDate, float price,
-                 String facility, double facilityGeoLat, double facilityGeoLong, int maxAttendees, int maxWaitlist,
+                 String facility, double facilityGeoLat, double facilityGeoLong, int maxWaitlist, int maxAttendees,
                  ArrayList<User> waitlist, String QrCode, boolean geo, String posterPhotoUrl) {
         this.id = id;
         this.name = name;
